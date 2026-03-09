@@ -5,9 +5,10 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const { pool } = require('../db/pool');
 const { extractBearerToken } = require('../middleware/auth');
+const { getJWTSecret } = require('../config/env');
 
 // JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = getJWTSecret();
 
 function signAccessToken(user) {
     const userId = user.id || user.userId;

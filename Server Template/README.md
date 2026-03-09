@@ -30,6 +30,16 @@ Server default URL: `http://localhost:8000`
 - `JWT_SECRET`
 - `DATABASE_URL`
 - `ALLOWED_ORIGINS`
+- `RATE_LIMIT_MAX` (recommended, default `100`)
+
+## Local `.env` Minimum
+For local server startup, set at least:
+- `NODE_ENV=development`
+- `PORT=8000`
+- `JWT_SECRET=<any-long-dev-secret>`
+- `ALLOWED_ORIGINS=http://localhost:3000`
+- `OPENAI_API_KEY=<your-key>`
+- either `DATABASE_URL=<postgres-url>` or `DB_*` variables from `.env.example`
 
 ## Health Checks
 - `GET /api/health`

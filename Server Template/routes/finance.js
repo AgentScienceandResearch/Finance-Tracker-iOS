@@ -1,9 +1,9 @@
 const express = require('express');
 const axios = require('axios');
+const { getOpenAIConfig } = require('../config/env');
 
 const router = express.Router();
 
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
 const OPENAI_ENDPOINT = 'https://api.openai.com/v1/responses';
 
 const ALLOWED_CATEGORIES = new Set([
@@ -52,7 +52,7 @@ router.post('/ai/insights', async (req, res) => {
 
         return res.json({
             message: text,
-            model: OPENAI_MODEL
+            model: getOpenAIConfig().model
         });
     } catch (error) {
         return res.status(502).json({
@@ -117,7 +117,8 @@ router.post('/ai/parse-receipt', async (req, res) => {
 });
 
 async function callOpenAI({ instructions, input }) {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const openAIConfig = getOpenAIConfig();
+    const apiKey = openAIConfig.apiKey;
     if (!apiKey) {
         throw new Error('OPENAI_API_KEY is not configured on the server.');
     }
@@ -126,7 +127,7 @@ async function callOpenAI({ instructions, input }) {
         const response = await axios.post(
             OPENAI_ENDPOINT,
             {
-                model: OPENAI_MODEL,
+                model: openAIConfig.model,
                 instructions,
                 input
             },

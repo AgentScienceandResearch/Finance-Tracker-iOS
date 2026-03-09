@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { getJWTSecret } = require('../config/env');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = getJWTSecret();
 
 function extractBearerToken(authorizationHeader) {
     if (!authorizationHeader) {

@@ -4,19 +4,19 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { pool } = require('./db/pool');
+const { getServerConfig, validateServerEnv } = require('./config/env');
+
+const serverConfig = getServerConfig();
+validateServerEnv();
 
 // Initialize Express app
 const app = express();
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
-    .split(',')
-    .map(origin => origin.trim())
-    .filter(Boolean);
 
 // Middleware
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({
-    origin: allowedOrigins,
+    origin: serverConfig.allowedOrigins,
     credentials: true
 }));
 app.use(express.json());
@@ -24,7 +24,7 @@ app.use(express.json());
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: Number(process.env.RATE_LIMIT_MAX || 100),
+    max: serverConfig.rateLimitMax,
     message: 'Too many requests, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
@@ -56,7 +56,7 @@ app.use((req, res) => {
 module.exports = app;
 
 function startServer() {
-    const port = process.env.PORT || 8000;
+    const port = serverConfig.port;
     const server = app.listen(port, async () => {
         console.log(`Server running on port ${port}`);
 
