@@ -1,0 +1,10 @@
+--swiftversion 5.10
+--indent 4
+--linebreaks lf
+--maxwidth 140
+--trimwhitespace always
+--commas inline
+--wraparguments before-first
+--wrapcollections before-first
+--self remove
+--disable redundantReturn

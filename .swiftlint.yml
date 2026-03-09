@@ -1,0 +1,37 @@
+included:
+  - App Template
+  - App TemplateTests
+
+excluded:
+  - IOSAppTemplate.xcodeproj
+  - IOSAppTemplate.xcworkspace
+  - Server Template
+  - .build
+
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - force_unwrapping
+  - modifier_order
+
+line_length:
+  warning: 140
+  error: 180
+
+function_body_length:
+  warning: 70
+  error: 120
+
+type_body_length:
+  warning: 350
+  error: 450
+
+identifier_name:
+  min_length:
+    warning: 2
+  excluded:
+    - id
+
+trailing_whitespace:
+  ignores_empty_lines: true

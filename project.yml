@@ -1,0 +1,67 @@
+name: IOSAppTemplate
+options:
+  bundleIdPrefix: com.template
+  deploymentTarget:
+    iOS: 17.0
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+settings:
+  base:
+    SWIFT_VERSION: 5.10
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 1.0.0
+    DEVELOPMENT_TEAM: ""
+    ENABLE_TESTABILITY: YES
+configs:
+  Debug: debug
+  Staging: release
+  Release: release
+packages: {}
+targets:
+  TemplateApp:
+    type: application
+    platform: iOS
+    configFiles:
+      Debug: Config/xcconfigs/Debug.xcconfig
+      Staging: Config/xcconfigs/Staging.xcconfig
+      Release: Config/xcconfigs/Release.xcconfig
+    sources:
+      - path: App Template
+        excludes:
+          - "**/INSTRUCTIONS.md"
+          - "**/*.md"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.template.iosapptemplate
+        INFOPLIST_FILE: Config/Info.plist
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+  TemplateAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: App TemplateTests
+    dependencies:
+      - target: TemplateApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.template.iosapptemplate.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TemplateApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TemplateApp"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  TemplateApp:
+    build:
+      targets:
+        TemplateApp: all
+        TemplateAppTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - TemplateAppTests
+    archive:
+      config: Release

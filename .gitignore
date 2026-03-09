@@ -1,0 +1,7 @@
+.DS_Store
+**/.DS_Store
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+Server Template/node_modules/
+Server Template/coverage/

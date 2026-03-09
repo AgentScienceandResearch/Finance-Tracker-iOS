@@ -1,0 +1,33 @@
+{
+  "name": "finance-tracker-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for Finance Tracker iOS app (Railway + OpenAI relay)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "jest --coverage",
+    "db:migrate": "node scripts/migrate.js",
+    "db:check": "node scripts/check-db.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "validator": "^13.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "uuid": "^9.0.1",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
