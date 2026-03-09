@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "5CE9B1C4D278042244FF3064"
+               BlueprintIdentifier = "8D1C5F33CC5348FA18D5313A"
                BuildableName = "TemplateApp.app"
                BlueprintName = "TemplateApp"
-               ReferencedContainer = "container:IOSAppTemplate.xcodeproj">
+               ReferencedContainer = "container:FinanceTrackeriOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -29,10 +29,10 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3D0CECC1038D0302F9F3F945"
+               BlueprintIdentifier = "530E2D5112F7C3CBBE15A306"
                BuildableName = "TemplateAppTests.xctest"
                BlueprintName = "TemplateAppTests"
-               ReferencedContainer = "container:IOSAppTemplate.xcodeproj">
+               ReferencedContainer = "container:FinanceTrackeriOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,10 +46,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5CE9B1C4D278042244FF3064"
+            BlueprintIdentifier = "8D1C5F33CC5348FA18D5313A"
             BuildableName = "TemplateApp.app"
             BlueprintName = "TemplateApp"
-            ReferencedContainer = "container:IOSAppTemplate.xcodeproj">
+            ReferencedContainer = "container:FinanceTrackeriOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -58,10 +58,10 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3D0CECC1038D0302F9F3F945"
+               BlueprintIdentifier = "530E2D5112F7C3CBBE15A306"
                BuildableName = "TemplateAppTests.xctest"
                BlueprintName = "TemplateAppTests"
-               ReferencedContainer = "container:IOSAppTemplate.xcodeproj">
+               ReferencedContainer = "container:FinanceTrackeriOS.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -82,10 +82,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5CE9B1C4D278042244FF3064"
+            BlueprintIdentifier = "8D1C5F33CC5348FA18D5313A"
             BuildableName = "TemplateApp.app"
             BlueprintName = "TemplateApp"
-            ReferencedContainer = "container:IOSAppTemplate.xcodeproj">
+            ReferencedContainer = "container:FinanceTrackeriOS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -101,10 +101,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "5CE9B1C4D278042244FF3064"
+            BlueprintIdentifier = "8D1C5F33CC5348FA18D5313A"
             BuildableName = "TemplateApp.app"
             BlueprintName = "TemplateApp"
-            ReferencedContainer = "container:IOSAppTemplate.xcodeproj">
+            ReferencedContainer = "container:FinanceTrackeriOS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

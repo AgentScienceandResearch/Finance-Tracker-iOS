@@ -29,7 +29,7 @@ make bootstrap
 What this does:
 
 - validates tool availability
-- generates `IOSAppTemplate.xcodeproj` from `project.yml`
+- generates `FinanceTrackeriOS.xcodeproj` from `project.yml`
 - creates `App Template/.env` from `App Template/.env.example` if missing
 
 ## 3) Build and Test
@@ -44,7 +44,7 @@ These commands preserve manual Xcode project edits. They only generate the proje
 ## 4) Open in Xcode
 
 ```bash
-open IOSAppTemplate.xcodeproj
+open FinanceTrackeriOS.xcodeproj
 ```
 
 Run scheme `TemplateApp` on a simulator.
@@ -85,7 +85,7 @@ make clean
 ## Troubleshooting
 
 - Build fails on simulator destination:
-  - run `xcodebuild -showdestinations -project IOSAppTemplate.xcodeproj -scheme TemplateApp`
+  - run `xcodebuild -showdestinations -project FinanceTrackeriOS.xcodeproj -scheme TemplateApp`
   - update `DESTINATION` in `Makefile` if needed
 
 - `xcodegen` missing:

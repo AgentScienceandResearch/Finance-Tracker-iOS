@@ -1,4 +1,4 @@
-PROJECT := IOSAppTemplate.xcodeproj
+PROJECT := FinanceTrackeriOS.xcodeproj
 SCHEME := TemplateApp
 DESTINATION := platform=iOS Simulator,name=iPhone 17
 

@@ -1,4 +1,4 @@
-name: IOSAppTemplate
+name: FinanceTrackeriOS
 options:
   bundleIdPrefix: com.template
   deploymentTarget:
