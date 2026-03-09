@@ -40,6 +40,7 @@ Set `API_URL` in iOS config to your server base URL.
 
 ## Railway Deploy Note
 - This repo includes root-level `railway.json` and `package.json` so Railway can deploy directly from repo root while running the backend from `Server Template/`.
+- This repo now includes root-level `.env.example` so Railway can detect/suggest required backend variable names in the Variables UI.
 
 ## Key Files
 - App entry: `App Template/App.swift`
