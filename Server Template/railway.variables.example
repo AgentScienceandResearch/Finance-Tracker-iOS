@@ -1,0 +1,12 @@
+# Paste into Railway Variables (Raw Editor) and fill secrets.
+NODE_ENV=production
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4.1-mini
+JWT_SECRET=
+
+# Required for API runtime
+ALLOWED_ORIGINS=https://your-ios-api-client-origin.example
+RATE_LIMIT_MAX=100
+
+# Set via Railway Postgres service reference in dashboard
+# DATABASE_URL=${{Postgres.DATABASE_URL}}

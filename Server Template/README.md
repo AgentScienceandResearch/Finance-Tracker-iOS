@@ -32,6 +32,24 @@ Server default URL: `http://localhost:8000`
 - `ALLOWED_ORIGINS`
 - `RATE_LIMIT_MAX` (recommended, default `100`)
 
+## Set Railway Variables Quickly (CLI)
+Railway does not auto-create variables from GitHub files. Use the helper script:
+
+```bash
+cd "Server Template"
+./scripts/set-railway-vars.sh \
+  --openai-key "<your-openai-key>" \
+  --openai-model "gpt-4.1-mini" \
+  --allowed-origins "https://your-app.example.com" \
+  --service "<your-railway-service-name>" \
+  --environment "production"
+```
+
+If `--jwt-secret` is omitted, the script generates a secure random one.
+
+Or use raw editor template:
+- [railway.variables.example](./railway.variables.example)
+
 ## Local `.env` Minimum
 For local server startup, set at least:
 - `NODE_ENV=development`

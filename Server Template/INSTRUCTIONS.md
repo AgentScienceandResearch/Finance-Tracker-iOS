@@ -64,6 +64,8 @@ For each app, extend `db/schema.sql` with app-specific entities (for example `pr
    - API service (this Node app)
    - PostgreSQL service
 4. In API service, set Railway Variables (required + optional for your app).
+   - Fast path: run `./scripts/set-railway-vars.sh --openai-key ... --service ... --environment production`
+   - Raw editor template: `railway.variables.example`
 5. Set `DATABASE_URL` from the PostgreSQL service connection.
 6. Deploy.
 7. Run migration once:
