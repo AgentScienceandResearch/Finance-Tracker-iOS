@@ -34,6 +34,9 @@ Server default URL: `http://localhost:8000`
 `DATABASE_URL` is optional if you only use AI relay endpoints.  
 It is required for DB-backed routes (`/api/auth`, `/api/users`, `/api/subscriptions`).
 
+If you want deployment to fail fast on missing production vars, set:
+- `STRICT_ENV_VALIDATION=true`
+
 ## Set Railway Variables Quickly (CLI)
 Railway does not auto-create variables from GitHub files. Use the helper script:
 

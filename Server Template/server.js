@@ -7,7 +7,16 @@ const { pool } = require('./db/pool');
 const { getServerConfig, validateServerEnv } = require('./config/env');
 
 const serverConfig = getServerConfig();
-validateServerEnv();
+try {
+    validateServerEnv();
+} catch (error) {
+    const strictValidation = process.env.STRICT_ENV_VALIDATION === 'true';
+    if (strictValidation) {
+        throw error;
+    }
+
+    console.warn(`Environment validation warning (non-fatal): ${error.message}`);
+}
 
 // Initialize Express app
 const app = express();
