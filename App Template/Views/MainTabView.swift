@@ -61,6 +61,9 @@ struct MainTabView: View {
         .sheet(isPresented: $showAIAssistant) {
             AIAssistantSheet(financeManager: financeManager, aiManager: financeAIManager)
         }
+        .onAppear {
+            financeManager.processDueRecurringExpenses()
+        }
     }
 
     @ViewBuilder
@@ -143,6 +146,8 @@ private struct DashboardTabView: View {
                     )
                 }
 
+                BudgetStatusCard(financeManager: financeManager)
+
                 Text("Quick Actions")
                     .font(.system(size: 38, weight: .bold))
                     .padding(.top, 4)
@@ -201,6 +206,8 @@ private struct DashboardTabView: View {
                         }
                     }
                 }
+
+                TopCategoriesCard(rows: financeManager.topCategoriesThisMonth())
             }
             .padding(.horizontal, 12)
             .padding(.top, 10)
@@ -377,6 +384,7 @@ private struct FinanceSettingsTabView: View {
 
     @State private var showDeleteConfirmation = false
     @State private var showEditProfile = false
+    @State private var showBudgetEditor = false
 
     var exportPayload: String {
         financeManager.exportJSON()
@@ -389,8 +397,21 @@ private struct FinanceSettingsTabView: View {
                     .font(.system(size: 52, weight: .bold))
                     .padding(.top, 10)
 
+                Text(financeManager.syncStatusText)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color.black.opacity(0.6))
+
                 SettingsSectionCard {
-                    SettingsRow(icon: "chart.pie.fill", title: "Budgets", trailingText: "Soon")
+                    Button {
+                        showBudgetEditor = true
+                    } label: {
+                        SettingsRow(
+                            icon: "chart.pie.fill",
+                            title: "Monthly Budget",
+                            trailingText: financeManager.monthlyBudget.map { CurrencyFormatting.shared.string(for: $0) } ?? "Not set"
+                        )
+                    }
+                    .buttonStyle(.plain)
                     Divider()
                     SettingsRow(icon: "tag.fill", title: "Categories", trailingText: "\(ExpenseCategory.allCases.count)")
                 }
@@ -442,6 +463,7 @@ private struct FinanceSettingsTabView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 12)
                     .foregroundStyle(.black)
+                    .buttonStyle(.plain)
                 }
 
                 Text("About")
@@ -450,7 +472,13 @@ private struct FinanceSettingsTabView: View {
                 SettingsSectionCard {
                     SettingsRow(icon: "info.circle.fill", title: "Version", trailingText: "1.0.0")
                     Divider()
-                    SettingsRow(icon: "questionmark.circle.fill", title: "Help & Support", trailingText: "Soon")
+                    Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/issues")!) {
+                        SettingsRow(icon: "questionmark.circle.fill", title: "Help & Support", trailingText: nil)
+                    }
+                    Divider()
+                    Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/blob/main/PRIVACY_POLICY.md")!) {
+                        SettingsRow(icon: "hand.raised.fill", title: "Privacy Policy", trailingText: nil)
+                    }
                 }
             }
             .padding(.horizontal, 12)
@@ -463,6 +491,9 @@ private struct FinanceSettingsTabView: View {
         }
         .sheet(isPresented: $showEditProfile) {
             EditProfileSheet(financeManager: financeManager)
+        }
+        .sheet(isPresented: $showBudgetEditor) {
+            BudgetEditorSheet(financeManager: financeManager)
         }
     }
 }
@@ -533,6 +564,71 @@ private struct SummaryCard: View {
         .padding(.horizontal, 12)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+private struct BudgetStatusCard: View {
+    @ObservedObject var financeManager: FinanceManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Budget")
+                    .font(.system(size: 16, weight: .semibold))
+                Spacer()
+                if let budget = financeManager.monthlyBudget {
+                    Text(CurrencyFormatting.shared.string(for: budget))
+                        .font(.system(size: 14, weight: .semibold))
+                } else {
+                    Text("Not Set")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.black.opacity(0.55))
+                }
+            }
+
+            if let ratio = financeManager.monthlyBudgetUsageRatio {
+                ProgressView(value: min(max(ratio, 0), 1))
+                    .tint(ratio > 1 ? .red : .black)
+                    .scaleEffect(x: 1, y: 1.4, anchor: .center)
+            }
+
+            Text(financeManager.budgetStatusText)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Color.black.opacity(0.72))
+        }
+        .padding(14)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+}
+
+private struct TopCategoriesCard: View {
+    let rows: [(category: ExpenseCategory, total: Decimal)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Top Categories This Month")
+                .font(.system(size: 18, weight: .bold))
+
+            if rows.isEmpty {
+                Text("No category totals yet.")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color.black.opacity(0.6))
+            } else {
+                ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                    HStack {
+                        Text(row.category.rawValue)
+                            .font(.system(size: 14, weight: .medium))
+                        Spacer()
+                        Text(CurrencyFormatting.shared.string(for: row.total))
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
@@ -1064,6 +1160,74 @@ private struct AIMessageBubble: View {
             }
         }
         .font(.system(size: 14, weight: .medium))
+    }
+}
+
+private struct BudgetEditorSheet: View {
+    @ObservedObject var financeManager: FinanceManager
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var budgetInput: String
+    @State private var inlineError: String?
+
+    init(financeManager: FinanceManager) {
+        self.financeManager = financeManager
+        if let budget = financeManager.monthlyBudget {
+            _budgetInput = State(initialValue: NSDecimalNumber(decimal: budget).stringValue)
+        } else {
+            _budgetInput = State(initialValue: "")
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Monthly Budget") {
+                    TextField("Amount", text: $budgetInput)
+                        .keyboardType(.decimalPad)
+                    Text("Leave blank to remove the budget cap.")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundStyle(Color.secondary)
+                }
+
+                if let inlineError {
+                    Section {
+                        Text(inlineError)
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("Budget")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        saveBudget()
+                    }
+                    .fontWeight(.bold)
+                }
+            }
+        }
+    }
+
+    private func saveBudget() {
+        let trimmed = budgetInput.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmed.isEmpty {
+            financeManager.setMonthlyBudget(nil)
+            dismiss()
+            return
+        }
+
+        guard let budget = DecimalParser.parse(trimmed), budget > 0 else {
+            inlineError = "Enter a valid amount greater than zero."
+            return
+        }
+
+        financeManager.setMonthlyBudget(budget)
+        dismiss()
     }
 }
 

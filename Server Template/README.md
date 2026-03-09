@@ -1,112 +1,50 @@
-# Finance Tracker Server
+# Finance Tracker Backend (Railway)
 
-Backend starter for iOS apps that need:
-- secure API key storage (via Railway environment variables)
-- user/auth/subscription APIs
-- persistent PostgreSQL data
-- GPT relay endpoints for finance insights and receipt parsing
+Express backend for Finance Tracker iOS.
 
-## What This Template Includes
-- Express API server (`server.js`)
-- Health endpoints (`/api/health`, `/api/health/db`)
-- DB-backed auth/users/subscriptions routes
-- Finance AI routes:
-  - `POST /api/finance/ai/insights`
-  - `POST /api/finance/ai/parse-receipt`
-- PostgreSQL connection pool with Railway-compatible `DATABASE_URL`
-- Initial SQL schema (`db/schema.sql`)
-- Database scripts (`npm run db:migrate`, `npm run db:check`)
-- Railway deployment config (`railway.json`)
-- Step-by-step implementation guide (`INSTRUCTIONS.md`)
+## Purpose
+- Keep provider secrets off-device (`OPENAI_API_KEY` stored in Railway variables)
+- Provide GPT relay endpoints for iOS app
+- Keep optional auth/subscription template routes available for future expansion
 
-## 1) App-Specific Setup Checklist
-Before first push/deploy, update these:
+## Active Finance AI Endpoints
+- `POST /api/finance/ai/insights`
+- `POST /api/finance/ai/parse-receipt`
 
-1. `package.json`:
-   - `name`
-   - `description`
-2. `.env` (copy from `.env.example`):
-   - `APP_NAME`
-   - `SERVICE_NAME`
-   - `PUBLIC_API_BASE_URL`
-   - `JWT_SECRET`
-3. CORS:
-   - set `ALLOWED_ORIGINS` to your app/web origins
-4. iOS app:
-   - set `API_URL` to deployed backend URL
+## Setup
 
-## 2) GitHub Push Setup
-If this repo is not initialized yet:
-
-```bash
-git init
-git add .
-git commit -m "Initial app + server template"
-git branch -M main
-git remote add origin <your-github-repo-url>
-git push -u origin main
-```
-
-## 3) Local Development
 ```bash
 cd "Server Template"
 cp .env.example .env
 npm install
-npm run db:check
-npm run db:migrate
 npm run dev
 ```
 
-Server runs on `http://localhost:8000` by default.
+Server default URL: `http://localhost:8000`
 
-## 4) Required Environment Variables (Production)
-Minimum required values for production:
-
+## Required Railway Variables
 - `NODE_ENV=production`
-- `PORT` (Railway sets this automatically)
-- `JWT_SECRET` (long random secret)
-- `DATABASE_URL` (Railway Postgres connection string)
-- `ALLOWED_ORIGINS` (comma-separated trusted origins)
-
-Recommended:
-- `RATE_LIMIT_MAX`
-- third-party provider keys your app needs (Stripe/OpenAI/etc)
+- `PORT` (Railway sets automatically)
 - `OPENAI_API_KEY`
-- `OPENAI_MODEL` (optional, defaults to `gpt-4.1-mini`)
+- `OPENAI_MODEL` (optional, default `gpt-4.1-mini`)
+- `JWT_SECRET`
+- `DATABASE_URL`
+- `ALLOWED_ORIGINS`
 
-## 5) Railway Deployment
-1. Push repository to GitHub.
-2. In Railway, create project from GitHub repo.
-3. Create two services:
-   - `api` (this Node server)
-   - `postgres` (Railway PostgreSQL)
-4. In the `api` service variables, set:
-   - `NODE_ENV=production`
-   - `JWT_SECRET=<generated-secret>`
-   - `ALLOWED_ORIGINS=<your-prod-origins>`
-   - provider API keys needed by your app
-5. Add `DATABASE_URL` to `api` service from Railway Postgres reference.
-6. Run migration command once:
-   - `npm run db:migrate`
-7. Verify:
-   - `GET /api/health`
-   - `GET /api/health/db`
+## Health Checks
+- `GET /api/health`
+- `GET /api/health/db`
 
-## 6) Database Notes
-- Initial schema is in `db/schema.sql`.
-- Add new schema changes by creating SQL migration files and applying them in order.
-- Current schema includes core tables for:
-  - `users`
-  - `subscriptions`
-  - `app_settings`
+## Testing
 
-## 7) Security Notes
-- Never commit `.env` or real secrets.
-- Store API keys in Railway environment variables, not in source.
-- Rotate `JWT_SECRET` and provider keys if exposed.
-- Use server-side API calls for sensitive provider integrations (never from iOS directly with secret keys).
+```bash
+npm test -- --runInBand
+```
 
-## 8) Next Steps Per App
-- Add webhook handlers (App Store / Stripe) if subscriptions are used.
-- Add tests for auth + subscription lifecycle.
-- Extend schema for app-specific entities and add route modules per feature spec.
+## Deploy
+1. Push GitHub repo.
+2. Create Railway project from repo.
+3. Add Postgres + API services.
+4. Set variables above.
+5. Run `npm run db:migrate` once.
+6. Point iOS `API_URL` to Railway API URL.

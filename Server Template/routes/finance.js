@@ -33,6 +33,10 @@ router.post('/ai/insights', async (req, res) => {
             return res.status(400).json({ error: 'Finance summary is required.' });
         }
 
+        if (prompt.length > 4_000 || financeSummary.length > 12_000) {
+            return res.status(400).json({ error: 'Payload is too large.' });
+        }
+
         const instructions = [
             'You are a practical personal finance assistant.',
             'Keep responses concise, concrete, and action-oriented.',
@@ -63,6 +67,10 @@ router.post('/ai/parse-receipt', async (req, res) => {
 
         if (!rawText || typeof rawText !== 'string') {
             return res.status(400).json({ error: 'rawText is required.' });
+        }
+
+        if (rawText.length > 12_000) {
+            return res.status(400).json({ error: 'rawText is too large.' });
         }
 
         const instructions = [
@@ -114,23 +122,32 @@ async function callOpenAI({ instructions, input }) {
         throw new Error('OPENAI_API_KEY is not configured on the server.');
     }
 
-    const response = await axios.post(
-        OPENAI_ENDPOINT,
-        {
-            model: OPENAI_MODEL,
-            instructions,
-            input
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
+    try {
+        const response = await axios.post(
+            OPENAI_ENDPOINT,
+            {
+                model: OPENAI_MODEL,
+                instructions,
+                input
             },
-            timeout: 45000
-        }
-    );
+            {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 45000
+            }
+        );
 
-    return extractOutputText(response.data);
+        return extractOutputText(response.data);
+    } catch (error) {
+        const providerMessage = error?.response?.data?.error?.message;
+        const statusCode = error?.response?.status;
+        if (providerMessage) {
+            throw new Error(`OpenAI error${statusCode ? ` (${statusCode})` : ''}: ${providerMessage}`);
+        }
+        throw new Error('OpenAI request failed.');
+    }
 }
 
 function extractOutputText(payload) {

@@ -53,30 +53,35 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });
 });
 
-// Start server
-const PORT = process.env.PORT || 8000;
-const server = app.listen(PORT, async () => {
-    console.log(`Server running on port ${PORT}`);
-
-    try {
-        await pool.query('SELECT NOW()');
-        console.log('Database connection check succeeded');
-    } catch (error) {
-        console.error('Database connection check failed:', error.message);
-    }
-});
-
-const shutdown = async () => {
-    try {
-        await pool.end();
-    } catch (_) {
-        // Ignore pool close errors on shutdown
-    } finally {
-        server.close(() => process.exit(0));
-    }
-};
-
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
-
 module.exports = app;
+
+function startServer() {
+    const port = process.env.PORT || 8000;
+    const server = app.listen(port, async () => {
+        console.log(`Server running on port ${port}`);
+
+        try {
+            await pool.query('SELECT NOW()');
+            console.log('Database connection check succeeded');
+        } catch (error) {
+            console.error('Database connection check failed:', error.message);
+        }
+    });
+
+    const shutdown = async () => {
+        try {
+            await pool.end();
+        } catch (_) {
+            // Ignore pool close errors on shutdown
+        } finally {
+            server.close(() => process.exit(0));
+        }
+    };
+
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+}
+
+if (require.main === module) {
+    startServer();
+}

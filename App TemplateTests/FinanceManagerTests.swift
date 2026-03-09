@@ -82,10 +82,12 @@ final class FinanceManagerTests: XCTestCase {
 
     func testStatePersistsAcrossInstancesAndCanExport() throws {
         let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+        manager.setMonthlyBudget(Decimal(500))
         manager.addExpense(Expense(title: "Coffee", amount: 5, category: .foodDining, date: Date()))
 
         let secondManager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
         XCTAssertEqual(secondManager.expenses.count, 1)
+        XCTAssertEqual(secondManager.monthlyBudget, Decimal(500))
 
         let json = secondManager.exportJSON()
         XCTAssertFalse(json.isEmpty)
@@ -95,6 +97,38 @@ final class FinanceManagerTests: XCTestCase {
         decoder.dateDecodingStrategy = .iso8601
         let snapshot = try decoder.decode(FinanceExportSnapshot.self, from: data)
         XCTAssertEqual(snapshot.expenses.count, 1)
+        XCTAssertEqual(snapshot.monthlyBudget, Decimal(500))
+        XCTAssertEqual(snapshot.profile.id, secondManager.currentProfile.id)
+    }
+
+    func testBudgetStatusAndUsageCalculations() {
+        let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+        manager.setMonthlyBudget(Decimal(100))
+        manager.addExpense(Expense(title: "Groceries", amount: 25, category: .foodDining, date: Date()))
+
+        XCTAssertEqual(manager.remainingBudgetThisMonth, Decimal(75))
+        XCTAssertNotNil(manager.monthlyBudgetUsageRatio)
+        XCTAssertEqual(manager.budgetStatusText.contains("left this month"), true)
+    }
+
+    func testProcessDueRecurringExpensesCreatesExpensesAndAdvancesDate() {
+        let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+        let threeWeeksAgo = Calendar.current.date(byAdding: .day, value: -21, to: Date()) ?? Date()
+        manager.addRecurringExpense(
+            RecurringExpense(
+                title: "Gym Membership",
+                amount: 12,
+                category: .health,
+                frequency: .weekly,
+                nextDueDate: threeWeeksAgo
+            )
+        )
+
+        let previousCount = manager.expenses.count
+        manager.processDueRecurringExpenses(referenceDate: Date())
+
+        XCTAssertGreaterThan(manager.expenses.count, previousCount)
+        XCTAssertTrue(manager.recurringExpenses.first?.nextDueDate ?? .distantPast > Date())
     }
 }
 #endif
