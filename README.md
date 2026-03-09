@@ -38,6 +38,9 @@ Set `API_URL` in iOS config to your server base URL.
 - Firebase setup: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
 - Server deployment: [Server Template/README.md](Server%20Template/README.md)
 
+## Railway Deploy Note
+- This repo includes root-level `railway.json` and `package.json` so Railway can deploy directly from repo root while running the backend from `Server Template/`.
+
 ## Key Files
 - App entry: `App Template/App.swift`
 - Composition root: `App Template/AppEnvironment.swift`

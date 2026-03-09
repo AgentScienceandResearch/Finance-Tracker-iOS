@@ -1,0 +1,15 @@
+{
+  "name": "finance-tracker-ios-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Root scripts for Railway deployment of Finance Tracker backend",
+  "scripts": {
+    "start": "cd \"Server Template\" && npm start",
+    "build": "cd \"Server Template\" && npm ci",
+    "dev:server": "cd \"Server Template\" && npm run dev",
+    "test:server": "cd \"Server Template\" && npm test -- --runInBand"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
