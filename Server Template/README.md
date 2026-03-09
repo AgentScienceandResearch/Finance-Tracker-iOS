@@ -28,9 +28,11 @@ Server default URL: `http://localhost:8000`
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` (optional, default `gpt-4.1-mini`)
 - `JWT_SECRET`
-- `DATABASE_URL`
 - `ALLOWED_ORIGINS`
 - `RATE_LIMIT_MAX` (recommended, default `100`)
+
+`DATABASE_URL` is optional if you only use AI relay endpoints.  
+It is required for DB-backed routes (`/api/auth`, `/api/users`, `/api/subscriptions`).
 
 ## Set Railway Variables Quickly (CLI)
 Railway does not auto-create variables from GitHub files. Use the helper script:

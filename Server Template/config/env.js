@@ -41,10 +41,6 @@ function validateServerEnv() {
     const missing = [];
 
     if (config.isProduction) {
-        if (!config.databaseURL) {
-            missing.push('DATABASE_URL');
-        }
-
         if (config.allowedOrigins.length === 0) {
             missing.push('ALLOWED_ORIGINS');
         }
