@@ -17,7 +17,10 @@ configs:
   Debug: debug
   Staging: release
   Release: release
-packages: {}
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: 11.0.0
 targets:
   TemplateApp:
     type: application
@@ -33,11 +36,22 @@ targets:
           - "**/*.md"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.template.iosapptemplate
+        PRODUCT_BUNDLE_IDENTIFIER: com.agentscienceandresearch.financetrackerios
         INFOPLIST_FILE: Config/Info.plist
       configs:
         Debug:
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+    dependencies:
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseFirestoreSwift
+      - package: Firebase
+        product: FirebaseAnalytics
   TemplateAppTests:
     type: bundle.unit-test
     platform: iOS
@@ -47,7 +61,7 @@ targets:
       - target: TemplateApp
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.template.iosapptemplate.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.agentscienceandresearch.financetrackerios.tests
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TemplateApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TemplateApp"
         BUNDLE_LOADER: "$(TEST_HOST)"
