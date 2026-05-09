@@ -1,7 +1,7 @@
 import Foundation
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
-import FirebaseFirestoreSwift
+// FirebaseFirestoreSwift merged into FirebaseFirestore in Firebase SDK 11+
 #endif
 
 @MainActor
