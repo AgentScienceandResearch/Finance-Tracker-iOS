@@ -32,7 +32,8 @@ function getServerConfig() {
         allowedOrigins,
         databaseURL: process.env.DATABASE_URL || '',
         jwtSecret: getJWTSecret(),
-        openAI: getOpenAIConfig()
+        openAI: getOpenAIConfig(),
+        logoDevToken: process.env.LOGO_DEV_TOKEN || ''
     };
 }
 

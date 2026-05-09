@@ -92,7 +92,8 @@ struct MainTabView: View {
             ExpensesTabView(
                 financeManager: financeManager,
                 onAddExpense: { showAddExpense = true },
-                onSmartAdd: { showReceiptScanner = true }
+                onSmartAdd: { showAIAssistant = true },
+                onScanReceipt: { showReceiptScanner = true }
             )
         case .recurring:
             RecurringTabView(
@@ -221,6 +222,7 @@ private struct ExpensesTabView: View {
 
     let onAddExpense: () -> Void
     let onSmartAdd: () -> Void
+    let onScanReceipt: () -> Void
 
     @State private var searchText = ""
     @State private var selectedCategory: ExpenseCategory?
@@ -238,6 +240,10 @@ private struct ExpensesTabView: View {
                 HStack(spacing: 10) {
                     CircleIconButton(icon: "plus") {
                         onAddExpense()
+                    }
+
+                    CircleIconButton(icon: "camera.fill") {
+                        onScanReceipt()
                     }
 
                     CircleIconButton(icon: "sparkles") {
@@ -616,7 +622,15 @@ private struct TopCategoriesCard: View {
                     .foregroundStyle(Color.black.opacity(0.6))
             } else {
                 ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                    HStack {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(row.category.color.opacity(0.15))
+                                .frame(width: 30, height: 30)
+                            Image(systemName: row.category.sfSymbol)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(row.category.color)
+                        }
                         Text(row.category.rawValue)
                             .font(.system(size: 14, weight: .medium))
                         Spacer()
@@ -687,19 +701,14 @@ private struct ExpenseRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon(for: expense.category))
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.black)
-                .frame(width: 34, height: 34)
-                .background(Color.black.opacity(0.08))
-                .clipShape(Circle())
+            MerchantLogoView(merchant: expense.title, category: expense.category, size: 40)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(expense.title)
                     .font(.system(size: 16, weight: .semibold))
                 Text(expense.category.rawValue)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color.black.opacity(0.65))
+                    .foregroundStyle(expense.category.color.opacity(0.8))
             }
 
             Spacer()
@@ -707,6 +716,7 @@ private struct ExpenseRow: View {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(CurrencyFormatting.shared.string(for: expense.amount))
                     .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(expense.category.isIncome ? Color(red: 0.1, green: 0.65, blue: 0.35) : .black)
                 Text(expense.date.formattedDate)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Color.black.opacity(0.6))
@@ -716,36 +726,21 @@ private struct ExpenseRow: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
-
-    private func icon(for category: ExpenseCategory) -> String {
-        switch category {
-        case .foodDining: return "fork.knife"
-        case .transportation: return "car.fill"
-        case .housing: return "house.fill"
-        case .utilities: return "bolt.fill"
-        case .entertainment: return "tv.fill"
-        case .shopping: return "bag.fill"
-        case .health: return "cross.case.fill"
-        case .travel: return "airplane"
-        case .education: return "book.fill"
-        case .subscriptions: return "arrow.triangle.2.circlepath"
-        case .incomeOffset: return "arrow.down.circle.fill"
-        case .other: return "square.grid.2x2.fill"
-        }
-    }
 }
 
 private struct RecurringExpenseRow: View {
     let expense: RecurringExpense
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
+            MerchantLogoView(merchant: expense.title, category: expense.category, size: 40)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(expense.title)
                     .font(.system(size: 16, weight: .semibold))
                 Text("\(expense.frequency.rawValue) • \(expense.nextDueDate.formattedDate)")
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color.black.opacity(0.65))
+                    .foregroundStyle(expense.category.color.opacity(0.8))
             }
 
             Spacer()
@@ -932,6 +927,32 @@ private struct AddRecurringExpenseSheet: View {
             Form {
                 Section("Recurring Expense") {
                     TextField("Title", text: $title)
+
+                    let suggestions = category.recurringTitleSuggestions
+                    if !suggestions.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(suggestions, id: \.self) { suggestion in
+                                    Button(suggestion) {
+                                        title = suggestion
+                                    }
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundStyle(title == suggestion ? .white : category.color)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        title == suggestion
+                                            ? category.color
+                                            : category.color.opacity(0.12)
+                                    )
+                                    .clipShape(Capsule())
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    }
+
                     TextField("Amount", text: $amount)
                         .keyboardType(.decimalPad)
                     Picker("Category", selection: $category) {
