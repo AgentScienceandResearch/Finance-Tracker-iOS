@@ -6,12 +6,11 @@ struct MerchantLogoView: View {
     let category: ExpenseCategory
     let size: CGFloat
 
-    @State private var logoURL: URL?
-    @State private var didLoad = false
+    private var logoURL: URL? { LogoService.shared.logoURL(for: merchant) }
 
     var body: some View {
         ZStack {
-            if let url = logoURL, didLoad {
+            if let url = logoURL {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
@@ -31,10 +30,6 @@ struct MerchantLogoView: View {
             }
         }
         .frame(width: size, height: size)
-        .task(id: merchant) {
-            logoURL = await LogoService.shared.logoURL(for: merchant)
-            withAnimation(.easeIn(duration: 0.2)) { didLoad = true }
-        }
     }
 
     private var fallbackIcon: some View {
