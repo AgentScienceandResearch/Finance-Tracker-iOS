@@ -217,7 +217,7 @@ private struct DashboardTabView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 20) {
+            VStack(spacing: 18) {
                 GreetingHeader(
                     greeting: greeting, name: firstName,
                     onNotification: {},
@@ -268,8 +268,9 @@ private struct GreetingHeader: View {
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(FT.t2)
                 Text("My Finance")
-                    .font(.system(size: 34, weight: .bold, design: .default))
+                    .font(.system(size: 42, weight: .heavy, design: .default))
                     .foregroundStyle(FT.t1)
+                    .tracking(-0.5)
             }
 
             Spacer()
@@ -351,25 +352,26 @@ private struct HeroBalanceCard: View {
         }
     }
 
+    // spending DOWN = good (green), spending UP = bad (red) — same as banking apps
     private var trendUp: Bool { trendPct > 0 }
     private var trendZero: Bool { abs(trendPct) < 0.1 }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("Monthly Spending")
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 5) {
+                        Text("Total Balance")
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(FT.t2)
-                        Image(systemName: "eye.slash")
+                        Image(systemName: "eye")
                             .font(.system(size: 12))
                             .foregroundStyle(FT.t3)
                     }
 
                     Text(CurrencyFormatting.shared.string(for: financeManager.thisMonthTotal))
-                        .font(.system(size: 38, weight: .bold, design: .default))
+                        .font(.system(size: 40, weight: .bold, design: .default))
                         .foregroundStyle(FT.t1)
                         .contentTransition(.numericText())
 
@@ -380,6 +382,7 @@ private struct HeroBalanceCard: View {
                             Text(String(format: "%.1f%% vs last month", abs(trendPct)))
                                 .font(.system(size: 12, weight: .medium))
                         }
+                        // spending up = red (over-spending), spending down = green (saving more)
                         .foregroundStyle(trendUp ? Color(red: 0.9, green: 0.3, blue: 0.3) : FT.green)
                     }
                 }
@@ -562,17 +565,33 @@ private struct AnalyticsRow: View {
 
     private var budgetRatio: Double { financeManager.monthlyBudgetUsageRatio ?? 0 }
 
+    private var spendingTrendPct: Double {
+        let cal = Calendar.current; let now = Date()
+        guard let monthStart = cal.date(from: cal.dateComponents([.year, .month], from: now)),
+              let lastStart  = cal.date(byAdding: .month, value: -1, to: monthStart) else { return 0 }
+        let last = financeManager.expenses
+            .filter { $0.date >= lastStart && $0.date < monthStart && !$0.category.isIncome }
+            .reduce(0.0) { $0 + NSDecimalNumber(decimal: $1.amount).doubleValue }
+        let current = NSDecimalNumber(decimal: financeManager.thisMonthTotal).doubleValue
+        guard last > 0 else { return current > 0 ? 100 : 0 }
+        return ((current - last) / last) * 100
+    }
+
     var body: some View {
         HStack(spacing: 14) {
             // Spending card
             VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .top) {
+                    // "Spending · This Month" exactly like reference
+                    HStack(spacing: 4) {
                         Text("Spending")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(FT.t2)
+                        Text("·")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundStyle(FT.t3)
                         Text("This Month")
-                            .font(.system(size: 11, weight: .regular))
+                            .font(.system(size: 12, weight: .regular))
                             .foregroundStyle(FT.t3)
                     }
                     Spacer()
@@ -591,7 +610,22 @@ private struct AnalyticsRow: View {
                     .foregroundStyle(FT.t1)
                     .contentTransition(.numericText())
 
-                MiniSparklineView(dataPoints: weekData.isEmpty ? [0,0] : weekData, color: FT.green)
+                // Trend vs last month — spending DOWN is green (good)
+                let trendColor = spendingTrendPct > 0
+                    ? Color(red: 0.9, green: 0.3, blue: 0.3)
+                    : FT.green
+                if abs(spendingTrendPct) > 0.1 {
+                    HStack(spacing: 3) {
+                        Image(systemName: spendingTrendPct > 0 ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 10, weight: .bold))
+                        Text(String(format: "%.1f%% vs last month", abs(spendingTrendPct)))
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .foregroundStyle(trendColor)
+                }
+
+                MiniSparklineView(dataPoints: weekData.isEmpty ? [0,0] : weekData,
+                                  color: spendingTrendPct > 0 ? Color(red: 0.9, green: 0.3, blue: 0.3) : FT.green)
                     .frame(height: 36)
             }
             .ftCard()
@@ -599,10 +633,10 @@ private struct AnalyticsRow: View {
 
             // Budget card
             VStack(alignment: .leading, spacing: 10) {
-                HStack {
+                HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Budget Left")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(FT.t2)
                         if let budget = financeManager.monthlyBudget {
                             let pct = Int(min(budgetRatio * 100, 100))
@@ -616,16 +650,15 @@ private struct AnalyticsRow: View {
                         }
                     }
                     Spacer()
+                    // Static pie chart icon (matches reference) instead of arc ring
                     ZStack {
-                        Circle()
-                            .stroke(FT.bg, lineWidth: 4)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill((budgetRatio > 0.9 ? Color.red : FT.green).opacity(0.12))
                             .frame(width: 36, height: 36)
-                        Circle()
-                            .trim(from: 0, to: min(CGFloat(budgetRatio), 1))
-                            .stroke(budgetRatio > 0.9 ? Color.red : FT.green,
-                                    style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                            .frame(width: 36, height: 36)
-                            .rotationEffect(.degrees(-90))
+                        Image(systemName: "chart.pie.fill")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(budgetRatio > 0.9 ? Color.red : FT.green)
+                    }
                         Image(systemName: "chart.pie.fill")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(budgetRatio > 0.9 ? Color.red : FT.green)
