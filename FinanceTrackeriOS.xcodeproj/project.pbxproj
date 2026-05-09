@@ -12,6 +12,8 @@
 		14B7680693CE0CBA6AD4E5EC /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C944CF2744263108639983 /* Expense.swift */; };
 		1A5B70AEBBF6F2A0D5250DB2 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0735E007CA2E9DC9E46151 /* GitHubService.swift */; };
 		1D1DD871E51F9057F06AE3D1 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE554411F91BC277DCC90DC /* OpenAIService.swift */; };
+		A1C4D8E9F01234567890BCDE /* LogoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D5E9F0A12345678901CDEF /* LogoService.swift */; };
+		C3E6F0A1B23456789012DEF0 /* MerchantLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F7A0B1C234567890123EF0 /* MerchantLogoView.swift */; };
 		1EA02E3226554AC161BA18A9 /* FirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */; };
 		1F51F0D83EA99C946F18AB70 /* SubscriptionManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873151EE3D65B4068041EBB6 /* SubscriptionManaging.swift */; };
 		20356FC84A9CDDE89C1E7E78 /* Observability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CA64650308007393F5F690 /* Observability.swift */; };
@@ -111,6 +113,8 @@
 		8E59951EB81195A32C0D4765 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		968843BADE0D4458604AD7FB /* AuthenticationManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManaging.swift; sourceTree = "<group>"; };
 		9DE554411F91BC277DCC90DC /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
+		B2D5E9F0A12345678901CDEF /* LogoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoService.swift; sourceTree = "<group>"; };
+		D4F7A0B1C234567890123EF0 /* MerchantLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantLogoView.swift; sourceTree = "<group>"; };
 		9F2580B4692163C0B383BEBB /* ReceiptDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptDraft.swift; sourceTree = "<group>"; };
 		AB9CC1605D10E1A44E37AC1A /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
 		B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAIManager.swift; sourceTree = "<group>"; };
@@ -244,6 +248,7 @@
 				7B82BF3E72C5A17F5D531AE5 /* GlassmorphismShowcaseView.swift */,
 				7D839F8B1F42AACC363C2C03 /* MainTabView.swift */,
 				F71D6C311F918AC58E05F0A6 /* PaywallView.swift */,
+				D4F7A0B1C234567890123EF0 /* MerchantLogoView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -285,6 +290,7 @@
 				C4CD8FA777A6A20D7150FDAF /* APIServing.swift */,
 				4E0735E007CA2E9DC9E46151 /* GitHubService.swift */,
 				9DE554411F91BC277DCC90DC /* OpenAIService.swift */,
+				B2D5E9F0A12345678901CDEF /* LogoService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -468,6 +474,8 @@
 				57C40AABB075551EB50B280F /* MainTabView.swift in Sources */,
 				20356FC84A9CDDE89C1E7E78 /* Observability.swift in Sources */,
 				1D1DD871E51F9057F06AE3D1 /* OpenAIService.swift in Sources */,
+				A1C4D8E9F01234567890BCDE /* LogoService.swift in Sources */,
+				C3E6F0A1B23456789012DEF0 /* MerchantLogoView.swift in Sources */,
 				812AD23A10F4EB31415E6555 /* PaywallFlowViewModel.swift in Sources */,
 				DBD3DA64155F6099E7C692BD /* PaywallView.swift in Sources */,
 				E2644F04B5A17093CB5FFE59 /* PreviewFixtures.swift in Sources */,
