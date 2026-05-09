@@ -49,9 +49,8 @@ targets:
       - package: Firebase
         product: FirebaseFirestore
       - package: Firebase
-        product: FirebaseFirestoreSwift
-      - package: Firebase
         product: FirebaseAnalytics
+      # FirebaseFirestoreSwift was merged into FirebaseFirestore in SDK 11+
   TemplateAppTests:
     type: bundle.unit-test
     platform: iOS
