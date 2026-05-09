@@ -4,6 +4,10 @@ import SwiftUI
 struct TemplateApp: App {
     @StateObject private var environment = AppEnvironment()
 
+    init() {
+        FirebaseBootstrap.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             MainTabView()
