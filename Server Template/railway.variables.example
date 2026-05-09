@@ -4,6 +4,12 @@ OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini
 JWT_SECRET=
 
+# logo.dev — brand logos in the iOS app
+# Publishable key (safe to expose, appears in image URLs)
+LOGO_DEV_TOKEN=pk_VfLJ3VfBQCiaIl-gF2sL7A
+# Secret key — keep this Railway-only, never commit
+LOGO_DEV_SECRET=
+
 # Required for API runtime
 ALLOWED_ORIGINS=https://your-ios-api-client-origin.example
 RATE_LIMIT_MAX=100

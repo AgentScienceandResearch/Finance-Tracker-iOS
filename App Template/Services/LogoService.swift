@@ -1,50 +1,49 @@
 import Foundation
 
 /// Resolves merchant names to logo.dev image URLs.
-/// The token is fetched once from the backend and cached in memory.
+/// Uses the embedded publishable key immediately; optionally refreshes from the backend
+/// so the Railway LOGO_DEV_TOKEN env var can override it (e.g. to rotate keys).
 @MainActor
 final class LogoService: ObservableObject {
     static let shared = LogoService()
 
-    private var token: String?
-    private var fetchTask: Task<String?, Never>?
+    // Publishable key — safe to ship in the client bundle (appears in every image URL).
+    // Set LOGO_DEV_TOKEN in Railway to override without a re-deploy.
+    private static let embeddedPublishableKey = "pk_VfLJ3VfBQCiaIl-gF2sL7A"
 
-    private init() {}
+    private var token: String = embeddedPublishableKey
+    private var fetchTask: Task<Void, Never>?
+
+    private init() {
+        // Kick off a background refresh so Railway overrides take effect without delay.
+        prefetchToken()
+    }
 
     // MARK: - Public API
 
-    func logoURL(for merchant: String) async -> URL? {
-        let tok = await resolvedToken()
-        guard let tok, !tok.isEmpty else { return nil }
+    func logoURL(for merchant: String) -> URL? {
+        guard !token.isEmpty else { return nil }
         guard let domain = Self.domain(for: merchant) else { return nil }
-        return URL(string: "https://img.logo.dev/\(domain)?token=\(tok)&size=64&format=png")
+        return URL(string: "https://img.logo.dev/\(domain)?token=\(token)&size=64&format=png")
     }
 
-    // MARK: - Token Resolution
+    // MARK: - Token Refresh
 
-    private func resolvedToken() async -> String? {
-        if let cached = token { return cached }
-
-        if let existing = fetchTask {
-            return await existing.value
-        }
-
-        let task = Task<String?, Never> {
-            guard let url = URL(string: AppConfig.shared.apiURL.absoluteString + "/api/config") else { return nil }
+    private func prefetchToken() {
+        guard fetchTask == nil else { return }
+        fetchTask = Task {
+            guard let url = URL(string: AppConfig.shared.apiURL.absoluteString + "/api/config") else { return }
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
-                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-                return json?["logoDevToken"] as? String
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let remote = json["logoDevToken"] as? String, !remote.isEmpty {
+                    token = remote
+                }
             } catch {
-                return nil
+                // Embedded key stays active — no-op on network failure.
             }
+            fetchTask = nil
         }
-
-        fetchTask = task
-        let result = await task.value
-        token = result
-        fetchTask = nil
-        return result
     }
 
     // MARK: - Merchant → Domain Mapping
