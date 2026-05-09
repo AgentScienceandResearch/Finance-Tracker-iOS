@@ -659,10 +659,6 @@ private struct AnalyticsRow: View {
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(budgetRatio > 0.9 ? Color.red : FT.green)
                     }
-                        Image(systemName: "chart.pie.fill")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(budgetRatio > 0.9 ? Color.red : FT.green)
-                    }
                 }
 
                 if let budget = financeManager.monthlyBudget {
