@@ -37,6 +37,7 @@
 		9EA4DB3C27932D9402DD51F7 /* ReceiptDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2580B4692163C0B383BEBB /* ReceiptDraft.swift */; };
 		A0C2EAC2DA769690EA9F1B03 /* UserStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF28296FDF9AA07370CC451 /* UserStoring.swift */; };
 		A1C4D8E9F01234567890BCDE /* LogoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D5E9F0A12345678901CDEF /* LogoService.swift */; };
+		E5F1A2B3C4D5E6F7A8B9C0D1 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */; };
 		A391D60490CF26841E04C9D8 /* RecurringExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62FCE98085B13A3EA37F54F /* RecurringExpense.swift */; };
 		A6C511CBA787C593AC5A8AA3 /* AppConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F65786883781A66EF931E /* AppConfigTests.swift */; };
 		B1B3C52FD3E59EFCD8792C1F /* FlowViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871ADDE4BA855712D146CC58 /* FlowViewModelTests.swift */; };
@@ -116,6 +117,7 @@
 		AB9CC1605D10E1A44E37AC1A /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
 		B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAIManager.swift; sourceTree = "<group>"; };
 		B2D5E9F0A12345678901CDEF /* LogoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoService.swift; sourceTree = "<group>"; };
+		F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		BC8F883DA1370AC5B1A91518 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseBootstrap.swift; sourceTree = "<group>"; };
 		C4CD8FA777A6A20D7150FDAF /* APIServing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIServing.swift; sourceTree = "<group>"; };
@@ -289,6 +291,7 @@
 				4E0735E007CA2E9DC9E46151 /* GitHubService.swift */,
 				9DE554411F91BC277DCC90DC /* OpenAIService.swift */,
 				B2D5E9F0A12345678901CDEF /* LogoService.swift */,
+				F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -469,6 +472,7 @@
 				20356FC84A9CDDE89C1E7E78 /* Observability.swift in Sources */,
 				1D1DD871E51F9057F06AE3D1 /* OpenAIService.swift in Sources */,
 				A1C4D8E9F01234567890BCDE /* LogoService.swift in Sources */,
+				E5F1A2B3C4D5E6F7A8B9C0D1 /* KeychainService.swift in Sources */,
 				C3E6F0A1B23456789012DEF0 /* MerchantLogoView.swift in Sources */,
 				812AD23A10F4EB31415E6555 /* PaywallFlowViewModel.swift in Sources */,
 				DBD3DA64155F6099E7C692BD /* PaywallView.swift in Sources */,
