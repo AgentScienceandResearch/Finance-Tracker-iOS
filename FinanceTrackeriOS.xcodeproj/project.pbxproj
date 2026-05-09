@@ -11,6 +11,7 @@
 		0E12D92D5D7E4C5BA77F44F3 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 661DE467F852D75B5E1B16A7 /* Theme.swift */; };
 		14B7680693CE0CBA6AD4E5EC /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C944CF2744263108639983 /* Expense.swift */; };
 		1A5B70AEBBF6F2A0D5250DB2 /* GitHubService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0735E007CA2E9DC9E46151 /* GitHubService.swift */; };
+		1D146E9F2FAF92D700941791 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1D146E9E2FAF92D700941791 /* GoogleService-Info.plist */; };
 		1D1DD871E51F9057F06AE3D1 /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE554411F91BC277DCC90DC /* OpenAIService.swift */; };
 		1EA02E3226554AC161BA18A9 /* FirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */; };
 		1F51F0D83EA99C946F18AB70 /* SubscriptionManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873151EE3D65B4068041EBB6 /* SubscriptionManaging.swift */; };
@@ -37,7 +38,6 @@
 		9EA4DB3C27932D9402DD51F7 /* ReceiptDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2580B4692163C0B383BEBB /* ReceiptDraft.swift */; };
 		A0C2EAC2DA769690EA9F1B03 /* UserStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF28296FDF9AA07370CC451 /* UserStoring.swift */; };
 		A1C4D8E9F01234567890BCDE /* LogoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D5E9F0A12345678901CDEF /* LogoService.swift */; };
-		E5F1A2B3C4D5E6F7A8B9C0D1 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */; };
 		A391D60490CF26841E04C9D8 /* RecurringExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62FCE98085B13A3EA37F54F /* RecurringExpense.swift */; };
 		A6C511CBA787C593AC5A8AA3 /* AppConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F65786883781A66EF931E /* AppConfigTests.swift */; };
 		B1B3C52FD3E59EFCD8792C1F /* FlowViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871ADDE4BA855712D146CC58 /* FlowViewModelTests.swift */; };
@@ -56,10 +56,12 @@
 		D10A6E7369330DC03A7B6EFA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1414BE1DFA4B061D65D6614 /* AppEnvironment.swift */; };
 		D4AA4562B9DF39CF536512F0 /* GlassmorphismShowcaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B82BF3E72C5A17F5D531AE5 /* GlassmorphismShowcaseView.swift */; };
 		D541B8E726F6667888E657DF /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8F883DA1370AC5B1A91518 /* Components.swift */; };
+		FF00AA11BB22CC33DD44EE55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF66 /* Assets.xcassets */; };
 		D62D23ED546092FE4051AAC7 /* AnalyticsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8901995848E592614B6754 /* AnalyticsProvider.swift */; };
 		DBD3DA64155F6099E7C692BD /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71D6C311F918AC58E05F0A6 /* PaywallView.swift */; };
 		DEB7969A47B3AD12C99D7BB1 /* .env.example in Resources */ = {isa = PBXBuildFile; fileRef = 4586F679CA10AA0CDF436CA0 /* .env.example */; };
 		E2644F04B5A17093CB5FFE59 /* PreviewFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = E78764491862238DC7207612 /* PreviewFixtures.swift */; };
+		E5F1A2B3C4D5E6F7A8B9C0D1 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */; };
 		E982E8CCA51CBDCEE4162EDB /* ExpenseCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D47280014B1000D8EEAFBD9 /* ExpenseCategory.swift */; };
 		FB07859A2DDAAB86BC70B102 /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B80D2357B6BACCB7ABAF83 /* UserRepository.swift */; };
 		FC7BA8F693790D830E7D8ACB /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29EDA968A520A7D7FE07A9D5 /* App.swift */; };
@@ -81,6 +83,7 @@
 		11536BD245143056CF16EDC0 /* FinanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceManager.swift; sourceTree = "<group>"; };
 		133AB98515546BCFAB61B22E /* AIChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatMessage.swift; sourceTree = "<group>"; };
 		16092F6CED0B7BDD3163FC19 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		1D146E9E2FAF92D700941791 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		230F65786883781A66EF931E /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		29EDA968A520A7D7FE07A9D5 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		2B1179F38E1A5E65BB151423 /* SubscriptionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRepository.swift; sourceTree = "<group>"; };
@@ -117,7 +120,7 @@
 		AB9CC1605D10E1A44E37AC1A /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
 		B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAIManager.swift; sourceTree = "<group>"; };
 		B2D5E9F0A12345678901CDEF /* LogoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogoService.swift; sourceTree = "<group>"; };
-		F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF66 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BC8F883DA1370AC5B1A91518 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseBootstrap.swift; sourceTree = "<group>"; };
 		C4CD8FA777A6A20D7150FDAF /* APIServing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIServing.swift; sourceTree = "<group>"; };
@@ -129,6 +132,7 @@
 		E62FCE98085B13A3EA37F54F /* RecurringExpense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringExpense.swift; sourceTree = "<group>"; };
 		E78764491862238DC7207612 /* PreviewFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewFixtures.swift; sourceTree = "<group>"; };
 		EAA976F0AB2310FDBA5FB32A /* FinanceExportSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceExportSnapshot.swift; sourceTree = "<group>"; };
+		F6A7B8C9D0E1F2A3B4C5D6E7 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		F71D6C311F918AC58E05F0A6 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		FA9DD170CC13EAC30052E3BC /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		FEB63B06A994954ADEA16513 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
@@ -161,6 +165,7 @@
 		13DA7D171C2AF582C1E70D86 /* Design */ = {
 			isa = PBXGroup;
 			children = (
+				AA11BB22CC33DD44EE55FF66 /* Assets.xcassets */,
 				BC8F883DA1370AC5B1A91518 /* Components.swift */,
 				661DE467F852D75B5E1B16A7 /* Theme.swift */,
 			);
@@ -194,6 +199,7 @@
 				4586F679CA10AA0CDF436CA0 /* .env.example */,
 				29EDA968A520A7D7FE07A9D5 /* App.swift */,
 				D1414BE1DFA4B061D65D6614 /* AppEnvironment.swift */,
+				1D146E9E2FAF92D700941791 /* GoogleService-Info.plist */,
 				04A324F0470CD6B71A891F21 /* Config */,
 				13DA7D171C2AF582C1E70D86 /* Design */,
 				A4BE5D8237DC7725D350D0C3 /* Managers */,
@@ -420,6 +426,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DEB7969A47B3AD12C99D7BB1 /* .env.example in Resources */,
+				1D146E9F2FAF92D700941791 /* GoogleService-Info.plist in Resources */,
+				FF00AA11BB22CC33DD44EE55 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
