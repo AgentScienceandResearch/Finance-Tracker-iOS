@@ -1,6 +1,7 @@
 import Foundation
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
+import FirebaseCore
 // FirebaseFirestoreSwift merged into FirebaseFirestore in Firebase SDK 11+
 #endif
 
@@ -12,11 +13,18 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
     @Published var errorMessage: String?
     private let logger: Logging
 
-#if canImport(FirebaseFirestore)
-    private let db = Firestore.firestore()
-#else
+    // In-memory fallback — always available regardless of Firebase config
     private var inMemoryUsers: [String: User] = [:]
     private var inMemoryCollections: [String: [String: Data]] = [:]
+
+#if canImport(FirebaseFirestore)
+    /// Returns a live Firestore instance only when Firebase has been configured
+    /// (GoogleService-Info.plist present). Returns nil otherwise so callers
+    /// fall back to in-memory storage without crashing.
+    private var db: Firestore? {
+        guard FirebaseApp.app() != nil else { return nil }
+        return Firestore.firestore()
+    }
 #endif
 
     override init() {
@@ -32,9 +40,13 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            try db.collection("users")
-                .document(user.id)
-                .setData(from: user, merge: true)
+            if let db = db {
+                try db.collection("users")
+                    .document(user.id)
+                    .setData(from: user, merge: true)
+            } else {
+                inMemoryUsers[user.id] = user
+            }
 #else
             inMemoryUsers[user.id] = user
 #endif
@@ -51,11 +63,14 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            let document = try await db.collection("users")
-                .document(userId)
-                .getDocument()
-
-            return try document.data(as: User.self)
+            if let db = db {
+                let document = try await db.collection("users")
+                    .document(userId)
+                    .getDocument()
+                return try document.data(as: User.self)
+            } else {
+                return inMemoryUsers[userId]
+            }
 #else
             return inMemoryUsers[userId]
 #endif
@@ -72,12 +87,24 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            try await db.collection("users")
-                .document(userId)
-                .updateData([
-                    "displayName": displayName,
-                    "profileImageURL": profileImageURL as Any
-                ])
+            if let db = db {
+                try await db.collection("users")
+                    .document(userId)
+                    .updateData([
+                        "displayName": displayName,
+                        "profileImageURL": profileImageURL as Any
+                    ])
+            } else {
+                guard let existing = inMemoryUsers[userId] else { return }
+                inMemoryUsers[userId] = User(
+                    id: existing.id,
+                    email: existing.email,
+                    displayName: displayName,
+                    profileImageURL: profileImageURL,
+                    createdAt: existing.createdAt,
+                    lastSignIn: existing.lastSignIn
+                )
+            }
 #else
             guard let existing = inMemoryUsers[userId] else { return }
             inMemoryUsers[userId] = User(
@@ -104,9 +131,16 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            try db.collection(collection)
-                .document(documentID)
-                .setData(from: data, merge: true)
+            if let db = db {
+                try db.collection(collection)
+                    .document(documentID)
+                    .setData(from: data, merge: true)
+            } else {
+                let encoded = try JSONEncoder().encode(data)
+                var documents = inMemoryCollections[collection] ?? [:]
+                documents[documentID] = encoded
+                inMemoryCollections[collection] = documents
+            }
 #else
             let encoded = try JSONEncoder().encode(data)
             var documents = inMemoryCollections[collection] ?? [:]
@@ -126,11 +160,15 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            let document = try await db.collection(collection)
-                .document(documentID)
-                .getDocument()
-
-            return try document.data(as: T.self)
+            if let db = db {
+                let document = try await db.collection(collection)
+                    .document(documentID)
+                    .getDocument()
+                return try document.data(as: T.self)
+            } else {
+                guard let encoded = inMemoryCollections[collection]?[documentID] else { return nil }
+                return try JSONDecoder().decode(T.self, from: encoded)
+            }
 #else
             guard let encoded = inMemoryCollections[collection]?[documentID] else {
                 return nil
@@ -150,9 +188,13 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            try await db.collection(collection)
-                .document(documentID)
-                .delete()
+            if let db = db {
+                try await db.collection(collection)
+                    .document(documentID)
+                    .delete()
+            } else {
+                inMemoryCollections[collection]?[documentID] = nil
+            }
 #else
             inMemoryCollections[collection]?[documentID] = nil
 #endif
@@ -171,18 +213,21 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            let snapshot = try await db.collection(collection)
-                .whereField(whereField, isEqualTo: value)
-                .getDocuments()
-
-            return try snapshot.documents.compactMap { document in
-                try document.data(as: T.self)
+            if let db = db {
+                let snapshot = try await db.collection(collection)
+                    .whereField(whereField, isEqualTo: value)
+                    .getDocuments()
+                return try snapshot.documents.compactMap { document in
+                    try document.data(as: T.self)
+                }
+            } else {
+                return try inMemoryCollections[collection]?.values.compactMap { encoded in
+                    let decoded = try JSONDecoder().decode(T.self, from: encoded)
+                    return matches(decoded, field: whereField, expectedValue: value) ? decoded : nil
+                } ?? []
             }
 #else
-            guard let documents = inMemoryCollections[collection] else {
-                return []
-            }
-
+            guard let documents = inMemoryCollections[collection] else { return [] }
             let decoder = JSONDecoder()
             return try documents.values.compactMap { encoded in
                 let decoded = try decoder.decode(T.self, from: encoded)
@@ -204,22 +249,27 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
 
         do {
 #if canImport(FirebaseFirestore)
-            let batch = db.batch()
-
-            for (index, item) in items.enumerated() {
-                let docRef = db.collection(collection).document(String(index))
-                try batch.setData(from: item, forDocument: docRef, merge: true)
+            if let db = db {
+                let batch = db.batch()
+                for (index, item) in items.enumerated() {
+                    let docRef = db.collection(collection).document(String(index))
+                    try batch.setData(from: item, forDocument: docRef, merge: true)
+                }
+                try await batch.commit()
+            } else {
+                let encoder = JSONEncoder()
+                var documents = inMemoryCollections[collection] ?? [:]
+                for (index, item) in items.enumerated() {
+                    documents[String(index)] = try encoder.encode(item)
+                }
+                inMemoryCollections[collection] = documents
             }
-
-            try await batch.commit()
 #else
             let encoder = JSONEncoder()
             var documents = inMemoryCollections[collection] ?? [:]
-
             for (index, item) in items.enumerated() {
                 documents[String(index)] = try encoder.encode(item)
             }
-
             inMemoryCollections[collection] = documents
 #endif
         } catch {
@@ -229,14 +279,9 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
         }
     }
 
-#if !canImport(FirebaseFirestore)
     private func matches<T>(_ item: T, field: String, expectedValue: Any) -> Bool {
         let mirror = Mirror(reflecting: item)
-        guard let child = mirror.children.first(where: { $0.label == field }) else {
-            return false
-        }
-
+        guard let child = mirror.children.first(where: { $0.label == field }) else { return false }
         return String(describing: child.value) == String(describing: expectedValue)
     }
-#endif
 }
