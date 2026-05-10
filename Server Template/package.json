@@ -1,7 +1,7 @@
 {
   "name": "finance-tracker-backend",
   "version": "1.0.0",
-  "description": "Backend API server for Finance Tracker iOS app (Railway + OpenAI relay)",
+  "description": "Backend API server for Finance Tracker iOS app (Railway + Claude relay)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -22,7 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
     "uuid": "^9.0.1",
-    "axios": "^1.6.2"
+    "@anthropic-ai/sdk": "^0.52.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
