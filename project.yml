@@ -1,6 +1,6 @@
 name: FinanceTrackeriOS
 options:
-  bundleIdPrefix: com.template
+  bundleIdPrefix: com.agentscienceandresearch
   deploymentTarget:
     iOS: 17.0
   xcodeVersion: "16.0"
@@ -11,7 +11,7 @@ settings:
     SWIFT_VERSION: 5.10
     CURRENT_PROJECT_VERSION: 1
     MARKETING_VERSION: 1.0.0
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: R79MH5A2VX
     ENABLE_TESTABILITY: YES
 configs:
   Debug: debug
@@ -22,7 +22,7 @@ packages:
     url: https://github.com/firebase/firebase-ios-sdk.git
     from: 11.0.0
 targets:
-  TemplateApp:
+  FinanceTrackerAI:
     type: application
     platform: iOS
     configFiles:
@@ -51,30 +51,30 @@ targets:
       - package: Firebase
         product: FirebaseAnalytics
       # FirebaseFirestoreSwift was merged into FirebaseFirestore in SDK 11+
-  TemplateAppTests:
+  FinanceTrackerAITests:
     type: bundle.unit-test
     platform: iOS
     sources:
       - path: App TemplateTests
     dependencies:
-      - target: TemplateApp
+      - target: FinanceTrackerAI
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.agentscienceandresearch.financetrackerios.tests
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TemplateApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TemplateApp"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
-  TemplateApp:
+  FinanceTrackerAI:
     build:
       targets:
-        TemplateApp: all
-        TemplateAppTests: [test]
+        FinanceTrackerAI: all
+        FinanceTrackerAITests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
-        - TemplateAppTests
+        - FinanceTrackerAITests
     archive:
       config: Release
