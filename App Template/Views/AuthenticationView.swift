@@ -58,14 +58,12 @@ struct AuthenticationView: View {
             .ignoresSafeArea(edges: .top)
 
             VStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(.white.opacity(0.22))
-                        .frame(width: 72, height: 72)
-                    Image(systemName: "chart.pie.fill")
-                        .font(.system(size: 34, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
+                Image("AppLogo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 80, height: 80)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
 
                 VStack(spacing: 4) {
                     Text("Finance Tracker")

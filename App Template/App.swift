@@ -62,9 +62,12 @@ private struct SplashView: View {
 
             VStack(spacing: 20) {
                 if showLogo {
-                    Image(systemName: "chart.pie.fill")
-                        .font(.system(size: 60, weight: .semibold))
-                        .foregroundStyle(.white)
+                    Image("AppLogo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 90, height: 90)
+                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        .shadow(color: .black.opacity(0.3), radius: 16, x: 0, y: 8)
                         .transition(.scale.combined(with: .opacity))
                 }
 
