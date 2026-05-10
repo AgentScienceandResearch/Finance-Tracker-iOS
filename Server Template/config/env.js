@@ -10,10 +10,10 @@ function getJWTSecret() {
     return process.env.JWT_SECRET || DEV_FALLBACK_JWT_SECRET;
 }
 
-function getOpenAIConfig() {
+function getClaudeConfig() {
     return {
-        apiKey: process.env.OPENAI_API_KEY || '',
-        model: process.env.OPENAI_MODEL || 'gpt-4.1-mini'
+        apiKey: process.env.ANTHROPIC_API_KEY || '',
+        model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5'
     };
 }
 
@@ -32,7 +32,7 @@ function getServerConfig() {
         allowedOrigins,
         databaseURL: process.env.DATABASE_URL || '',
         jwtSecret: getJWTSecret(),
-        openAI: getOpenAIConfig(),
+        claude: getClaudeConfig(),
         logoDevToken: process.env.LOGO_DEV_TOKEN || ''
     };
 }
@@ -46,8 +46,8 @@ function validateServerEnv() {
             missing.push('ALLOWED_ORIGINS');
         }
 
-        if (!config.openAI.apiKey) {
-            missing.push('OPENAI_API_KEY');
+        if (!config.claude.apiKey) {
+            missing.push('ANTHROPIC_API_KEY');
         }
 
         if (INVALID_PROD_JWT_SECRETS.has(config.jwtSecret)) {
@@ -64,7 +64,7 @@ function validateServerEnv() {
 
 module.exports = {
     getJWTSecret,
-    getOpenAIConfig,
+    getClaudeConfig,
     getServerConfig,
     validateServerEnv
 };

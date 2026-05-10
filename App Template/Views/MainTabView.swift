@@ -582,18 +582,11 @@ private struct AnalyticsRow: View {
             // Spending card
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .top) {
-                    // "Spending · This Month" exactly like reference
-                    HStack(spacing: 4) {
-                        Text("Spending")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(FT.t2)
-                        Text("·")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundStyle(FT.t3)
-                        Text("This Month")
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundStyle(FT.t3)
-                    }
+                    (Text("Spending").font(.system(size: 12, weight: .semibold)).foregroundStyle(FT.t2)
+                     + Text(" · ").font(.system(size: 12, weight: .regular)).foregroundStyle(FT.t3)
+                     + Text("This Month").font(.system(size: 12, weight: .regular)).foregroundStyle(FT.t3))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                     Spacer()
                     ZStack {
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -620,6 +613,8 @@ private struct AnalyticsRow: View {
                             .font(.system(size: 10, weight: .bold))
                         Text(String(format: "%.1f%% vs last month", abs(spendingTrendPct)))
                             .font(.system(size: 11, weight: .medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                     .foregroundStyle(trendColor)
                 }
@@ -643,10 +638,13 @@ private struct AnalyticsRow: View {
                             Text("\(pct)% of \(CurrencyFormatting.shared.string(for: budget))")
                                 .font(.system(size: 11, weight: .regular))
                                 .foregroundStyle(FT.t3)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         } else {
                             Text("No budget set")
                                 .font(.system(size: 11))
                                 .foregroundStyle(FT.t3)
+                                .lineLimit(1)
                         }
                     }
                     Spacer()

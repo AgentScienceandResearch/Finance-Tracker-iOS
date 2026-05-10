@@ -1,20 +1,25 @@
 const request = require('supertest');
-const axios = require('axios');
+const Anthropic = require('@anthropic-ai/sdk');
 const { pool } = require('../db/pool');
 
-jest.mock('axios');
+jest.mock('@anthropic-ai/sdk');
 
 const app = require('../server');
+
+const mockCreate = jest.fn();
+Anthropic.mockImplementation(() => ({
+    messages: { create: mockCreate }
+}));
 
 describe('Finance AI routes', () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        process.env.OPENAI_API_KEY = 'test-openai-key';
-        process.env.OPENAI_MODEL = 'gpt-4.1-mini';
+        process.env.ANTHROPIC_API_KEY = 'test-anthropic-key';
+        process.env.CLAUDE_MODEL = 'claude-haiku-4-5';
     });
 
     afterAll(() => {
-        delete process.env.OPENAI_API_KEY;
+        delete process.env.ANTHROPIC_API_KEY;
         return pool.end();
     });
 
@@ -28,10 +33,8 @@ describe('Finance AI routes', () => {
     });
 
     test('POST /api/finance/ai/insights returns assistant message', async () => {
-        axios.post.mockResolvedValueOnce({
-            data: {
-                output_text: 'You can reduce dining spending by 10% this month.'
-            }
+        mockCreate.mockResolvedValueOnce({
+            content: [{ type: 'text', text: 'You can reduce dining spending by 10% this month.' }]
         });
 
         const response = await request(app)
@@ -46,10 +49,8 @@ describe('Finance AI routes', () => {
     });
 
     test('POST /api/finance/ai/parse-receipt normalizes category and response', async () => {
-        axios.post.mockResolvedValueOnce({
-            data: {
-                output_text: "```json\n{\"merchant\":\"Corner Cafe\",\"amount\":18.5,\"category\":\"Invalid Category\",\"purchaseDate\":\"2026-03-01\",\"notes\":\"latte and sandwich\"}\n```"
-            }
+        mockCreate.mockResolvedValueOnce({
+            content: [{ type: 'text', text: '{"merchant":"Corner Cafe","amount":18.5,"category":"Invalid Category","purchaseDate":"2026-03-01","notes":"latte and sandwich"}' }]
         });
 
         const response = await request(app)
