@@ -553,8 +553,8 @@ private struct AnalyticsRow: View {
 
     private var weekData: [Double] {
         let cal = Calendar.current; let now = Date()
-        return (6...0).reversed().map { offset -> Double in
-            guard let day = cal.date(byAdding: .day, value: -offset, to: now) else { return 0 }
+        return (0...6).map { offset -> Double in
+            guard let day = cal.date(byAdding: .day, value: -(6 - offset), to: now) else { return 0 }
             let start = cal.startOfDay(for: day)
             let end   = cal.date(byAdding: .day, value: 1, to: start)!
             return financeManager.expenses
