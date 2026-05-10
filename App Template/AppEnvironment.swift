@@ -79,9 +79,11 @@ final class AppEnvironment: ObservableObject {
 
     private func bindManagerChanges() {
         financeManager.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+        authManager.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
     }
 }

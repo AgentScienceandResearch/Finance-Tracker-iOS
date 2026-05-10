@@ -186,9 +186,10 @@ private struct PremiumTabBar: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
-        .background(.ultraThinMaterial)
-        .clipShape(Capsule())
-        .shadow(color: .black.opacity(0.08), radius: 20, x: 0, y: 6)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .shadow(color: .black.opacity(0.10), radius: 20, x: 0, y: 6)
+        .shadow(color: .black.opacity(0.04), radius: 3, x: 0, y: 1)
     }
 }
 
@@ -1276,14 +1277,26 @@ private struct RecurringRow: View {
 
 private struct InsightsTabView: View {
     @ObservedObject var financeManager: FinanceManager
+    @EnvironmentObject private var financeAIManager: FinanceAIManager
     let onAskAI: () -> Void
 
-    private var topCategories: [(category: ExpenseCategory, total: Decimal)] {
-        financeManager.topCategoriesThisMonth(limit: 6)
+    @State private var selectedCategoryIndex: Int? = nil
+    @State private var categoryInsight: String? = nil
+    @State private var isLoadingInsight = false
+
+    private var spendingData: [(category: ExpenseCategory, total: Decimal, percentage: Double)] {
+        let cats = financeManager.topCategoriesThisMonth(limit: 8)
+        let grandTotal = cats.reduce(0.0) { $0 + NSDecimalNumber(decimal: $1.total).doubleValue }
+        guard grandTotal > 0 else { return [] }
+        return cats.map { item in
+            let pct = NSDecimalNumber(decimal: item.total).doubleValue / grandTotal
+            return (item.category, item.total, pct)
+        }
     }
 
-    private var maxCategoryTotal: Double {
-        topCategories.first.map { NSDecimalNumber(decimal: $0.total).doubleValue } ?? 1
+    private var selectedItem: (category: ExpenseCategory, total: Decimal, percentage: Double)? {
+        guard let idx = selectedCategoryIndex, idx < spendingData.count else { return nil }
+        return spendingData[idx]
     }
 
     var body: some View {
@@ -1294,12 +1307,11 @@ private struct InsightsTabView: View {
                     .foregroundStyle(FT.t1)
                     .padding(.top, 18)
 
-                // Monthly overview card
+                // Monthly overview
                 VStack(alignment: .leading, spacing: 14) {
                     Text("This Month")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(FT.t2)
-
                     HStack(spacing: 14) {
                         InsightMetric(label: "Spent",
                                       value: CurrencyFormatting.shared.string(for: financeManager.thisMonthTotal),
@@ -1316,69 +1328,135 @@ private struct InsightsTabView: View {
                 }
                 .ftCard()
 
-                // Category breakdown
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Spending by Category")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(FT.t2)
+                // Pie chart card
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text("Spending by Category")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(FT.t2)
+                        Spacer()
+                        if selectedCategoryIndex != nil {
+                            Button {
+                                withAnimation(.spring()) { selectedCategoryIndex = nil }
+                            } label: {
+                                Text("Clear")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(FT.green)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
 
-                    if topCategories.isEmpty {
+                    if spendingData.isEmpty {
                         Text("Add expenses to see your breakdown")
                             .font(.system(size: 14))
                             .foregroundStyle(FT.t3)
                             .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 12)
+                            .padding(.vertical, 32)
                     } else {
-                        VStack(spacing: 12) {
-                            ForEach(Array(topCategories.enumerated()), id: \.element.category) { _, row in
-                                let pct = maxCategoryTotal > 0
-                                    ? NSDecimalNumber(decimal: row.total).doubleValue / maxCategoryTotal
-                                    : 0
-                                VStack(spacing: 6) {
-                                    HStack {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                .fill(row.category.color.opacity(0.15))
-                                                .frame(width: 28, height: 28)
-                                            Image(systemName: row.category.sfSymbol)
-                                                .font(.system(size: 12, weight: .semibold))
-                                                .foregroundStyle(row.category.color)
-                                        }
-                                        Text(row.category.rawValue)
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundStyle(FT.t1)
-                                        Spacer()
-                                        Text(CurrencyFormatting.shared.string(for: row.total))
-                                            .font(.system(size: 13, weight: .semibold))
-                                            .foregroundStyle(FT.t1)
-                                    }
-                                    GeometryReader { g in
-                                        ZStack(alignment: .leading) {
-                                            Capsule().fill(FT.bg).frame(height: 5)
-                                            Capsule()
-                                                .fill(row.category.color)
-                                                .frame(width: g.size.width * CGFloat(pct), height: 5)
-                                        }
-                                    }
-                                    .frame(height: 5)
+                        ZStack {
+                            SpendingPieChartView(slices: spendingData, selectedIndex: $selectedCategoryIndex)
+                                .frame(height: 220)
+
+                            VStack(spacing: 3) {
+                                if let item = selectedItem {
+                                    Text(item.category.rawValue)
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(item.category.color)
+                                        .multilineTextAlignment(.center)
+                                        .lineLimit(2)
+                                        .frame(maxWidth: 80)
+                                    Text(CurrencyFormatting.shared.string(for: item.total))
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundStyle(FT.t1)
+                                    Text("\(Int(item.percentage * 100))%")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundStyle(FT.t3)
+                                } else {
+                                    Text("Total")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundStyle(FT.t2)
+                                    Text(CurrencyFormatting.shared.string(for: financeManager.thisMonthTotal))
+                                        .font(.system(size: 17, weight: .bold))
+                                        .foregroundStyle(FT.t1)
+                                    Text("this month")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundStyle(FT.t3)
                                 }
                             }
+                            .animation(.spring(response: 0.35), value: selectedCategoryIndex)
                         }
+
+                        // Legend grid
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                            ForEach(Array(spendingData.enumerated()), id: \.offset) { i, item in
+                                Button {
+                                    withAnimation(.spring(response: 0.35)) {
+                                        selectedCategoryIndex = selectedCategoryIndex == i ? nil : i
+                                    }
+                                } label: {
+                                    HStack(spacing: 7) {
+                                        Circle()
+                                            .fill(item.category.color)
+                                            .frame(width: 9, height: 9)
+                                        Text(item.category.rawValue)
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundStyle(FT.t1)
+                                            .lineLimit(1)
+                                        Spacer(minLength: 0)
+                                        Text("\(Int(item.percentage * 100))%")
+                                            .font(.system(size: 11, weight: .semibold))
+                                            .foregroundStyle(FT.t2)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 7)
+                                    .background(
+                                        selectedCategoryIndex == i
+                                            ? item.category.color.opacity(0.12)
+                                            : FT.bg
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                            .strokeBorder(
+                                                selectedCategoryIndex == i ? item.category.color.opacity(0.4) : Color.clear,
+                                                lineWidth: 1
+                                            )
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        Text("Tap a slice or label to get AI insight")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(FT.t3)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
                 .ftCard()
 
-                // Budget progress
+                // AI Category Insight card
+                if let item = selectedItem {
+                    CategoryInsightCard(
+                        category: item.category,
+                        amount: item.total,
+                        percentage: item.percentage,
+                        insight: $categoryInsight,
+                        isLoading: $isLoadingInsight
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
+                // Budget health
                 if financeManager.monthlyBudget != nil {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Budget Health")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(FT.t2)
-
                         Text(financeManager.budgetStatusText)
                             .font(.system(size: 15, weight: .medium))
                             .foregroundStyle(FT.t1)
-
                         if let ratio = financeManager.monthlyBudgetUsageRatio {
                             GeometryReader { g in
                                 ZStack(alignment: .leading) {
@@ -1394,7 +1472,7 @@ private struct InsightsTabView: View {
                     .ftCard()
                 }
 
-                // AI action
+                // Ask AI button
                 Button(action: onAskAI) {
                     HStack {
                         Image(systemName: "sparkles")
@@ -1412,10 +1490,184 @@ private struct InsightsTabView: View {
                     .shadow(color: FT.green.opacity(0.35), radius: 12, x: 0, y: 6)
                 }
                 .buttonStyle(.plain)
+
+                Spacer(minLength: 8)
             }
             .padding(.horizontal, 18)
             .padding(.bottom, 24)
         }
+        .animation(.spring(response: 0.4), value: selectedCategoryIndex)
+        .task(id: selectedCategoryIndex) {
+            guard let idx = selectedCategoryIndex, idx < spendingData.count else {
+                categoryInsight = nil
+                isLoadingInsight = false
+                return
+            }
+            let item = spendingData[idx]
+            categoryInsight = nil
+            isLoadingInsight = true
+
+            let catExpenses = financeManager.expenses
+                .filter { $0.category == item.category && !$0.category.isIncome }
+                .sorted { $0.date > $1.date }
+                .prefix(5)
+
+            let recentTx = catExpenses.map {
+                "\($0.title): \(CurrencyFormatting.shared.string(for: $0.amount))"
+            }.joined(separator: ", ")
+
+            let monthlyTotal = NSDecimalNumber(decimal: financeManager.thisMonthTotal).doubleValue
+
+            categoryInsight = await financeAIManager.getCategoryInsight(
+                category: item.category.rawValue,
+                amount: NSDecimalNumber(decimal: item.total).doubleValue,
+                percentage: item.percentage,
+                monthlyTotal: monthlyTotal,
+                recentTransactions: recentTx
+            )
+            isLoadingInsight = false
+        }
+    }
+}
+
+// MARK: - Spending Pie Chart
+
+private struct SpendingPieChartView: View {
+    let slices: [(category: ExpenseCategory, total: Decimal, percentage: Double)]
+    @Binding var selectedIndex: Int?
+
+    @State private var appeared = false
+
+    var body: some View {
+        GeometryReader { geo in
+            let size = min(geo.size.width, geo.size.height)
+            let center = CGPoint(x: geo.size.width / 2, y: size / 2)
+            let outerR = size / 2 - 4
+            let innerR = outerR * 0.52
+
+            Canvas { ctx, _ in
+                var startDeg = -90.0
+                for (i, slice) in slices.enumerated() {
+                    let endDeg = startDeg + slice.percentage * 360
+                    let r: CGFloat = selectedIndex == i ? outerR + 10 : outerR
+                    let alpha: Double = selectedIndex == nil || selectedIndex == i ? 1.0 : 0.38
+
+                    var path = Path()
+                    path.addArc(center: center, radius: r,
+                                startAngle: .degrees(startDeg + 0.5),
+                                endAngle: .degrees(endDeg - 0.5),
+                                clockwise: false)
+                    path.addArc(center: center, radius: innerR,
+                                startAngle: .degrees(endDeg - 0.5),
+                                endAngle: .degrees(startDeg + 0.5),
+                                clockwise: true)
+                    path.closeSubpath()
+
+                    ctx.fill(path, with: .color(slice.category.color.opacity(alpha)))
+                    startDeg = endDeg
+                }
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0).onEnded { value in
+                    let dx = value.location.x - center.x
+                    let dy = value.location.y - center.y
+                    let dist = sqrt(dx * dx + dy * dy)
+
+                    guard dist > innerR else {
+                        withAnimation(.spring(response: 0.35)) { selectedIndex = nil }
+                        return
+                    }
+
+                    var angle = atan2(dy, dx) * 180 / .pi + 90
+                    if angle < 0 { angle += 360 }
+
+                    var cumDeg = 0.0
+                    for (i, slice) in slices.enumerated() {
+                        cumDeg += slice.percentage * 360
+                        if angle <= cumDeg || i == slices.count - 1 {
+                            withAnimation(.spring(response: 0.35)) {
+                                selectedIndex = selectedIndex == i ? nil : i
+                            }
+                            return
+                        }
+                    }
+                }
+            )
+        }
+        .opacity(appeared ? 1 : 0)
+        .scaleEffect(appeared ? 1 : 0.7)
+        .onAppear {
+            withAnimation(.spring(response: 0.65, dampingFraction: 0.78)) {
+                appeared = true
+            }
+        }
+    }
+}
+
+// MARK: - Category Insight Card
+
+private struct CategoryInsightCard: View {
+    let category: ExpenseCategory
+    let amount: Decimal
+    let percentage: Double
+    @Binding var insight: String?
+    @Binding var isLoading: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(category.color.opacity(0.15))
+                        .frame(width: 38, height: 38)
+                    Image(systemName: category.sfSymbol)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(category.color)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("AI Insight · \(category.rawValue)")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(category.color)
+                    Text("\(CurrencyFormatting.shared.string(for: amount)) · \(Int(percentage * 100))% of spending")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(FT.t3)
+                }
+            }
+
+            if isLoading {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.75)
+                        .tint(category.color)
+                    Text("Analyzing \(category.rawValue) spending…")
+                        .font(.system(size: 13))
+                        .foregroundStyle(FT.t2)
+                }
+                .padding(.top, 2)
+            } else if let text = insight {
+                Text(text)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(FT.t1)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [category.color.opacity(0.09), category.color.opacity(0.04)],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: FT.cardR, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: FT.cardR, style: .continuous)
+                .strokeBorder(category.color.opacity(0.22), lineWidth: 1)
+        )
+        .animation(.spring(response: 0.35), value: isLoading)
+        .animation(.spring(response: 0.35), value: insight)
     }
 }
 
@@ -1443,9 +1695,11 @@ private struct InsightMetric: View {
 
 private struct FinanceSettingsTabView: View {
     @ObservedObject var financeManager: FinanceManager
+    @EnvironmentObject private var authManager: AuthenticationManager
     let onAskAI: () -> Void
 
     @State private var showDeleteConfirmation = false
+    @State private var showSignOutConfirmation = false
     @State private var showEditProfile        = false
     @State private var showBudgetEditor       = false
 
@@ -1503,6 +1757,11 @@ private struct FinanceSettingsTabView: View {
                                        detail: financeManager.currentProfile.email) {
                         showEditProfile = true
                     }
+                    SettingsDivider()
+                    PremiumSettingsRow(icon: "rectangle.portrait.and.arrow.right", color: .red,
+                                       title: "Sign Out", detail: nil, isDestructive: true) {
+                        showSignOutConfirmation = true
+                    }
                 }
 
                 SettingsSection(label: "About") {
@@ -1525,6 +1784,9 @@ private struct FinanceSettingsTabView: View {
         }
         .confirmationDialog("Clear all tracked data?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Clear All Data", role: .destructive) { financeManager.clearAllData() }
+        }
+        .confirmationDialog("Sign out of Finance Tracker?", isPresented: $showSignOutConfirmation, titleVisibility: .visible) {
+            Button("Sign Out", role: .destructive) { authManager.signOut() }
         }
         .sheet(isPresented: $showEditProfile)  { EditProfileSheet(financeManager: financeManager) }
         .sheet(isPresented: $showBudgetEditor) { BudgetEditorSheet(financeManager: financeManager) }

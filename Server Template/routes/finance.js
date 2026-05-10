@@ -103,6 +103,40 @@ router.post('/ai/insights', async (req, res) => {
     }
 });
 
+router.post('/ai/category-insight', async (req, res) => {
+    const { category, amount, percentage, monthlyTotal, recentTransactions } = req.body;
+
+    if (!category || typeof category !== 'string' || !ALLOWED_CATEGORIES.has(category)) {
+        return res.status(400).json({ error: 'Valid category is required.' });
+    }
+
+    const amountNum = Number(amount);
+    const percentageNum = Number(percentage);
+    const monthlyTotalNum = Number(monthlyTotal);
+
+    if (!Number.isFinite(amountNum) || !Number.isFinite(percentageNum) || !Number.isFinite(monthlyTotalNum)) {
+        return res.status(400).json({ error: 'Invalid numeric values.' });
+    }
+
+    try {
+        const userMessage = `Category: ${category}
+Spent this month: $${amountNum.toFixed(2)} (${(percentageNum * 100).toFixed(0)}% of total spending — $${monthlyTotalNum.toFixed(2)} total)
+Recent transactions: ${recentTransactions || 'none'}`;
+
+        const system = `You are a concise personal finance analyst. Given one spending category with real data, write exactly 2-3 short sentences. Reference the specific dollar amounts. End with one concrete, actionable suggestion. No markdown, no bullet points, no greeting, no emoji — plain conversational text only.`;
+
+        const text = await callClaude({ system, userMessage, maxTokens: 200 });
+
+        if (!text) {
+            return res.status(502).json({ error: 'Claude returned an empty response.' });
+        }
+
+        return res.json({ insight: text });
+    } catch (error) {
+        return res.status(502).json({ error: error.message || 'Failed to generate category insight.' });
+    }
+});
+
 router.post('/ai/parse-receipt', async (req, res) => {
     const { rawText } = req.body;
 

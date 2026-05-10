@@ -80,6 +80,29 @@ final class FinanceAIManager: ObservableObject {
         }
     }
 
+    func getCategoryInsight(
+        category: String,
+        amount: Double,
+        percentage: Double,
+        monthlyTotal: Double,
+        recentTransactions: String
+    ) async -> String? {
+        do {
+            if service.isConfigured {
+                return try await service.getCategoryInsight(
+                    category: category,
+                    amount: amount,
+                    percentage: percentage,
+                    monthlyTotal: monthlyTotal,
+                    recentTransactions: recentTransactions
+                )
+            }
+            return localCategoryInsight(category: category, amount: amount, percentage: percentage)
+        } catch {
+            return localCategoryInsight(category: category, amount: amount, percentage: percentage)
+        }
+    }
+
     func resetConversation() {
         messages = [
             AIChatMessage(
@@ -117,6 +140,11 @@ final class FinanceAIManager: ObservableObject {
         Upcoming recurring:
         \(upcomingRows.isEmpty ? "- none" : upcomingRows.joined(separator: "\n"))
         """
+    }
+
+    private func localCategoryInsight(category: String, amount: Double, percentage: Double) -> String {
+        let amountStr = CurrencyFormatting.shared.string(for: Decimal(amount))
+        return "You spent \(amountStr) on \(category) this month, which is \(Int(percentage * 100))% of total spending. Connect to the AI server for personalized advice on this category."
     }
 
     private func localFallbackInsight(for prompt: String, financeManager: FinanceManager) -> String {

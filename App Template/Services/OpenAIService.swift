@@ -5,6 +5,7 @@ protocol OpenAIServing: AnyObject {
 
     func generateFinanceInsight(prompt: String, financeSummary: String) async throws -> String
     func parseReceipt(from rawText: String) async throws -> ReceiptDraft
+    func getCategoryInsight(category: String, amount: Double, percentage: Double, monthlyTotal: Double, recentTransactions: String) async throws -> String
 }
 
 final class OpenAIService: OpenAIServing {
@@ -65,6 +66,26 @@ final class OpenAIService: OpenAIServing {
         )
     }
 
+    func getCategoryInsight(category: String, amount: Double, percentage: Double, monthlyTotal: Double, recentTransactions: String) async throws -> String {
+        let endpoint = try makeEndpoint(path: "/api/finance/ai/category-insight")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 30
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let payload = CategoryInsightRequest(
+            category: category,
+            amount: amount,
+            percentage: percentage,
+            monthlyTotal: monthlyTotal,
+            recentTransactions: recentTransactions
+        )
+        request.httpBody = try JSONEncoder().encode(payload)
+
+        let response: CategoryInsightResponse = try await execute(request: request)
+        return response.insight
+    }
+
     private func makeEndpoint(path: String) throws -> URL {
         let base = config.apiURL
         guard let endpoint = URL(string: path, relativeTo: base)?.absoluteURL else {
@@ -102,6 +123,18 @@ final class OpenAIService: OpenAIServing {
 
         return message
     }
+}
+
+private struct CategoryInsightRequest: Encodable {
+    let category: String
+    let amount: Double
+    let percentage: Double
+    let monthlyTotal: Double
+    let recentTransactions: String
+}
+
+private struct CategoryInsightResponse: Decodable {
+    let insight: String
 }
 
 private struct InsightsRequest: Encodable {
