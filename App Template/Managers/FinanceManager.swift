@@ -409,7 +409,7 @@ final class FinanceManager: ObservableObject {
     }
 
     private func loadLocalState() {
-        guard let data = userDefaults.data(forKey: Self.localStorageKey) else {
+        guard let data = userDefaults.data(forKey: localStorageKey) else {
             return
         }
 
@@ -443,7 +443,7 @@ final class FinanceManager: ObservableObject {
                 updatedAt: lastSuccessfulSyncAt
             )
             let data = try encoder.encode(state)
-            userDefaults.set(data, forKey: Self.localStorageKey)
+            userDefaults.set(data, forKey: localStorageKey)
         } catch {
             logger.error("Failed to persist local finance state: \(error.localizedDescription)", category: "finance")
             errorMessage = "Unable to save your latest changes."
@@ -456,7 +456,7 @@ final class FinanceManager: ObservableObject {
 
         do {
             let data = try encoder.encode(currentProfile)
-            userDefaults.set(data, forKey: Self.profileStorageKey)
+            userDefaults.set(data, forKey: profileStorageKey)
         } catch {
             logger.error("Failed to persist local profile: \(error.localizedDescription)", category: "finance")
         }
@@ -478,14 +478,8 @@ final class FinanceManager: ObservableObject {
     }
 
     private static func loadOrCreateLocalProfile(userDefaults: UserDefaults) -> User {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-
-        if let data = userDefaults.data(forKey: Self.profileStorageKey),
-           let profile = try? decoder.decode(User.self, from: data) {
-            return profile
-        }
-
+        // This runs at init before any Firebase user is known (currentUserID = "anonymous").
+        // switchUser(to:) will replace this profile as soon as auth resolves.
         let fallbackID: String
         if let existingID = userDefaults.string(forKey: Self.fallbackUserIDKey), !existingID.isEmpty {
             fallbackID = existingID
@@ -495,7 +489,7 @@ final class FinanceManager: ObservableObject {
             fallbackID = generated
         }
 
-        let profile = User(
+        return User(
             id: fallbackID,
             email: "local.user@financetracker.app",
             displayName: "Local User",
@@ -503,14 +497,6 @@ final class FinanceManager: ObservableObject {
             createdAt: Date(),
             lastSignIn: Date()
         )
-
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(profile) {
-            userDefaults.set(data, forKey: Self.profileStorageKey)
-        }
-
-        return profile
     }
 
     private var remoteCollectionName: String {
