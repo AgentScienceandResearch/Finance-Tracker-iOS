@@ -5,3 +5,4 @@ DerivedData/
 **/xcuserdata/
 Server Template/node_modules/
 Server Template/coverage/
+Config/xcconfigs/Local.xcconfig

@@ -6,4 +6,6 @@ struct SubscriptionPlan: Identifiable, Equatable {
     let billingPeriod: String
     let displayPrice: String
     let pricePerMonth: String?
+    let trialDuration: String?
+    let savingsLabel: String?
 }

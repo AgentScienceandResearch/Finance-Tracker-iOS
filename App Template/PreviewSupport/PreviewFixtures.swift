@@ -72,18 +72,22 @@ final class PreviewSubscriptionManagerMock: SubscriptionManaging {
 enum PaywallPreviewFixtures {
     static let samplePlans: [SubscriptionPlan] = [
         SubscriptionPlan(
-            id: "monthly",
+            id: "com.agentscienceandresearch.financetrackerios.monthly",
             title: "Monthly",
             billingPeriod: "1 month",
-            displayPrice: "$9.99",
-            pricePerMonth: "~$9.99/mo"
+            displayPrice: "$6.99",
+            pricePerMonth: nil,
+            trialDuration: nil,
+            savingsLabel: nil
         ),
         SubscriptionPlan(
-            id: "yearly",
+            id: "com.agentscienceandresearch.financetrackerios.yearly",
             title: "Yearly",
             billingPeriod: "1 year",
-            displayPrice: "$79.99",
-            pricePerMonth: "~$6.67/mo"
+            displayPrice: "$49.99",
+            pricePerMonth: "~$4.17/mo",
+            trialDuration: "7 days",
+            savingsLabel: "Save 40%"
         )
     ]
 

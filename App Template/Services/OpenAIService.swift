@@ -5,6 +5,7 @@ protocol OpenAIServing: AnyObject {
 
     func generateFinanceInsight(prompt: String, financeSummary: String) async throws -> String
     func parseReceipt(from rawText: String) async throws -> ReceiptDraft
+    func parseImage(imageBase64: String, mimeType: String) async throws -> [ReceiptDraft]
     func getCategoryInsight(category: String, amount: Double, percentage: Double, monthlyTotal: Double, recentTransactions: String) async throws -> String
 }
 
@@ -66,6 +67,31 @@ final class OpenAIService: OpenAIServing {
         )
     }
 
+    func parseImage(imageBase64: String, mimeType: String) async throws -> [ReceiptDraft] {
+        let endpoint = try makeEndpoint(path: "/api/finance/ai/parse-image")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 60
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let payload = ImageParseRequest(imageBase64: imageBase64, mimeType: mimeType)
+        request.httpBody = try JSONEncoder().encode(payload)
+
+        let response: ImageParseResponse = try await execute(request: request)
+        let today = Date()
+        return response.transactions.map { t in
+            let category = ExpenseCategory(rawValue: t.category) ?? .from(freeform: t.category)
+            let date = Self.isoDateFormatter.date(from: t.purchaseDate) ?? today
+            return ReceiptDraft(
+                merchant: t.merchant,
+                amount: Decimal(t.amount),
+                category: category,
+                purchaseDate: date,
+                notes: t.notes
+            )
+        }
+    }
+
     func getCategoryInsight(category: String, amount: Double, percentage: Double, monthlyTotal: Double, recentTransactions: String) async throws -> String {
         let endpoint = try makeEndpoint(path: "/api/finance/ai/category-insight")
         var request = URLRequest(url: endpoint)
@@ -123,6 +149,32 @@ final class OpenAIService: OpenAIServing {
 
         return message
     }
+}
+
+private struct ImageParseRequest: Encodable {
+    let imageBase64: String
+    let mimeType: String
+}
+
+private struct ImageTransaction: Decodable {
+    let merchant: String
+    let amount: Double
+    let category: String
+    let purchaseDate: String
+    let notes: String?
+}
+
+private struct ImageParseResponse: Decodable {
+    let transactions: [ImageTransaction]
+}
+
+private extension OpenAIService {
+    static let isoDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
 }
 
 private struct CategoryInsightRequest: Encodable {

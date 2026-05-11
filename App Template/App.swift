@@ -16,6 +16,8 @@ struct TemplateApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var environment = AppEnvironment()
     @State private var showSplash = true
+    @State private var showPaywall = false
+    @State private var paywallMode: PaywallMode = .initial
 
     var body: some Scene {
         WindowGroup {
@@ -40,6 +42,44 @@ struct TemplateApp: App {
             }
             .animation(.easeInOut(duration: 0.4), value: showSplash)
             .animation(.easeInOut(duration: 0.35), value: environment.authManager.isAuthenticated)
+            .fullScreenCover(isPresented: $showPaywall) {
+                PaywallView(
+                    subscriptionManager: environment.subscriptionManager,
+                    mode: paywallMode,
+                    onDismiss: paywallMode == .initial ? { showPaywall = false } : nil
+                )
+            }
+            .onChange(of: environment.authManager.isAuthenticated) { _, isAuthenticated in
+                if isAuthenticated { evaluatePaywall() }
+            }
+            .onChange(of: environment.subscriptionManager.isSubscribed) { _, isSubscribed in
+                if isSubscribed { showPaywall = false }
+            }
+            .task {
+                if environment.authManager.isAuthenticated { evaluatePaywall() }
+            }
+        }
+    }
+
+    // MARK: - Paywall logic
+
+    private func evaluatePaywall() {
+        guard !environment.subscriptionManager.isSubscribed else { return }
+        let userID = environment.authManager.currentUser?.id ?? "anonymous"
+        let key = "freeTrialStart_\(userID)"
+
+        if let startDate = UserDefaults.standard.object(forKey: key) as? Date {
+            let days = Calendar.current.dateComponents([.day], from: startDate, to: .now).day ?? 0
+            if days >= 7 {
+                paywallMode = .yearlyHard
+                showPaywall = true
+            }
+            // Within 7 days: free access, no paywall
+        } else {
+            // First time this user has launched — show trial offer and start the clock
+            UserDefaults.standard.set(Date.now, forKey: key)
+            paywallMode = .initial
+            showPaywall = true
         }
     }
 }

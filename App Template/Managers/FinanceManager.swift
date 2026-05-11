@@ -12,9 +12,14 @@ final class FinanceManager: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
-    private static let localStorageKey = "financeTrackerState.v1"
-    private static let profileStorageKey = "financeUserProfile.v1"
+    // Keys are user-scoped to prevent data leaking between accounts.
     private static let fallbackUserIDKey = "financeFallbackUserID"
+
+    private var localStorageKey: String { "financeTrackerState.v1.\(currentUserID)" }
+    private var profileStorageKey: String { "financeUserProfile.v1.\(currentUserID)" }
+
+    // Set by AppEnvironment when Firebase auth resolves.
+    private(set) var currentUserID: String = "anonymous"
 
     private let databaseManager: DatabaseManager
     private let userDefaults: UserDefaults
@@ -236,9 +241,13 @@ final class FinanceManager: ObservableObject {
         var updated = recurringExpenses
         var generatedExpenses: [Expense] = []
 
+        // Don't back-fill more than 90 days to prevent runaway expense generation
+        // if a recurring item's nextDueDate is far in the past.
+        let earliestBackfill = calendar.date(byAdding: .day, value: -90, to: referenceDate) ?? referenceDate
+
         for index in updated.indices where updated[index].isActive {
             var recurring = updated[index]
-            var nextDue = recurring.nextDueDate
+            var nextDue = max(recurring.nextDueDate, earliestBackfill)
 
             while nextDue <= referenceDate {
                 let generated = Expense(
@@ -273,6 +282,36 @@ final class FinanceManager: ObservableObject {
         recurringExpenses = []
         monthlyBudget = nil
         persistState()
+    }
+
+    /// Called when a user signs in. Switches all local and remote data to that user's scope.
+    func switchUser(to user: User) {
+        guard currentUserID != user.id else { return }
+        wipeMemory()
+        currentUserID = user.id
+        currentProfile = user
+        loadLocalState()
+        guard remoteSyncEnabled else { return }
+        Task {
+            await syncProfileFromRemote()
+            await saveProfileToRemote()
+            await syncFromRemote()
+            processDueRecurringExpenses()
+        }
+    }
+
+    /// Called on sign-out. Clears all in-memory data so the next user starts clean.
+    func handleSignOut() {
+        wipeMemory()
+        currentUserID = "anonymous"
+    }
+
+    private func wipeMemory() {
+        expenses = []
+        recurringExpenses = []
+        monthlyBudget = nil
+        lastSuccessfulSyncAt = nil
+        errorMessage = nil
     }
 
     func exportJSON() -> String {

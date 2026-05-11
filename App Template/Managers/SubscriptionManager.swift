@@ -9,12 +9,11 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
         analytics: NoOpAnalyticsTracker.shared
     )
     
-    // MARK: - Product IDs (update with your app's IDs)
-    static let weeklyProductID = "your_app.subscription.weekly"
-    static let monthlyProductID = "your_app.subscription.monthly"
-    static let yearlyProductID = "your_app.subscription.yearly"
-    
-    static let subscriptionProductIDs = [weeklyProductID, monthlyProductID, yearlyProductID]
+    // MARK: - Product IDs
+    static let monthlyProductID = "com.agentscienceandresearch.financetrackerios.monthly"
+    static let yearlyProductID  = "com.agentscienceandresearch.financetrackerios.yearly"
+
+    static let subscriptionProductIDs = [monthlyProductID, yearlyProductID]
     static let allProductIDs = subscriptionProductIDs
     
     // MARK: - Published Properties
@@ -32,7 +31,7 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
     var sortedProducts: [Product] {
         products.filter { Self.subscriptionProductIDs.contains($0.id) }
             .sorted { p1, p2 in
-                let order = [Self.weeklyProductID, Self.monthlyProductID, Self.yearlyProductID]
+                let order = [Self.monthlyProductID, Self.yearlyProductID]
                 let i1 = order.firstIndex(of: p1.id) ?? 0
                 let i2 = order.firstIndex(of: p2.id) ?? 0
                 return i1 < i2
@@ -197,8 +196,23 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
             title: product.displayName,
             billingPeriod: billingPeriod(for: product),
             displayPrice: product.displayPrice,
-            pricePerMonth: pricePerMonth(for: product)
+            pricePerMonth: pricePerMonth(for: product),
+            trialDuration: trialDuration(for: product),
+            savingsLabel: product.id == yearlyProductID ? "Save 40%" : nil
         )
+    }
+
+    private static func trialDuration(for product: Product) -> String? {
+        guard let offer = product.subscription?.introductoryOffer,
+              offer.paymentMode == .freeTrial else { return nil }
+        let period = offer.period
+        switch period.unit {
+        case .day:   return period.value == 1 ? "1 day" : "\(period.value) days"
+        case .week:  return period.value == 1 ? "1 week" : "\(period.value) weeks"
+        case .month: return period.value == 1 ? "1 month" : "\(period.value) months"
+        case .year:  return period.value == 1 ? "1 year" : "\(period.value) years"
+        @unknown default: return nil
+        }
     }
 
     private static func billingPeriod(for product: Product) -> String {

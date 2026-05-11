@@ -1,6 +1,9 @@
 import SwiftUI
 import AuthenticationServices
 import CryptoKit
+#if canImport(FirebaseAuth)
+import FirebaseAuth
+#endif
 
 @MainActor
 class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging {
@@ -8,10 +11,11 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
     @Published var currentUser: User?
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
+
     private let userRepository: UserRepositorying
     private let logger: Logging
     private let analytics: AnalyticsTracking
+    private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     init(
         userRepository: UserRepositorying,
@@ -22,6 +26,7 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
         self.logger = logger
         self.analytics = analytics
         super.init()
+        listenToAuthState()
     }
 
     convenience init(userRepository: UserRepositorying) {
@@ -39,124 +44,178 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
             analytics: NoOpAnalyticsTracker.shared
         )
     }
-    
-    // MARK: - Authentication Methods
-    
-    func signInWithApple(credentials: ASAuthorizationAppleIDCredential) async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        do {
-            let user = User(
-                id: credentials.user,
-                email: credentials.email ?? "user@example.com",
-                displayName: "\(credentials.fullName?.givenName ?? "") \(credentials.fullName?.familyName ?? "")".trimmingCharacters(in: .whitespaces),
-                profileImageURL: nil,
-                createdAt: Date(),
-                lastSignIn: Date()
-            )
-            
-            try await userRepository.saveUser(user)
-            currentUser = user
-            isAuthenticated = true
-            analytics.track(event: AnalyticsEvent(name: "auth_sign_in_apple_success"))
-            logger.info("Signed in with Apple", category: "auth")
-            
-        } catch {
-            errorMessage = "Failed to sign in: \(error.localizedDescription)"
-            logger.error("Apple sign-in failed: \(error.localizedDescription)", category: "auth")
+
+    // MARK: - Firebase Auth state listener
+
+    private func listenToAuthState() {
+#if canImport(FirebaseAuth)
+        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, firebaseUser in
+            guard let self else { return }
+            Task { @MainActor in
+                if let firebaseUser {
+                    let user = User(
+                        id: firebaseUser.uid,
+                        email: firebaseUser.email ?? "",
+                        displayName: firebaseUser.displayName ?? firebaseUser.email?.components(separatedBy: "@").first ?? "User",
+                        profileImageURL: firebaseUser.photoURL?.absoluteString,
+                        createdAt: Date(),
+                        lastSignIn: Date()
+                    )
+                    self.currentUser = user
+                    self.isAuthenticated = true
+                } else {
+                    self.currentUser = nil
+                    self.isAuthenticated = false
+                }
+            }
         }
+#endif
     }
-    
+
+    // MARK: - Email / Password
+
     func signInWithEmail(_ email: String, password: String) async {
         isLoading = true
         defer { isLoading = false }
-        
+        errorMessage = nil
+
+#if canImport(FirebaseAuth)
         do {
-            // Validate input
-            guard email.contains("@") else {
-                errorMessage = "Invalid email format"
-                return
-            }
-            
-            // This would connect to your backend API
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            let uid = result.user.uid
             let user = User(
-                id: UUID().uuidString,
-                email: email,
-                displayName: email.components(separatedBy: "@").first ?? "User",
-                profileImageURL: nil,
+                id: uid,
+                email: result.user.email ?? email,
+                displayName: result.user.displayName ?? email.components(separatedBy: "@").first ?? "User",
+                profileImageURL: result.user.photoURL?.absoluteString,
                 createdAt: Date(),
                 lastSignIn: Date()
             )
-            
             try await userRepository.saveUser(user)
             currentUser = user
             isAuthenticated = true
             analytics.track(event: AnalyticsEvent(name: "auth_sign_in_email_success"))
             logger.info("Signed in with email: \(email)", category: "auth")
-            
         } catch {
-            errorMessage = "Sign in failed. Please try again."
+            errorMessage = firebaseAuthErrorMessage(error)
             logger.error("Email sign-in failed: \(error.localizedDescription)", category: "auth")
         }
+#else
+        errorMessage = "Firebase Auth not available."
+#endif
     }
-    
+
     func signUp(email: String, password: String, displayName: String) async {
         isLoading = true
         defer { isLoading = false }
-        
+        errorMessage = nil
+
+        guard email.contains("@") else { errorMessage = "Invalid email format"; return }
+        guard password.count >= 8 else { errorMessage = "Password must be at least 8 characters"; return }
+
+#if canImport(FirebaseAuth)
         do {
-            guard email.contains("@") else {
-                errorMessage = "Invalid email format"
-                return
-            }
-            
-            guard password.count >= 8 else {
-                errorMessage = "Password must be at least 8 characters"
-                return
-            }
-            
+            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            let changeRequest = result.user.createProfileChangeRequest()
+            changeRequest.displayName = displayName
+            try await changeRequest.commitChanges()
+
             let user = User(
-                id: UUID().uuidString,
+                id: result.user.uid,
                 email: email,
                 displayName: displayName,
                 profileImageURL: nil,
                 createdAt: Date(),
                 lastSignIn: Date()
             )
-            
             try await userRepository.saveUser(user)
             currentUser = user
             isAuthenticated = true
             analytics.track(event: AnalyticsEvent(name: "auth_sign_up_success"))
             logger.info("Signed up new user: \(email)", category: "auth")
-            
         } catch {
-            errorMessage = "Sign up failed. Please try again."
+            errorMessage = firebaseAuthErrorMessage(error)
             logger.error("Sign-up failed: \(error.localizedDescription)", category: "auth")
         }
+#else
+        errorMessage = "Firebase Auth not available."
+#endif
     }
-    
+
+    // MARK: - Apple Sign In
+
+    func signInWithApple(credentials: ASAuthorizationAppleIDCredential) async {
+        isLoading = true
+        defer { isLoading = false }
+        errorMessage = nil
+
+#if canImport(FirebaseAuth)
+        guard let tokenData = credentials.identityToken,
+              let idTokenString = String(data: tokenData, encoding: .utf8) else {
+            errorMessage = "Apple Sign In failed: missing identity token."
+            return
+        }
+
+        // rawNonce is nil because no nonce was set in the Apple auth request
+        let credential = OAuthProvider.appleCredential(
+            withIDToken: idTokenString,
+            rawNonce: nil,
+            fullName: credentials.fullName
+        )
+
+        do {
+            let result = try await Auth.auth().signIn(with: credential)
+            let displayName: String = {
+                let given  = credentials.fullName?.givenName ?? ""
+                let family = credentials.fullName?.familyName ?? ""
+                let joined = "\(given) \(family)".trimmingCharacters(in: .whitespaces)
+                return joined.isEmpty ? (result.user.displayName ?? result.user.email?.components(separatedBy: "@").first ?? "User") : joined
+            }()
+
+            let user = User(
+                id: result.user.uid,
+                email: result.user.email ?? credentials.email ?? "",
+                displayName: displayName,
+                profileImageURL: result.user.photoURL?.absoluteString,
+                createdAt: Date(),
+                lastSignIn: Date()
+            )
+            try await userRepository.saveUser(user)
+            currentUser = user
+            isAuthenticated = true
+            analytics.track(event: AnalyticsEvent(name: "auth_sign_in_apple_success"))
+            logger.info("Signed in with Apple uid=\(result.user.uid)", category: "auth")
+        } catch {
+            errorMessage = "Apple Sign In failed. Please try again."
+            logger.error("Apple sign-in failed: \(error.localizedDescription)", category: "auth")
+        }
+#else
+        errorMessage = "Firebase Auth not available."
+#endif
+    }
+
+    // MARK: - Google Sign In
+
     func signInWithGoogle() async {
         isLoading = true
         defer { isLoading = false }
         errorMessage = nil
 
-        let clientID = "925045680013-j3fvc6rl139nnrdfbrkk12c2npe3js65.apps.googleusercontent.com"
+        let clientID     = "925045680013-j3fvc6rl139nnrdfbrkk12c2npe3js65.apps.googleusercontent.com"
         let redirectScheme = "com.googleusercontent.apps.925045680013-j3fvc6rl139nnrdfbrkk12c2npe3js65"
-        let redirectURI   = "\(redirectScheme):/oauth2redirect"
+        let redirectURI  = "\(redirectScheme):/oauth2redirect"
 
         let verifier  = makeCodeVerifier()
         let challenge = makeCodeChallenge(verifier)
 
         var comps = URLComponents(string: "https://accounts.google.com/o/oauth2/v2/auth")!
         comps.queryItems = [
-            .init(name: "client_id",             value: clientID),
-            .init(name: "redirect_uri",           value: redirectURI),
-            .init(name: "response_type",          value: "code"),
-            .init(name: "scope",                  value: "openid profile email"),
-            .init(name: "code_challenge",         value: challenge),
-            .init(name: "code_challenge_method",  value: "S256"),
+            .init(name: "client_id",            value: clientID),
+            .init(name: "redirect_uri",          value: redirectURI),
+            .init(name: "response_type",         value: "code"),
+            .init(name: "scope",                 value: "openid profile email"),
+            .init(name: "code_challenge",        value: challenge),
+            .init(name: "code_challenge_method", value: "S256"),
         ]
 
         guard let authURL = comps.url else {
@@ -185,23 +244,32 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
                 return
             }
 
-            let tokens   = try await exchangeGoogleCode(code, redirectURI: redirectURI, verifier: verifier, clientID: clientID)
+            let tokens = try await exchangeGoogleCode(code, redirectURI: redirectURI, verifier: verifier, clientID: clientID)
+
+#if canImport(FirebaseAuth)
+            let firebaseCredential = GoogleAuthProvider.credential(
+                withIDToken: tokens.idToken,
+                accessToken: tokens.accessToken ?? ""
+            )
+            let result = try await Auth.auth().signIn(with: firebaseCredential)
             let userInfo = try decodeGoogleIDToken(tokens.idToken)
 
             let user = User(
-                id: userInfo.sub,
-                email: userInfo.email,
-                displayName: userInfo.name ?? userInfo.email.components(separatedBy: "@").first ?? "User",
-                profileImageURL: userInfo.picture,
+                id: result.user.uid,
+                email: result.user.email ?? userInfo.email,
+                displayName: result.user.displayName ?? userInfo.name ?? userInfo.email.components(separatedBy: "@").first ?? "User",
+                profileImageURL: result.user.photoURL?.absoluteString ?? userInfo.picture,
                 createdAt: Date(),
                 lastSignIn: Date()
             )
-
             try await userRepository.saveUser(user)
             currentUser = user
             isAuthenticated = true
             analytics.track(event: AnalyticsEvent(name: "auth_sign_in_google_success"))
             logger.info("Signed in with Google: \(userInfo.email)", category: "auth")
+#else
+            errorMessage = "Firebase Auth not available."
+#endif
 
         } catch {
             let cancelled = (error as? ASWebAuthenticationSessionError)?.code == .canceledLogin
@@ -213,15 +281,36 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
         }
     }
 
+    // MARK: - Sign Out
+
     func signOut() {
         logger.info("Signed out user", category: "auth")
         analytics.track(event: AnalyticsEvent(name: "auth_sign_out"))
+#if canImport(FirebaseAuth)
+        try? Auth.auth().signOut()
+#endif
         isAuthenticated = false
         currentUser = nil
         errorMessage = nil
     }
 
-    // MARK: - Google OAuth helpers
+    // MARK: - Helpers
+
+    private func firebaseAuthErrorMessage(_ error: Error) -> String {
+#if canImport(FirebaseAuth)
+        switch (error as NSError).code {
+        case AuthErrorCode.wrongPassword.rawValue:        return "Incorrect password."
+        case AuthErrorCode.invalidEmail.rawValue:         return "Invalid email address."
+        case AuthErrorCode.userNotFound.rawValue:         return "No account found. Try signing up."
+        case AuthErrorCode.emailAlreadyInUse.rawValue:    return "Email already in use. Try signing in."
+        case AuthErrorCode.weakPassword.rawValue:         return "Password is too weak."
+        case AuthErrorCode.networkError.rawValue:         return "Network error. Check your connection."
+        default:                                          return "Authentication failed. Please try again."
+        }
+#else
+        return error.localizedDescription
+#endif
+    }
 
     private func makeCodeVerifier() -> String {
         var bytes = [UInt8](repeating: 0, count: 32)
@@ -242,7 +331,11 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
 
     private struct GoogleTokens: Decodable {
         let idToken: String
-        enum CodingKeys: String, CodingKey { case idToken = "id_token" }
+        let accessToken: String?
+        enum CodingKeys: String, CodingKey {
+            case idToken = "id_token"
+            case accessToken = "access_token"
+        }
     }
 
     private struct GoogleUserInfo {

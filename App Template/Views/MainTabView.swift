@@ -1,4 +1,6 @@
 import SwiftUI
+import VisionKit
+import UIKit
 
 // MARK: - Design Tokens
 
@@ -73,6 +75,7 @@ struct MainTabView: View {
     @State private var showAddIncome     = false
     @State private var showAddRecurring  = false
     @State private var showReceiptScanner = false
+    @State private var showImport        = false
     @State private var showAIAssistant   = false
 
     var body: some View {
@@ -101,6 +104,9 @@ struct MainTabView: View {
         .sheet(isPresented: $showReceiptScanner) {
             ReceiptScannerSheet(financeManager: financeManager, aiManager: financeAIManager)
         }
+        .sheet(isPresented: $showImport) {
+            ImportExpenseSheet(financeManager: financeManager, aiManager: financeAIManager)
+        }
         .sheet(isPresented: $showAIAssistant) {
             AIAssistantSheet(financeManager: financeManager, aiManager: financeAIManager)
         }
@@ -115,11 +121,12 @@ struct MainTabView: View {
         case .dashboard:
             DashboardTabView(
                 financeManager: financeManager,
-                onViewAll: { selectedTab = .expenses },
+                onViewAll:       { selectedTab = .expenses },
+                onViewInsights:  { selectedTab = .insights },
                 onAddExpense:    { analytics.track(event: AnalyticsEvent(name: "dash_add_expense")); showAddExpense = true },
                 onScanReceipt:   { analytics.track(event: AnalyticsEvent(name: "dash_scan")); showReceiptScanner = true },
                 onAddIncome:     { showAddIncome = true },
-                onTransfer:      { showAIAssistant = true },
+                onImport:        { analytics.track(event: AnalyticsEvent(name: "dash_import")); showImport = true },
                 onAskAI:         { showAIAssistant = true }
             )
         case .expenses:
@@ -141,8 +148,7 @@ struct MainTabView: View {
             )
         case .settings:
             FinanceSettingsTabView(
-                financeManager: financeManager,
-                onAskAI: { showAIAssistant = true }
+                financeManager: financeManager
             )
         }
     }
@@ -197,12 +203,13 @@ private struct PremiumTabBar: View {
 
 private struct DashboardTabView: View {
     @ObservedObject var financeManager: FinanceManager
-    let onViewAll:    () -> Void
-    let onAddExpense: () -> Void
-    let onScanReceipt: () -> Void
-    let onAddIncome:  () -> Void
-    let onTransfer:   () -> Void
-    let onAskAI:      () -> Void
+    let onViewAll:      () -> Void
+    let onViewInsights: () -> Void
+    let onAddExpense:   () -> Void
+    let onScanReceipt:  () -> Void
+    let onAddIncome:    () -> Void
+    let onImport:       () -> Void
+    let onAskAI:        () -> Void
 
     private var firstName: String {
         financeManager.currentProfile.displayName
@@ -231,19 +238,21 @@ private struct DashboardTabView: View {
 
                 RecurringBillsCard(financeManager: financeManager)
 
+                QuickActionsGrid(
+                    onAddExpense:  onAddExpense,
+                    onScanReceipt: onScanReceipt,
+                    onAddIncome:   onAddIncome,
+                    onImport:      onImport
+                )
+
+                SpendingAnalysisCard(onTap: onViewInsights, financeManager: financeManager)
+
                 RecentTransactionsSection(
                     financeManager: financeManager,
                     onViewAll: onViewAll
                 )
 
                 AIInsightCard(financeManager: financeManager, onTap: onAskAI)
-
-                QuickActionsGrid(
-                    onAddExpense:  onAddExpense,
-                    onScanReceipt: onScanReceipt,
-                    onAddIncome:   onAddIncome,
-                    onTransfer:    onTransfer
-                )
 
                 Spacer(minLength: 8)
             }
@@ -372,7 +381,7 @@ private struct HeroBalanceCard: View {
                     }
 
                     Text(CurrencyFormatting.shared.string(for: financeManager.thisMonthTotal))
-                        .font(.system(size: 40, weight: .bold, design: .default))
+                        .font(.system(size: 32, weight: .bold, design: .default))
                         .foregroundStyle(FT.t1)
                         .contentTransition(.numericText())
 
@@ -411,8 +420,8 @@ private struct HeroBalanceCard: View {
             SmoothChartView(dataPoints: chartData.isEmpty ? [0, 0] : chartData,
                             lineColor: FT.green,
                             showFill: true)
-                .frame(height: 100)
-                .padding(.top, 20)
+                .frame(height: 68)
+                .padding(.top, 14)
                 .padding(.horizontal, -4)
         }
         .ftCard(padding: 22)
@@ -624,6 +633,7 @@ private struct AnalyticsRow: View {
                                   color: spendingTrendPct > 0 ? Color(red: 0.9, green: 0.3, blue: 0.3) : FT.green)
                     .frame(height: 36)
             }
+            .frame(maxHeight: .infinity, alignment: .top)
             .ftCard()
             .frame(maxWidth: .infinity)
 
@@ -674,6 +684,8 @@ private struct AnalyticsRow: View {
                         .foregroundStyle(FT.t3)
                 }
 
+                Spacer(minLength: 0)
+
                 // Progress bar
                 GeometryReader { g in
                     ZStack(alignment: .leading) {
@@ -685,9 +697,11 @@ private struct AnalyticsRow: View {
                 }
                 .frame(height: 5)
             }
+            .frame(maxHeight: .infinity, alignment: .top)
             .ftCard()
             .frame(maxWidth: .infinity)
         }
+        .frame(minHeight: 0)
     }
 }
 
@@ -934,13 +948,54 @@ private struct AIInsightCard: View {
     }
 }
 
+// MARK: - Spending Analysis Card
+
+private struct SpendingAnalysisCard: View {
+    let onTap: () -> Void
+    @ObservedObject var financeManager: FinanceManager
+
+    private var subtitle: String {
+        let count = financeManager.topCategoriesThisMonth(limit: 10).count
+        return count > 0 ? "\(count) categories this month" : "AI-powered breakdown"
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(FT.green.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "chart.pie.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(FT.green)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Spending Analysis")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(FT.t1)
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(FT.t2)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(FT.t3)
+            }
+        }
+        .buttonStyle(.plain)
+        .ftCard(padding: 18)
+    }
+}
+
 // MARK: - Quick Actions Grid
 
 private struct QuickActionsGrid: View {
     let onAddExpense:  () -> Void
     let onScanReceipt: () -> Void
     let onAddIncome:   () -> Void
-    let onTransfer:    () -> Void
+    let onImport:      () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -949,10 +1004,10 @@ private struct QuickActionsGrid: View {
                 .foregroundStyle(FT.t1)
 
             HStack(spacing: 12) {
-                DashQuickAction(icon: "plus.circle.fill",         title: "Add Expense",   color: FT.green, action: onAddExpense)
-                DashQuickAction(icon: "viewfinder",               title: "Scan Receipt",  color: Color(red: 0.2, green: 0.5, blue: 0.9), action: onScanReceipt)
-                DashQuickAction(icon: "arrow.down.circle.fill",   title: "Add Income",    color: Color(red: 0.6, green: 0.2, blue: 0.9), action: onAddIncome)
-                DashQuickAction(icon: "arrow.left.arrow.right",   title: "Transfer",      color: Color(red: 0.9, green: 0.5, blue: 0.1), action: onTransfer)
+                DashQuickAction(icon: "plus.circle.fill",       title: "Add Expense",  color: FT.green,                                   action: onAddExpense)
+                DashQuickAction(icon: "viewfinder",             title: "Scan Document", color: Color(red: 0.2, green: 0.5, blue: 0.9),     action: onScanReceipt)
+                DashQuickAction(icon: "arrow.down.circle.fill", title: "Add Income",   color: Color(red: 0.6, green: 0.2, blue: 0.9),     action: onAddIncome)
+                DashQuickAction(icon: "photo.badge.plus",       title: "Import",       color: Color(red: 0.9, green: 0.5, blue: 0.1),     action: onImport)
             }
         }
     }
@@ -1696,7 +1751,6 @@ private struct InsightMetric: View {
 private struct FinanceSettingsTabView: View {
     @ObservedObject var financeManager: FinanceManager
     @EnvironmentObject private var authManager: AuthenticationManager
-    let onAskAI: () -> Void
 
     @State private var showDeleteConfirmation = false
     @State private var showSignOutConfirmation = false
@@ -1740,15 +1794,6 @@ private struct FinanceSettingsTabView: View {
                                        title: "Clear All Data", detail: nil, isDestructive: true) {
                         showDeleteConfirmation = true
                     }
-                }
-
-                SettingsSection(label: "AI Assistant") {
-                    PremiumSettingsRow(icon: "sparkles", color: Color(red: 0.95, green: 0.65, blue: 0.1),
-                                       title: "Open AI Assistant", detail: nil) { onAskAI() }
-                    SettingsDivider()
-                    PremiumSettingsRow(icon: "network", color: FT.t2,
-                                       title: "API Endpoint",
-                                       detail: AppConfig.shared.apiURL.host ?? "—") { }
                 }
 
                 SettingsSection(label: "Profile") {
@@ -2031,96 +2076,244 @@ private struct AddRecurringExpenseSheet: View {
     }
 }
 
-// MARK: - Sheets: Receipt Scanner
+// MARK: - Document Camera (VisionKit wrapper)
+
+private struct DocumentCameraView: UIViewControllerRepresentable {
+    let onScan: (VNDocumentCameraScan) -> Void
+    let onCancel: () -> Void
+    let onError: (Error) -> Void
+
+    func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
+        let vc = VNDocumentCameraViewController()
+        vc.delegate = context.coordinator
+        return vc
+    }
+
+    func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
+        private let parent: DocumentCameraView
+        init(_ parent: DocumentCameraView) { self.parent = parent }
+
+        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+            parent.onScan(scan)
+        }
+        func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+            parent.onCancel()
+        }
+        func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+            parent.onError(error)
+        }
+    }
+}
+
+// MARK: - Sheets: Scan Document
 
 private struct ReceiptScannerSheet: View {
     @ObservedObject var financeManager: FinanceManager
     @ObservedObject var aiManager: FinanceAIManager
     @Environment(\.dismiss) private var dismiss
 
-    @State private var receiptText = ""
-    @State private var draft: ReceiptDraft?
+    private enum Phase { case scanning, extracting, review }
+    @State private var phase: Phase = .scanning
+    @State private var drafts: [ScannerDraft] = []
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 16) {
-                Text("Paste or type receipt text. AI will extract the expense details automatically.")
-                    .font(.system(size: 14, weight: .medium))
+        switch phase {
+        case .scanning:
+            DocumentCameraView(
+                onScan: { scan in
+                    Task { await extract(scan: scan) }
+                },
+                onCancel: { dismiss() },
+                onError: { _ in dismiss() }
+            )
+            .ignoresSafeArea()
+
+        case .extracting:
+            VStack(spacing: 20) {
+                Spacer()
+                ProgressView().scaleEffect(1.6).tint(FT.green)
+                Text("Analyzing document…")
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(FT.t2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(FT.bg.ignoresSafeArea())
 
-                TextEditor(text: $receiptText)
-                    .frame(minHeight: 160)
-                    .padding(10)
-                    .background(FT.bg)
-                    .clipShape(RoundedRectangle(cornerRadius: FT.chipR, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: FT.chipR, style: .continuous)
-                                 .strokeBorder(FT.t3.opacity(0.4), lineWidth: 1))
-                    .font(.system(size: 14))
-
-                if let draft {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label("Detected", systemImage: "checkmark.circle.fill")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(FT.green)
-                        Group {
-                            Text("Merchant: \(draft.merchant)")
-                            Text("Amount: \(CurrencyFormatting.shared.string(for: draft.amount))")
-                            Text("Category: \(draft.category.rawValue)")
-                            Text("Date: \(draft.purchaseDate.formattedDate)")
+        case .review:
+            NavigationStack {
+                reviewView
+                    .background(FT.bg.ignoresSafeArea())
+                    .navigationTitle("Scan Document")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Rescan") { phase = .scanning }
+                                .foregroundStyle(FT.t2)
                         }
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(FT.t1)
-                    }
-                    .padding(12)
-                    .background(FT.greenSub)
-                    .clipShape(RoundedRectangle(cornerRadius: FT.chipR, style: .continuous))
-                }
-
-                if let err = aiManager.errorMessage {
-                    Text(err).font(.system(size: 12)).foregroundStyle(.red)
-                }
-
-                HStack(spacing: 12) {
-                    Button {
-                        Task { draft = await aiManager.parseReceipt(rawText: receiptText) }
-                    } label: {
-                        HStack {
-                            if aiManager.isLoading { ProgressView().tint(.white) }
-                            Text(aiManager.isLoading ? "Parsing…" : "Parse Receipt")
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Save Selected") { saveSelected() }
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(selectedCount > 0 ? FT.green : FT.t3)
+                                .disabled(selectedCount == 0)
                         }
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity).frame(height: 48)
-                        .background(FT.green)
-                        .clipShape(RoundedRectangle(cornerRadius: FT.innerR, style: .continuous))
                     }
-                    .buttonStyle(.plain)
-                    .disabled(aiManager.isLoading || receiptText.isEmpty)
+                    .tint(FT.green)
+            }
+        }
+    }
 
-                    Button {
-                        if let d = draft { financeManager.applyReceiptDraft(d); dismiss() }
-                    } label: {
-                        Text("Save Draft")
+    // MARK: - Review
+
+    private var reviewView: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 0) {
+                if drafts.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 36))
+                            .foregroundStyle(FT.t3)
+                        Text("No transactions found")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(FT.t1)
+                        Text("Try scanning again with better lighting or a flatter document.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(FT.t2)
+                            .multilineTextAlignment(.center)
+                        Button("Scan Again") { phase = .scanning }
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(FT.green)
-                            .frame(maxWidth: .infinity).frame(height: 48)
-                            .background(FT.greenSub)
-                            .clipShape(RoundedRectangle(cornerRadius: FT.innerR, style: .continuous))
+                            .padding(.top, 8)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(draft == nil)
+                    .padding(40)
+                } else {
+                    VStack(spacing: 0) {
+                        HStack {
+                            Text("\(drafts.count) transaction\(drafts.count == 1 ? "" : "s") found")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(FT.t2)
+                            Spacer()
+                            Button(selectedCount == drafts.count ? "Deselect All" : "Select All") {
+                                let all = selectedCount == drafts.count
+                                for i in drafts.indices { drafts[i].selected = !all }
+                            }
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(FT.green)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 14)
+
+                        ForEach($drafts) { $item in
+                            ScannerDraftRow(item: $item)
+                                .padding(.horizontal, 18)
+                                .padding(.bottom, 10)
+                        }
+
+                        Spacer(minLength: 24)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    private var selectedCount: Int { drafts.filter(\.selected).count }
+
+    private func extract(scan: VNDocumentCameraScan) async {
+        phase = .extracting
+        guard let jpeg = scan.imageOfPage(at: 0).resizedForScan().jpegData(compressionQuality: 0.7) else {
+            phase = .review
+            return
+        }
+        let base64 = jpeg.base64EncodedString()
+        let results = await aiManager.parseImage(imageBase64: base64, mimeType: "image/jpeg")
+        drafts = results.map { ScannerDraft(draft: $0) }
+        phase = .review
+    }
+
+    private func saveSelected() {
+        for item in drafts where item.selected {
+            financeManager.applyReceiptDraft(item.draft)
+        }
+        dismiss()
+    }
+}
+
+private struct ScannerDraft: Identifiable {
+    let id = UUID()
+    let draft: ReceiptDraft
+    var selected: Bool = true
+}
+
+private struct ScannerDraftRow: View {
+    @Binding var item: ScannerDraft
+
+    var body: some View {
+        Button { item.selected.toggle() } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(item.selected ? FT.green : FT.t3.opacity(0.25))
+                        .frame(width: 24, height: 24)
+                    if item.selected {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                }
+
+                MerchantLogoView(merchant: item.draft.merchant, category: item.draft.category, size: 40)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.draft.merchant)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(FT.t1)
+                        .lineLimit(1)
+                    HStack(spacing: 6) {
+                        Text(item.draft.category.rawValue)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(item.draft.category.color)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(item.draft.category.color.opacity(0.12))
+                            .clipShape(Capsule())
+                        Text(item.draft.purchaseDate.formattedDate)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(FT.t3)
+                    }
                 }
 
                 Spacer()
+
+                Text(CurrencyFormatting.shared.string(for: item.draft.amount))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(item.draft.amount < 0 ? FT.green : FT.t1)
             }
-            .padding(18)
-            .navigationTitle("Scan Receipt")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() } }
-            }
-            .tint(FT.green)
+            .padding(14)
+            .background(FT.card)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(item.selected ? FT.green.opacity(0.4) : Color.clear, lineWidth: 1.5)
+            )
         }
+        .buttonStyle(.plain)
+    }
+}
+
+private extension UIImage {
+    func resizedForScan(maxDimension: CGFloat = 1536) -> UIImage {
+        let longest = max(size.width, size.height)
+        guard longest > maxDimension else { return self }
+        let scale = maxDimension / longest
+        let newSize = CGSize(width: (size.width * scale).rounded(), height: (size.height * scale).rounded())
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        return renderer.image { _ in draw(in: CGRect(origin: .zero, size: newSize)) }
     }
 }
 
@@ -2227,7 +2420,7 @@ private struct BubbleShape: Shape {
     let isUser: Bool
     func path(in rect: CGRect) -> Path {
         let r: CGFloat = 18
-        let tail: CGFloat = 6
+        let _: CGFloat = 6 // tail offset (reserved)
         var p = Path()
         if isUser {
             p.addRoundedRect(in: CGRect(x: 0, y: 0, width: rect.width, height: rect.height),

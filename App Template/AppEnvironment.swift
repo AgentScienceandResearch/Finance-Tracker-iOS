@@ -85,5 +85,22 @@ final class AppEnvironment: ObservableObject {
         authManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+
+        subscriptionManager.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
+        // Isolate finance data per authenticated user.
+        // Fires immediately with the current value, then on every change.
+        authManager.$currentUser
+            .sink { [weak self] user in
+                guard let self else { return }
+                if let user {
+                    self.financeManager.switchUser(to: user)
+                } else {
+                    self.financeManager.handleSignOut()
+                }
+            }
+            .store(in: &cancellables)
     }
 }

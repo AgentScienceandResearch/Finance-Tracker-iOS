@@ -1,7 +1,7 @@
 // Release configuration
 APP_ENV = Release
 API_URL_SCHEME = https
-API_URL_HOST = api.example.com
+API_URL_HOST = finance-tracker-ios-production.up.railway.app
 URL_SLASH = /
 API_URL = $(API_URL_SCHEME):$(URL_SLASH)$(URL_SLASH)$(API_URL_HOST)
 GITHUB_TOKEN =

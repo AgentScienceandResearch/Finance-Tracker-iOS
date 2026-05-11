@@ -1,4 +1,4 @@
-// Debug configuration
+// Debug configuration — defaults first, then Local.xcconfig overrides
 APP_ENV = Debug
 API_URL_SCHEME = http
 API_URL_HOST = localhost:8000
@@ -7,3 +7,6 @@ API_URL = $(API_URL_SCHEME):$(URL_SLASH)$(URL_SLASH)$(API_URL_HOST)
 GITHUB_TOKEN =
 ANALYTICS_PROVIDER = console
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
+
+// Create Config/xcconfigs/Local.xcconfig (gitignored) to override any of the above
+#include? "Local.xcconfig"

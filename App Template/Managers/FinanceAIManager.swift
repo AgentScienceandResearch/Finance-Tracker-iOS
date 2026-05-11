@@ -54,6 +54,13 @@ final class FinanceAIManager: ObservableObject {
             errorMessage = error.localizedDescription
             logger.warning("AI response fallback used: \(error.localizedDescription)", category: "finance_ai")
         }
+
+        // Keep the initial welcome message + last 39 to bound memory usage.
+        if messages.count > 40 {
+            let welcome = messages.first
+            messages = Array(messages.suffix(39))
+            if let welcome { messages.insert(welcome, at: 0) }
+        }
     }
 
     func parseReceipt(rawText: String) async -> ReceiptDraft? {
@@ -77,6 +84,25 @@ final class FinanceAIManager: ObservableObject {
             logger.warning("Receipt parsing failed: \(error.localizedDescription)", category: "finance_ai")
             errorMessage = error.localizedDescription
             return localReceiptFallback(rawText: trimmedText)
+        }
+    }
+
+    func parseImage(imageBase64: String, mimeType: String) async -> [ReceiptDraft] {
+        errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
+
+        guard service.isConfigured else {
+            errorMessage = "AI server not reachable. Check your connection."
+            return []
+        }
+
+        do {
+            return try await service.parseImage(imageBase64: imageBase64, mimeType: mimeType)
+        } catch {
+            logger.warning("Image parsing failed: \(error.localizedDescription)", category: "finance_ai")
+            errorMessage = error.localizedDescription
+            return []
         }
     }
 

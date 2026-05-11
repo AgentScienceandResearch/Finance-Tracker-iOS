@@ -2,7 +2,9 @@ import Foundation
 #if canImport(FirebaseFirestore)
 import FirebaseFirestore
 import FirebaseCore
-// FirebaseFirestoreSwift merged into FirebaseFirestore in Firebase SDK 11+
+#endif
+#if canImport(FirebaseAuth)
+import FirebaseAuth
 #endif
 
 @MainActor
@@ -18,11 +20,14 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
     private var inMemoryCollections: [String: [String: Data]] = [:]
 
 #if canImport(FirebaseFirestore)
-    /// Returns a live Firestore instance only when Firebase has been configured
-    /// (GoogleService-Info.plist present). Returns nil otherwise so callers
-    /// fall back to in-memory storage without crashing.
+    /// Returns a live Firestore instance only when Firebase is configured AND
+    /// the user is authenticated. Falls back to nil (→ in-memory) otherwise,
+    /// preventing "Missing or insufficient permissions" errors for unauthenticated writes.
     private var db: Firestore? {
         guard FirebaseApp.app() != nil else { return nil }
+#if canImport(FirebaseAuth)
+        guard Auth.auth().currentUser != nil else { return nil }
+#endif
         return Firestore.firestore()
     }
 #endif

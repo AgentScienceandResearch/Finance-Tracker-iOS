@@ -1,18 +1,18 @@
 # App Store Prep Checklist (Finance Tracker iOS)
 
-Last updated: March 9, 2026
+Last updated: May 11, 2026
 
 ## Build Status
 - iOS unit tests are passing.
 - Finance app screens are implemented: Dashboard, Expenses, Recurring, Settings.
 - Data architecture is set to local-first + Firebase sync.
-- GPT calls are proxied through Railway server (`/api/finance/ai/*`).
+- Claude (Anthropic) calls are proxied through Railway server (`/api/finance/ai/*`).
 
 ## Required Before Beta/Release
-- Add Firebase configuration to iOS target (`GoogleService-Info.plist`) and verify Firestore rules.
-- Set Railway environment variable `OPENAI_API_KEY` for the server service.
-- Set production `ALLOWED_ORIGINS`, `JWT_SECRET`, and `DATABASE_URL` in Railway.
-- Change bundle id/team/signing in Xcode for your Apple Developer account.
+- Verify Firestore rules for production (`GoogleService-Info.plist` is already configured).
+- Set `ANTHROPIC_API_KEY` in Railway for the server service.
+- Set `DATABASE_URL` in Railway via the Postgres service reference.
+- `JWT_SECRET` is already set in Railway.
 
 ## iOS Release Checklist
 - Update app name and bundle identifiers from template defaults.

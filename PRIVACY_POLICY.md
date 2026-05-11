@@ -1,6 +1,6 @@
 # Privacy Policy - Finance Tracker iOS
 
-Effective date: March 9, 2026
+Effective date: May 11, 2026
 
 ## Overview
 Finance Tracker iOS is designed to help users track personal expenses and recurring payments. We store sensitive API keys on our backend infrastructure (Railway) and do not embed provider secret keys in the mobile app.
@@ -14,7 +14,7 @@ Finance Tracker iOS is designed to help users track personal expenses and recurr
 ## Where Data Is Stored
 - On device: local app storage for app state and fast startup
 - Cloud sync: Firebase (profile and finance state)
-- AI processing: prompts/receipt text are sent to our backend, then relayed to the OpenAI API
+- AI processing: prompts/receipt text are sent to our backend, then relayed to the Anthropic API
 
 ## How We Use Data
 - Provide core expense tracking functionality
@@ -26,7 +26,7 @@ Finance Tracker iOS is designed to help users track personal expenses and recurr
 We share data only with service providers required for app functionality:
 - Firebase (cloud storage/sync)
 - Railway (backend hosting)
-- OpenAI (AI generation/receipt parsing via backend relay)
+- Anthropic (AI generation/receipt parsing via backend relay)
 
 We do not sell personal data.
 

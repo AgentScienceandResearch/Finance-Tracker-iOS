@@ -37,5 +37,13 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Finance Tracker uses your photo library to import receipts and financial screenshots for AI-powered expense extraction.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Finance Tracker uses your camera to scan receipts and capture financial documents for AI-powered expense extraction.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Finance Tracker may save processed receipt images to your photo library.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
