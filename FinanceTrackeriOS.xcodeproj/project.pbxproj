@@ -550,7 +550,7 @@
 				MARKETING_VERSION = 3.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -566,7 +566,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI";
 			};
 			name = Debug;
@@ -653,7 +653,7 @@
 				MARKETING_VERSION = 3.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Staging;
 		};
@@ -669,7 +669,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI";
 			};
 			name = Staging;
@@ -686,7 +686,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025.tests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI";
 			};
 			name = Release;
@@ -780,7 +780,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};

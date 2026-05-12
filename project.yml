@@ -38,6 +38,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dakota.financetracker2025
         INFOPLIST_FILE: Config/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
       configs:
         Debug:
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
@@ -62,6 +63,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dakota.financetracker2025.tests
         GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
