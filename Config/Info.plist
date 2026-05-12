@@ -2,12 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>ANALYTICS_PROVIDER</key>
+	<string>$(ANALYTICS_PROVIDER)</string>
+	<key>API_URL</key>
+	<string>$(API_URL)</string>
+	<key>APP_ENV</key>
+	<string>$(APP_ENV)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Finance Tracker: AI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -16,14 +22,16 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>APP_ENV</key>
-	<string>$(APP_ENV)</string>
-	<key>API_URL</key>
-	<string>$(API_URL)</string>
 	<key>GITHUB_TOKEN</key>
 	<string>$(GITHUB_TOKEN)</string>
-	<key>ANALYTICS_PROVIDER</key>
-	<string>$(ANALYTICS_PROVIDER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Finance Tracker uses your camera to scan receipts and capture financial documents for AI-powered expense extraction.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Finance Tracker may save processed receipt images to your photo library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Finance Tracker uses your photo library to import receipts and financial screenshots for AI-powered expense extraction.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -37,13 +45,5 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Finance Tracker uses your photo library to import receipts and financial screenshots for AI-powered expense extraction.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Finance Tracker uses your camera to scan receipts and capture financial documents for AI-powered expense extraction.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Finance Tracker may save processed receipt images to your photo library.</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 </dict>
 </plist>

@@ -15,6 +15,8 @@
 		0DF49DB89CA82D65268FBBAE /* RecurringExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62FCE98085B13A3EA37F54F /* RecurringExpense.swift */; };
 		1394328C0ADF2D55BCB296B0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0141BD05BAD17E14C483C242 /* FirebaseFirestore */; };
 		1BE63336D7C191B07575F34D /* SubscriptionManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873151EE3D65B4068041EBB6 /* SubscriptionManaging.swift */; };
+		1D146EA32FB28ACC00941791 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D146EA22FB28ACC00941791 /* StoreKit.framework */; };
+		1D146EA52FB2ABDC00941791 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1D146EA42FB2ABDC00941791 /* GoogleService-Info.plist */; };
 		25747DD09E22D7F28C6F9A4B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 172965080010172944303FC9 /* Assets.xcassets */; };
 		2FC60DED5630C7ABCC8D12F2 /* LogoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32ADEB16F352070EEFEE552D /* LogoService.swift */; };
 		37159B11E51BFD85B7C04314 /* FirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */; };
@@ -29,7 +31,6 @@
 		65660EA3EF8E0F37996C3FC3 /* AnalyticsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8901995848E592614B6754 /* AnalyticsProvider.swift */; };
 		7049EF9668E872C14943DC8F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4B88D1194AAABB29D9089FCB /* FirebaseAuth */; };
 		74F5A11D1F05E09725771ABC /* FinanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11536BD245143056CF16EDC0 /* FinanceManager.swift */; };
-		76BC09EAED87737333A47735 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */; };
 		7880C9AF99D4F8468BBFFB07 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C944CF2744263108639983 /* Expense.swift */; };
 		7A1B822A62099B0DA3D1D44A /* FinanceExportSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA976F0AB2310FDBA5FB32A /* FinanceExportSnapshot.swift */; };
 		7C6C3E8BDD1827FDE8C191D4 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29EDA968A520A7D7FE07A9D5 /* App.swift */; };
@@ -86,6 +87,8 @@
 		16092F6CED0B7BDD3163FC19 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		172965080010172944303FC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1D146EA02FB0369D00941791 /* FinanceTrackerAI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FinanceTrackerAI.entitlements; sourceTree = "<group>"; };
+		1D146EA22FB28ACC00941791 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		1D146EA42FB2ABDC00941791 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		230F65786883781A66EF931E /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		29EDA968A520A7D7FE07A9D5 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		2B1179F38E1A5E65BB151423 /* SubscriptionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRepository.swift; sourceTree = "<group>"; };
@@ -123,7 +126,6 @@
 		9DE554411F91BC277DCC90DC /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
 		9F2580B4692163C0B383BEBB /* ReceiptDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptDraft.swift; sourceTree = "<group>"; };
 		AB9CC1605D10E1A44E37AC1A /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
-		B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAIManager.swift; sourceTree = "<group>"; };
 		BB22CC33DD44EE55FF66AA11 /* ImportExpenseSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExpenseSheet.swift; sourceTree = "<group>"; };
 		BC8F883DA1370AC5B1A91518 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
@@ -149,6 +151,7 @@
 			files = (
 				C27E062969FB306DB7762550 /* FirebaseCore in Frameworks */,
 				7049EF9668E872C14943DC8F /* FirebaseAuth in Frameworks */,
+				1D146EA32FB28ACC00941791 /* StoreKit.framework in Frameworks */,
 				1394328C0ADF2D55BCB296B0 /* FirebaseFirestore in Frameworks */,
 				5D73B4222FAED5DD71156585 /* FirebaseAnalytics in Frameworks */,
 			);
@@ -173,6 +176,14 @@
 				661DE467F852D75B5E1B16A7 /* Theme.swift */,
 			);
 			path = Design;
+			sourceTree = "<group>";
+		};
+		1D146EA12FB28ACC00941791 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1D146EA22FB28ACC00941791 /* StoreKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		28022074160B7774F4B6EC1A /* Utilities */ = {
@@ -202,7 +213,7 @@
 				4586F679CA10AA0CDF436CA0 /* .env.example */,
 				29EDA968A520A7D7FE07A9D5 /* App.swift */,
 				D1414BE1DFA4B061D65D6614 /* AppEnvironment.swift */,
-				B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */,
+				1D146EA42FB2ABDC00941791 /* GoogleService-Info.plist */,
 				04A324F0470CD6B71A891F21 /* Config */,
 				13DA7D171C2AF582C1E70D86 /* Design */,
 				A4BE5D8237DC7725D350D0C3 /* Managers */,
@@ -313,6 +324,7 @@
 				3BC1DD4182E65C746EEE2B4A /* App Template */,
 				B0C9993F69DF9E2545EDA368 /* App TemplateTests */,
 				FF2DBC7FDEA1A307D49C3A9E /* Config */,
+				1D146EA12FB28ACC00941791 /* Frameworks */,
 				6648739DE6CD63E6753F5EF0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -435,7 +447,7 @@
 			files = (
 				AB71253BC13553E893F01B87 /* .env.example in Resources */,
 				25747DD09E22D7F28C6F9A4B /* Assets.xcassets in Resources */,
-				76BC09EAED87737333A47735 /* GoogleService-Info.plist in Resources */,
+				1D146EA52FB2ABDC00941791 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,16 +539,16 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = FinanceTrackerAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Finance Tracker: AI";
+				INFOPLIST_KEY_CFBundleDisplayName = FinanceTrackerAI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.agentscienceandresearch.financetrackerios;
+				MARKETING_VERSION = 3.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -552,7 +564,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.agentscienceandresearch.financetrackerios.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI";
@@ -630,16 +642,16 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = FinanceTrackerAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Finance Tracker: AI";
+				INFOPLIST_KEY_CFBundleDisplayName = FinanceTrackerAI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.agentscienceandresearch.financetrackerios;
+				MARKETING_VERSION = 3.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -655,7 +667,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.agentscienceandresearch.financetrackerios.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI";
@@ -672,7 +684,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.agentscienceandresearch.financetrackerios.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025.tests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI";
@@ -756,16 +768,16 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = FinanceTrackerAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Finance Tracker: AI";
+				INFOPLIST_KEY_CFBundleDisplayName = FinanceTrackerAI;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.agentscienceandresearch.financetrackerios;
+				MARKETING_VERSION = 3.0.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				TARGETED_DEVICE_FAMILY = 1;

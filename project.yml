@@ -1,6 +1,6 @@
 name: FinanceTrackeriOS
 options:
-  bundleIdPrefix: com.agentscienceandresearch
+  bundleIdPrefix: com.dakota
   deploymentTarget:
     iOS: 17.0
   xcodeVersion: "16.0"
@@ -36,7 +36,7 @@ targets:
           - "**/*.md"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.agentscienceandresearch.financetrackerios
+        PRODUCT_BUNDLE_IDENTIFIER: com.dakota.financetracker2025
         INFOPLIST_FILE: Config/Info.plist
       configs:
         Debug:
@@ -60,7 +60,7 @@ targets:
       - target: FinanceTrackerAI
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.agentscienceandresearch.financetrackerios.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.dakota.financetracker2025.tests
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/FinanceTrackerAI.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinanceTrackerAI"
         BUNDLE_LOADER: "$(TEST_HOST)"
