@@ -52,4 +52,4 @@ This app is not intended for children under 13.
 
 ## Contact
 For privacy questions or deletion requests, contact:
-- Support URL: https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/issues
+- Support URL: https://agentscienceandresearch.github.io/Finance-Tracker-iOS/support.html

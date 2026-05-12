@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>925045680013-j3fvc6rl139nnrdfbrkk12c2npe3js65.apps.googleusercontent.com</string>
+	<string>925045680013-hkiga9t9c5mu9nf0uri319ls54jiont7.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.925045680013-j3fvc6rl139nnrdfbrkk12c2npe3js65</string>
+	<string>com.googleusercontent.apps.925045680013-hkiga9t9c5mu9nf0uri319ls54jiont7</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAb1ha8bd8Ug7v9exhR3MgzJpEtyBjfzdk</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.agentscienceandresearch.financetrackerios</string>
+	<string>com.dakota.financetracker2025</string>
 	<key>PROJECT_ID</key>
 	<string>finance-tracker-ai-d5ef1</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:925045680013:ios:096f8b3332c73a67e0bfc4</string>
+	<string>1:925045680013:ios:47395e27245e4329e0bfc4</string>
 </dict>
 </plist>
