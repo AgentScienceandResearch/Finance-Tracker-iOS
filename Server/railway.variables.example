@@ -1,0 +1,16 @@
+# Paste into Railway Variables (Raw Editor) and fill secrets.
+NODE_ENV=production
+ANTHROPIC_API_KEY=
+CLAUDE_MODEL=claude-haiku-4-5
+
+JWT_SECRET=
+# JWT_SECRET is already set — do not overwrite unless rotating.
+
+# logo.dev — publishable key fetched by iOS app via /api/config
+# Safe to expose; appears in image URLs constructed by the iOS client.
+LOGO_DEV_TOKEN=pk_VfLJ3VfBQCiaIl-gF2sL7A
+
+RATE_LIMIT_MAX=100
+
+# Set via Railway Postgres service reference in dashboard
+# DATABASE_URL=${{Postgres.DATABASE_URL}}
