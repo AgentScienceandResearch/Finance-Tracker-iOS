@@ -13,10 +13,9 @@
 		0C2F293079BC46077066C045 /* CurrencyFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A5D18A3CFECA6E4FE9357B8 /* CurrencyFormatting.swift */; };
 		0DA8B52827B079057BA424EF /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8F883DA1370AC5B1A91518 /* Components.swift */; };
 		0DF49DB89CA82D65268FBBAE /* RecurringExpense.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62FCE98085B13A3EA37F54F /* RecurringExpense.swift */; };
+		124223CCE5176582B1D26FA6 /* BillReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 769FA28E4C7F6404E0D2E8C3 /* BillReminderManager.swift */; };
 		1394328C0ADF2D55BCB296B0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0141BD05BAD17E14C483C242 /* FirebaseFirestore */; };
 		1BE63336D7C191B07575F34D /* SubscriptionManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873151EE3D65B4068041EBB6 /* SubscriptionManaging.swift */; };
-		1D146EA32FB28ACC00941791 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D146EA22FB28ACC00941791 /* StoreKit.framework */; };
-		1D146EA52FB2ABDC00941791 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1D146EA42FB2ABDC00941791 /* GoogleService-Info.plist */; };
 		25747DD09E22D7F28C6F9A4B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 172965080010172944303FC9 /* Assets.xcassets */; };
 		2FC60DED5630C7ABCC8D12F2 /* LogoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32ADEB16F352070EEFEE552D /* LogoService.swift */; };
 		37159B11E51BFD85B7C04314 /* FirebaseBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */; };
@@ -31,6 +30,7 @@
 		65660EA3EF8E0F37996C3FC3 /* AnalyticsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8901995848E592614B6754 /* AnalyticsProvider.swift */; };
 		7049EF9668E872C14943DC8F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4B88D1194AAABB29D9089FCB /* FirebaseAuth */; };
 		74F5A11D1F05E09725771ABC /* FinanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11536BD245143056CF16EDC0 /* FinanceManager.swift */; };
+		76BC09EAED87737333A47735 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */; };
 		7880C9AF99D4F8468BBFFB07 /* Expense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C944CF2744263108639983 /* Expense.swift */; };
 		7A1B822A62099B0DA3D1D44A /* FinanceExportSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA976F0AB2310FDBA5FB32A /* FinanceExportSnapshot.swift */; };
 		7C6C3E8BDD1827FDE8C191D4 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29EDA968A520A7D7FE07A9D5 /* App.swift */; };
@@ -47,10 +47,10 @@
 		9B227B8E39E8F289852CE752 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D5307A226E61E708D560405 /* AppConfig.swift */; };
 		A4155C1254ABACD97B37F2F5 /* SubscriptionPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B66094F503F65DE062FFA0E /* SubscriptionPlan.swift */; };
 		A6CC8297C347B6A040940D7C /* Observability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CA64650308007393F5F690 /* Observability.swift */; };
-		AA11BB22CC33DD44EE55FF66 /* ImportExpenseSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22CC33DD44EE55FF66AA11 /* ImportExpenseSheet.swift */; };
 		AB71253BC13553E893F01B87 /* .env.example in Resources */ = {isa = PBXBuildFile; fileRef = 4586F679CA10AA0CDF436CA0 /* .env.example */; };
 		B68ACCCF07FF787C9CD2F220 /* AppConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230F65786883781A66EF931E /* AppConfigTests.swift */; };
 		B794433E840E890F400D9A40 /* AnalyticsProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE452CBBD63369798F74948F /* AnalyticsProviderTests.swift */; };
+		B8646D4A91FA3465BAAB98FF /* ImportExpenseSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A697057EA134E3CBF5C6092 /* ImportExpenseSheet.swift */; };
 		B877AA974E21981F24E66C35 /* RecurrenceFrequency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321EF5B6079B968EBA8D6D0F /* RecurrenceFrequency.swift */; };
 		C27E062969FB306DB7762550 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 423027C8254BE853351CE073 /* FirebaseCore */; };
 		CA308C12C59CCDDD2123F436 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311C928CD654B89422BDD40C /* SubscriptionManager.swift */; };
@@ -86,9 +86,6 @@
 		133AB98515546BCFAB61B22E /* AIChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatMessage.swift; sourceTree = "<group>"; };
 		16092F6CED0B7BDD3163FC19 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		172965080010172944303FC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		1D146EA02FB0369D00941791 /* FinanceTrackerAI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FinanceTrackerAI.entitlements; sourceTree = "<group>"; };
-		1D146EA22FB28ACC00941791 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		1D146EA42FB2ABDC00941791 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		230F65786883781A66EF931E /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		29EDA968A520A7D7FE07A9D5 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		2B1179F38E1A5E65BB151423 /* SubscriptionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRepository.swift; sourceTree = "<group>"; };
@@ -99,20 +96,22 @@
 		3363DD6E9F4AD0F1E93E356A /* AuthenticationFlowViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationFlowViewModel.swift; sourceTree = "<group>"; };
 		3628D96B49324D1B438FCAF1 /* DatabaseManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManagerTests.swift; sourceTree = "<group>"; };
 		37DE3DB5F001083C7A60005F /* MerchantLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantLogoView.swift; sourceTree = "<group>"; };
-		3F040B97B7F0C2284D508E80 /* FinanceTrackerAITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FinanceTrackerAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F040B97B7F0C2284D508E80 /* FinanceTrackerAITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = FinanceTrackerAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		40B80D2357B6BACCB7ABAF83 /* UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
-		4586F679CA10AA0CDF436CA0 /* .env.example */ = {isa = PBXFileReference; lastKnownFileType = text; path = .env.example; sourceTree = "<group>"; };
+		4586F679CA10AA0CDF436CA0 /* .env.example */ = {isa = PBXFileReference; path = .env.example; sourceTree = "<group>"; };
 		48C3C7531A0F9BA7F90A5C5E /* FinanceManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceManagerTests.swift; sourceTree = "<group>"; };
 		48C944CF2744263108639983 /* Expense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expense.swift; sourceTree = "<group>"; };
-		4A2F71A1971815A407BEA166 /* FinanceTrackerAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FinanceTrackerAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A2F71A1971815A407BEA166 /* FinanceTrackerAI.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FinanceTrackerAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A5D18A3CFECA6E4FE9357B8 /* CurrencyFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatting.swift; sourceTree = "<group>"; };
 		4B66094F503F65DE062FFA0E /* SubscriptionPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlan.swift; sourceTree = "<group>"; };
 		4D47280014B1000D8EEAFBD9 /* ExpenseCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseCategory.swift; sourceTree = "<group>"; };
 		4E0735E007CA2E9DC9E46151 /* GitHubService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubService.swift; sourceTree = "<group>"; };
 		5D5307A226E61E708D560405 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		661DE467F852D75B5E1B16A7 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		6A697057EA134E3CBF5C6092 /* ImportExpenseSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExpenseSheet.swift; sourceTree = "<group>"; };
 		6AC89DD553860AEA8AB688C6 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		6BF28296FDF9AA07370CC451 /* UserStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStoring.swift; sourceTree = "<group>"; };
+		769FA28E4C7F6404E0D2E8C3 /* BillReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillReminderManager.swift; sourceTree = "<group>"; };
 		7B82BF3E72C5A17F5D531AE5 /* GlassmorphismShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassmorphismShowcaseView.swift; sourceTree = "<group>"; };
 		7C8901995848E592614B6754 /* AnalyticsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsProvider.swift; sourceTree = "<group>"; };
 		7D839F8B1F42AACC363C2C03 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -126,8 +125,8 @@
 		9DE554411F91BC277DCC90DC /* OpenAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
 		9F2580B4692163C0B383BEBB /* ReceiptDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptDraft.swift; sourceTree = "<group>"; };
 		AB9CC1605D10E1A44E37AC1A /* Staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Staging.xcconfig; sourceTree = "<group>"; };
+		B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAIManager.swift; sourceTree = "<group>"; };
-		BB22CC33DD44EE55FF66AA11 /* ImportExpenseSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportExpenseSheet.swift; sourceTree = "<group>"; };
 		BC8F883DA1370AC5B1A91518 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		C3A0CDED5AAD7E6E6DC59C96 /* FirebaseBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseBootstrap.swift; sourceTree = "<group>"; };
 		C4CD8FA777A6A20D7150FDAF /* APIServing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIServing.swift; sourceTree = "<group>"; };
@@ -151,7 +150,6 @@
 			files = (
 				C27E062969FB306DB7762550 /* FirebaseCore in Frameworks */,
 				7049EF9668E872C14943DC8F /* FirebaseAuth in Frameworks */,
-				1D146EA32FB28ACC00941791 /* StoreKit.framework in Frameworks */,
 				1394328C0ADF2D55BCB296B0 /* FirebaseFirestore in Frameworks */,
 				5D73B4222FAED5DD71156585 /* FirebaseAnalytics in Frameworks */,
 			);
@@ -176,14 +174,6 @@
 				661DE467F852D75B5E1B16A7 /* Theme.swift */,
 			);
 			path = Design;
-			sourceTree = "<group>";
-		};
-		1D146EA12FB28ACC00941791 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				1D146EA22FB28ACC00941791 /* StoreKit.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		28022074160B7774F4B6EC1A /* Utilities */ = {
@@ -213,7 +203,7 @@
 				4586F679CA10AA0CDF436CA0 /* .env.example */,
 				29EDA968A520A7D7FE07A9D5 /* App.swift */,
 				D1414BE1DFA4B061D65D6614 /* AppEnvironment.swift */,
-				1D146EA42FB2ABDC00941791 /* GoogleService-Info.plist */,
+				B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */,
 				04A324F0470CD6B71A891F21 /* Config */,
 				13DA7D171C2AF582C1E70D86 /* Design */,
 				A4BE5D8237DC7725D350D0C3 /* Managers */,
@@ -266,7 +256,7 @@
 			children = (
 				FEBB2FC8941F35AB7F16DE9B /* AuthenticationView.swift */,
 				7B82BF3E72C5A17F5D531AE5 /* GlassmorphismShowcaseView.swift */,
-				BB22CC33DD44EE55FF66AA11 /* ImportExpenseSheet.swift */,
+				6A697057EA134E3CBF5C6092 /* ImportExpenseSheet.swift */,
 				7D839F8B1F42AACC363C2C03 /* MainTabView.swift */,
 				37DE3DB5F001083C7A60005F /* MerchantLogoView.swift */,
 				F71D6C311F918AC58E05F0A6 /* PaywallView.swift */,
@@ -279,6 +269,7 @@
 			children = (
 				8E59951EB81195A32C0D4765 /* AuthenticationManager.swift */,
 				968843BADE0D4458604AD7FB /* AuthenticationManaging.swift */,
+				769FA28E4C7F6404E0D2E8C3 /* BillReminderManager.swift */,
 				FA9DD170CC13EAC30052E3BC /* DatabaseManager.swift */,
 				B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */,
 				11536BD245143056CF16EDC0 /* FinanceManager.swift */,
@@ -320,11 +311,9 @@
 		C3C37817033109C66F8119F1 = {
 			isa = PBXGroup;
 			children = (
-				1D146EA02FB0369D00941791 /* FinanceTrackerAI.entitlements */,
 				3BC1DD4182E65C746EEE2B4A /* App Template */,
 				B0C9993F69DF9E2545EDA368 /* App TemplateTests */,
 				FF2DBC7FDEA1A307D49C3A9E /* Config */,
-				1D146EA12FB28ACC00941791 /* Frameworks */,
 				6648739DE6CD63E6753F5EF0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -407,7 +396,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					3967F5A8CE7D129864F27EBE = {
 						DevelopmentTeam = R79MH5A2VX;
@@ -447,7 +436,7 @@
 			files = (
 				AB71253BC13553E893F01B87 /* .env.example in Resources */,
 				25747DD09E22D7F28C6F9A4B /* Assets.xcassets in Resources */,
-				1D146EA52FB2ABDC00941791 /* GoogleService-Info.plist in Resources */,
+				76BC09EAED87737333A47735 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,6 +458,7 @@
 				57156F644DB876277F612D6D /* AuthenticationManager.swift in Sources */,
 				86E5B49FFFC4C85C2CFC650A /* AuthenticationManaging.swift in Sources */,
 				584845BA8495A44F60A1D01E /* AuthenticationView.swift in Sources */,
+				124223CCE5176582B1D26FA6 /* BillReminderManager.swift in Sources */,
 				0DA8B52827B079057BA424EF /* Components.swift in Sources */,
 				0C2F293079BC46077066C045 /* CurrencyFormatting.swift in Sources */,
 				EFE8C38AF1141D39F231FF60 /* DatabaseManager.swift in Sources */,
@@ -481,9 +471,9 @@
 				37159B11E51BFD85B7C04314 /* FirebaseBootstrap.swift in Sources */,
 				F1038860174D426E6E2243D4 /* GitHubService.swift in Sources */,
 				9737AD111A46352FA97C8B65 /* GlassmorphismShowcaseView.swift in Sources */,
+				B8646D4A91FA3465BAAB98FF /* ImportExpenseSheet.swift in Sources */,
 				5654CFEF4CAB73F323FA6FC0 /* KeychainService.swift in Sources */,
 				2FC60DED5630C7ABCC8D12F2 /* LogoService.swift in Sources */,
-				AA11BB22CC33DD44EE55FF66 /* ImportExpenseSheet.swift in Sources */,
 				E7D7A778399D66414C398247 /* MainTabView.swift in Sources */,
 				F578C192522594854716397A /* MerchantLogoView.swift in Sources */,
 				A6CC8297C347B6A040940D7C /* Observability.swift in Sources */,
@@ -536,18 +526,12 @@
 			baseConfigurationReference = 0C9A6952613A05F4546F913A /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = FinanceTrackerAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = FinanceTrackerAI;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -575,7 +559,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -606,13 +589,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -622,12 +604,11 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 3.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.1;
@@ -639,18 +620,12 @@
 			baseConfigurationReference = AB9CC1605D10E1A44E37AC1A /* Staging.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = FinanceTrackerAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = FinanceTrackerAI;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -695,7 +670,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -726,12 +700,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -747,13 +720,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 3.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.1;
@@ -765,18 +737,12 @@
 			baseConfigurationReference = 6AC89DD553860AEA8AB688C6 /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = FinanceTrackerAI.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 6;
 				INFOPLIST_FILE = Config/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = FinanceTrackerAI;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dakota.financetracker2025;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -788,7 +754,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -819,13 +784,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 7;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -835,12 +799,11 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 3.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.1;

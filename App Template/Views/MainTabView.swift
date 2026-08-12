@@ -1,6 +1,7 @@
 import SwiftUI
 import VisionKit
 import UIKit
+import StoreKit
 
 // MARK: - Design Tokens
 
@@ -69,6 +70,7 @@ struct MainTabView: View {
     @EnvironmentObject private var financeManager: FinanceManager
     @EnvironmentObject private var financeAIManager: FinanceAIManager
     @Environment(\.analyticsTracker) private var analytics
+    @Environment(\.requestReview) private var requestReview
 
     @State private var selectedTab: FinanceTab = .dashboard
     @State private var showAddExpense    = false
@@ -112,6 +114,25 @@ struct MainTabView: View {
         }
         .onAppear {
             financeManager.processDueRecurringExpenses()
+            BillReminderManager.shared.reschedule(with: financeManager.upcomingRecurringExpenses)
+            requestReviewIfAppropriate(expenseCount: financeManager.expenses.count)
+        }
+        .onChange(of: financeManager.expenses.count) { _, newCount in
+            requestReviewIfAppropriate(expenseCount: newCount)
+        }
+    }
+
+    // Apple-compliant: native requestReview only, fired once at a natural pause
+    // after the user has logged a few expenses (a clear "got value" moment).
+    private func requestReviewIfAppropriate(expenseCount: Int) {
+        // UserDefaults directly rather than @AppStorage — this app defines its
+        // own `AppStorage` type that shadows SwiftUI's property wrapper here.
+        let reviewedKey = "review.requested"
+        guard !UserDefaults.standard.bool(forKey: reviewedKey), expenseCount >= 5 else { return }
+        UserDefaults.standard.set(true, forKey: reviewedKey)
+        Task {
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            await MainActor.run { requestReview() }
         }
     }
 
@@ -1750,6 +1771,7 @@ private struct InsightMetric: View {
 
 private struct FinanceSettingsTabView: View {
     @ObservedObject var financeManager: FinanceManager
+    @ObservedObject private var billReminders = BillReminderManager.shared
     @EnvironmentObject private var authManager: AuthenticationManager
 
     @State private var showDeleteConfirmation = false
@@ -1779,6 +1801,22 @@ private struct FinanceSettingsTabView: View {
                     PremiumSettingsRow(icon: "tag.fill", color: Color(red: 0.2, green: 0.5, blue: 0.9),
                                        title: "Categories",
                                        detail: "\(ExpenseCategory.allCases.count)") { }
+                }
+
+                SettingsSection(label: "Reminders") {
+                    SettingsToggleRow(icon: "bell.badge.fill",
+                                      color: Color(red: 0.95, green: 0.55, blue: 0.1),
+                                      title: "Bill Reminders",
+                                      detail: "A day before each bill is due",
+                                      isOn: Binding(
+                                        get: { billReminders.isEnabled },
+                                        set: { wantsOn in
+                                            if wantsOn {
+                                                Task { await billReminders.enable(with: financeManager.upcomingRecurringExpenses) }
+                                            } else {
+                                                billReminders.disable()
+                                            }
+                                        }))
                 }
 
                 SettingsSection(label: "Data") {
@@ -1811,7 +1849,7 @@ private struct FinanceSettingsTabView: View {
 
                 SettingsSection(label: "About") {
                     PremiumSettingsRow(icon: "info.circle.fill", color: FT.t2,
-                                       title: "Version", detail: "1.0.0") { }
+                                       title: "Version", detail: appVersionString) { }
                     SettingsDivider()
                     Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/issues")!) {
                         PremiumSettingsRowLabel(icon: "questionmark.circle.fill", color: FT.t2,
@@ -1835,6 +1873,13 @@ private struct FinanceSettingsTabView: View {
         }
         .sheet(isPresented: $showEditProfile)  { EditProfileSheet(financeManager: financeManager) }
         .sheet(isPresented: $showBudgetEditor) { BudgetEditorSheet(financeManager: financeManager) }
+    }
+
+    private var appVersionString: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String
+        return build.map { "\(short) (\($0))" } ?? short
     }
 }
 
@@ -1913,6 +1958,46 @@ private struct PremiumSettingsRowLabel: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
+    }
+}
+
+private struct SettingsToggleRow: View {
+    let icon: String
+    let color: Color
+    let title: String
+    let detail: String?
+    @Binding var isOn: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(color.opacity(0.12))
+                    .frame(width: 32, height: 32)
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(color)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(FT.t1)
+                if let detail {
+                    Text(detail)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(FT.t3)
+                }
+            }
+
+            Spacer()
+
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .tint(FT.green)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 11)
     }
 }
 
