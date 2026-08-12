@@ -2434,6 +2434,23 @@ private struct AIAssistantSheet: View {
                     .padding(16)
                 }
 
+                if let action = aiManager.pendingAction {
+                    AIActionCard(
+                        action: action,
+                        onApply: {
+                            withAnimation(.spring(response: 0.3)) {
+                                aiManager.applyPendingAction(financeManager: financeManager)
+                            }
+                        },
+                        onDismiss: {
+                            withAnimation(.spring(response: 0.3)) { aiManager.dismissPendingAction() }
+                        }
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
                 if let err = aiManager.errorMessage {
                     Text(err).font(.system(size: 12)).foregroundStyle(.red)
                         .padding(.horizontal, 16)
@@ -2471,6 +2488,69 @@ private struct AIAssistantSheet: View {
             }
             .tint(FT.green)
         }
+    }
+}
+
+private struct AIActionCard: View {
+    let action: PendingAIAction
+    let onApply: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .fill(FT.greenSub)
+                        .frame(width: 34, height: 34)
+                    Image(systemName: action.systemIcon)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(FT.green)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(action.title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(FT.t1)
+                    Text(action.detail)
+                        .font(.system(size: 12))
+                        .foregroundStyle(FT.t2)
+                        .lineLimit(2)
+                }
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                Button(action: onDismiss) {
+                    Text("Not now")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(FT.t2)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(FT.bg)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+                .buttonStyle(.plain)
+
+                Button(action: onApply) {
+                    Text("Apply")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(FT.green)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(14)
+        .background(FT.card)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(FT.green.opacity(0.35), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.06), radius: 10, y: 3)
     }
 }
 
