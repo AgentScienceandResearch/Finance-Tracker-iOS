@@ -51,7 +51,9 @@ final class FinanceAIManager: ObservableObject {
         } catch {
             let fallback = localFallbackInsight(for: trimmedPrompt, financeManager: financeManager)
             messages.append(AIChatMessage(role: .assistant, content: fallback))
-            errorMessage = error.localizedDescription
+            // The fallback message already tells the user AI is unavailable; never
+            // surface raw API/network errors (e.g. HTTP 401) in the UI.
+            errorMessage = nil
             logger.warning("AI response fallback used: \(error.localizedDescription)", category: "finance_ai")
         }
 
@@ -82,7 +84,7 @@ final class FinanceAIManager: ObservableObject {
             return localReceiptFallback(rawText: trimmedText)
         } catch {
             logger.warning("Receipt parsing failed: \(error.localizedDescription)", category: "finance_ai")
-            errorMessage = error.localizedDescription
+            errorMessage = "Couldn't read that receipt automatically. Please review the details."
             return localReceiptFallback(rawText: trimmedText)
         }
     }
@@ -101,7 +103,7 @@ final class FinanceAIManager: ObservableObject {
             return try await service.parseImage(imageBase64: imageBase64, mimeType: mimeType)
         } catch {
             logger.warning("Image parsing failed: \(error.localizedDescription)", category: "finance_ai")
-            errorMessage = error.localizedDescription
+            errorMessage = "Couldn't scan that image. Try again or add the expense manually."
             return []
         }
     }
@@ -170,7 +172,7 @@ final class FinanceAIManager: ObservableObject {
 
     private func localCategoryInsight(category: String, amount: Double, percentage: Double) -> String {
         let amountStr = CurrencyFormatting.shared.string(for: Decimal(amount))
-        return "You spent \(amountStr) on \(category) this month, which is \(Int(percentage * 100))% of total spending. Connect to the AI server for personalized advice on this category."
+        return "You spent \(amountStr) on \(category) this month, which is \(Int(percentage * 100))% of total spending."
     }
 
     private func localFallbackInsight(for prompt: String, financeManager: FinanceManager) -> String {
@@ -180,13 +182,12 @@ final class FinanceAIManager: ObservableObject {
         let recurring = formatter.string(for: financeManager.recurringMonthlyTotal)
 
         return """
-        Quick local insight:
-        - This month: \(monthTotal)
-        - This week: \(weekTotal)
-        - Monthly recurring load: \(recurring)
+        Here's a quick summary from your records:
+        • This month: \(monthTotal)
+        • This week: \(weekTotal)
+        • Monthly recurring: \(recurring)
 
-        To unlock GPT-powered advice, set `API_URL` to your Railway server and configure `OPENAI_API_KEY` on Railway.
-        Prompt received: "\(prompt)"
+        Personalized AI insights are temporarily unavailable. Please try again in a little while.
         """
     }
 

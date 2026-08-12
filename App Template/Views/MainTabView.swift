@@ -1040,8 +1040,6 @@ private struct DashQuickAction: View {
     let color: Color
     let action: () -> Void
 
-    @State private var pressed = false
-
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
@@ -1061,14 +1059,20 @@ private struct DashQuickAction: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity)
-            .scaleEffect(pressed ? 0.94 : 1)
         }
-        .buttonStyle(.plain)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in withAnimation(.spring(response: 0.2)) { pressed = true } }
-                .onEnded   { _ in withAnimation(.spring(response: 0.3)) { pressed = false } }
-        )
+        // A ButtonStyle drives the press animation via configuration.isPressed,
+        // which SwiftUI correctly clears when a scroll begins. The old
+        // simultaneous DragGesture(minimumDistance: 0) fired on scroll and made
+        // the button register taps while the user was just scrolling.
+        .buttonStyle(PressableScaleButtonStyle())
+    }
+}
+
+private struct PressableScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .animation(.spring(response: 0.3), value: configuration.isPressed)
     }
 }
 
@@ -1644,8 +1648,11 @@ private struct SpendingPieChartView: View {
                 }
             }
             .contentShape(Rectangle())
+            // SpatialTapGesture fires only on a real tap (giving the tap location)
+            // and yields to the enclosing ScrollView, so tapping a slice still works
+            // but no longer blocks vertical scrolling over the chart.
             .gesture(
-                DragGesture(minimumDistance: 0).onEnded { value in
+                SpatialTapGesture().onEnded { value in
                     let dx = value.location.x - center.x
                     let dy = value.location.y - center.y
                     let dist = sqrt(dx * dx + dy * dy)

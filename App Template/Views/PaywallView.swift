@@ -71,6 +71,16 @@ struct PaywallView: View {
                 )
             }
         }
+        // A plain overlay button is immediately and reliably hit-testable, unlike a
+        // toolbar item inside a fullScreenCover+NavigationStack (which could feel
+        // delayed/unresponsive). Shown only when the paywall is dismissable.
+        .overlay(alignment: .topTrailing) {
+            if onDismiss != nil {
+                xButton
+                    .padding(.top, 8)
+                    .padding(.trailing, 16)
+            }
+        }
         .task { await flow.loadPlans() }
         .dynamicTypeSize(.xSmall ... .accessibility3)
     }
@@ -82,9 +92,6 @@ struct PaywallView: View {
             initialYearlyContent
                 .navigationDestination(isPresented: $showingMonthlyFromInitial) {
                     initialMonthlyContent
-                }
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) { xButton }
                 }
         }
     }
@@ -184,9 +191,6 @@ struct PaywallView: View {
         .background(PW.bg.ignoresSafeArea())
         .navigationTitle("Monthly Plan")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { xButton }
-        }
     }
 
     // MARK: - Hard paywall (yearly or monthly, no X)
@@ -403,11 +407,12 @@ struct PaywallView: View {
             onDismiss?()
         } label: {
             Image(systemName: "xmark")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(PW.t2)
-                .padding(8)
+                .frame(width: 30, height: 30)
                 .background(PW.t3.opacity(0.18))
                 .clipShape(Circle())
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
     }

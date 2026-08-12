@@ -253,7 +253,9 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
 
         guard months > 0 else { return nil }
         let perMonth = product.price / months
-        return "~\(perMonth.description)/mo"
+        // Format in the product's own currency so it rounds to 2 places with the
+        // right symbol (was dumping the raw Decimal, e.g. "4.16583333…/mo").
+        return "~\(perMonth.formatted(product.priceFormatStyle))/mo"
     }
 
     static func makeForTesting(
