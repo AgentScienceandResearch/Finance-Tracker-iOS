@@ -1,6 +1,9 @@
 import Foundation
 #if canImport(FirebaseCore)
 import FirebaseCore
+#if canImport(FirebaseAnalytics)
+import FirebaseAnalytics
+#endif
 
 /// Call once at app launch. Safe to call even when GoogleService-Info.plist
 /// is missing or incomplete — it will simply skip Firebase configuration and
@@ -20,6 +23,13 @@ enum FirebaseBootstrap {
         }
 
         FirebaseApp.configure(options: options)
+
+        #if canImport(FirebaseAnalytics)
+        // Opt in explicitly so collection turns on once Google Analytics is enabled
+        // for the Firebase project (plist IS_ANALYTICS_ENABLED = true). The app already
+        // selects the firebase analytics provider in Release/Staging builds.
+        Analytics.setAnalyticsCollectionEnabled(true)
+        #endif
     }
 }
 #else
