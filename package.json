@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "description": "Root scripts for Railway deployment of Finance Tracker backend",
   "scripts": {
-    "start": "npm --prefix \"Server Template\" start",
-    "build": "npm ci --prefix \"Server Template\"",
-    "dev:server": "npm --prefix \"Server Template\" run dev",
-    "test:server": "npm --prefix \"Server Template\" test -- --runInBand"
+    "start": "npm --prefix Server start",
+    "build": "npm ci --prefix Server",
+    "dev:server": "npm --prefix Server run dev",
+    "test:server": "npm --prefix Server test -- --runInBand"
   },
   "engines": {
     "node": ">=18.0.0"

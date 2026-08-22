@@ -3,8 +3,8 @@ set -euo pipefail
 
 SERVICE=""
 ENVIRONMENT=""
-OPENAI_API_KEY=""
-OPENAI_MODEL="gpt-4.1-mini"
+ANTHROPIC_API_KEY=""
+CLAUDE_MODEL="claude-haiku-4-5"
 JWT_SECRET=""
 ALLOWED_ORIGINS="https://example.com"
 RATE_LIMIT_MAX="100"
@@ -17,8 +17,8 @@ Set required Finance Tracker AI variables in Railway.
 
 Usage:
   ./scripts/set-railway-vars.sh \
-    --openai-key <OPENAI_API_KEY> \
-    [--openai-model <OPENAI_MODEL>] \
+    --anthropic-key <ANTHROPIC_API_KEY> \
+    [--claude-model <CLAUDE_MODEL>] \
     [--jwt-secret <JWT_SECRET>] \
     [--allowed-origins <CSV_ORIGINS>] \
     [--rate-limit-max <NUMBER>] \
@@ -28,19 +28,19 @@ Usage:
     [--skip-deploys]
 
 Examples:
-  ./scripts/set-railway-vars.sh --openai-key sk-... --allowed-origins https://app.example.com --service "Finance Tracker API"
-  ./scripts/set-railway-vars.sh --openai-key sk-... --openai-model gpt-4.1-mini --environment production --rate-limit-max 100
+  ./scripts/set-railway-vars.sh --anthropic-key sk-ant-... --allowed-origins https://app.example.com --service "Finance Tracker API"
+  ./scripts/set-railway-vars.sh --anthropic-key sk-ant-... --claude-model claude-haiku-4-5 --environment production --rate-limit-max 100
 USAGE
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --openai-key)
-      OPENAI_API_KEY="${2:-}"
+    --anthropic-key)
+      ANTHROPIC_API_KEY="${2:-}"
       shift 2
       ;;
-    --openai-model)
-      OPENAI_MODEL="${2:-}"
+    --claude-model)
+      CLAUDE_MODEL="${2:-}"
       shift 2
       ;;
     --jwt-secret)
@@ -83,8 +83,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$OPENAI_API_KEY" ]]; then
-  echo "Error: --openai-key is required."
+if [[ -z "$ANTHROPIC_API_KEY" ]]; then
+  echo "Error: --anthropic-key is required."
   exit 1
 fi
 
@@ -133,8 +133,8 @@ fi
 
 CMD+=(
   "NODE_ENV=production"
-  "OPENAI_API_KEY=$OPENAI_API_KEY"
-  "OPENAI_MODEL=$OPENAI_MODEL"
+  "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"
+  "CLAUDE_MODEL=$CLAUDE_MODEL"
   "JWT_SECRET=$JWT_SECRET"
   "ALLOWED_ORIGINS=$ALLOWED_ORIGINS"
   "RATE_LIMIT_MAX=$RATE_LIMIT_MAX"
@@ -146,4 +146,4 @@ fi
 
 "${CMD[@]}"
 
-echo "Set Railway variables: NODE_ENV, OPENAI_API_KEY, OPENAI_MODEL, JWT_SECRET, ALLOWED_ORIGINS, RATE_LIMIT_MAX${DATABASE_URL:+, DATABASE_URL}"
+echo "Set Railway variables: NODE_ENV, ANTHROPIC_API_KEY, CLAUDE_MODEL, JWT_SECRET, ALLOWED_ORIGINS, RATE_LIMIT_MAX${DATABASE_URL:+, DATABASE_URL}"

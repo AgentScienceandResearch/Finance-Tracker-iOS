@@ -24,4 +24,4 @@ if [ ! -f "App Template/.env" ]; then
   echo "Created App Template/.env from template"
 fi
 
-echo "Bootstrap complete. Open IOSAppTemplate.xcodeproj or IOSAppTemplate.xcworkspace"
+echo "Bootstrap complete. Open FinanceTrackeriOS.xcodeproj and run the FinanceTrackerAI scheme."

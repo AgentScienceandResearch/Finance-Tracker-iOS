@@ -1,6 +1,6 @@
 # App Module Guide
 
-This folder contains the iOS application source for `TemplateApp`.
+This folder contains the iOS application source for `FinanceTrackerAI`.
 
 ## Architectural Shape
 

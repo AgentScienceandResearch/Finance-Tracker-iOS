@@ -3,18 +3,21 @@
 Express backend for Finance Tracker iOS.
 
 ## Purpose
-- Keep provider secrets off-device (`OPENAI_API_KEY` stored in Railway variables)
-- Provide GPT relay endpoints for iOS app
+- Keep provider secrets off-device (`ANTHROPIC_API_KEY` stored in Railway variables)
+- Provide Claude relay endpoints for the iOS app
 - Keep optional auth/subscription template routes available for future expansion
 
 ## Active Finance AI Endpoints
+- `POST /api/finance/ai/assistant`
 - `POST /api/finance/ai/insights`
 - `POST /api/finance/ai/parse-receipt`
+- `POST /api/finance/ai/parse-image`
+- `POST /api/finance/ai/category-insight`
 
 ## Setup
 
 ```bash
-cd "Server Template"
+cd Server
 cp .env.example .env
 npm install
 npm run dev
@@ -25,8 +28,8 @@ Server default URL: `http://localhost:8000`
 ## Required Railway Variables
 - `NODE_ENV=production`
 - `PORT` (Railway sets automatically)
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL` (optional, default `gpt-4.1-mini`)
+- `ANTHROPIC_API_KEY`
+- `CLAUDE_MODEL` (optional, default `claude-haiku-4-5`)
 - `JWT_SECRET`
 - `ALLOWED_ORIGINS`
 - `RATE_LIMIT_MAX` (recommended, default `100`)
@@ -41,10 +44,10 @@ If you want deployment to fail fast on missing production vars, set:
 Railway does not auto-create variables from GitHub files. Use the helper script:
 
 ```bash
-cd "Server Template"
+cd Server
 ./scripts/set-railway-vars.sh \
-  --openai-key "<your-openai-key>" \
-  --openai-model "gpt-4.1-mini" \
+  --anthropic-key "<your-anthropic-key>" \
+  --claude-model "claude-haiku-4-5" \
   --allowed-origins "https://your-app.example.com" \
   --service "<your-railway-service-name>" \
   --environment "production"
@@ -61,7 +64,8 @@ For local server startup, set at least:
 - `PORT=8000`
 - `JWT_SECRET=<any-long-dev-secret>`
 - `ALLOWED_ORIGINS=http://localhost:3000`
-- `OPENAI_API_KEY=<your-key>`
+- `ANTHROPIC_API_KEY=<your-key>`
+- `CLAUDE_MODEL=claude-haiku-4-5`
 - either `DATABASE_URL=<postgres-url>` or `DB_*` variables from `.env.example`
 
 ## Health Checks

@@ -1,6 +1,6 @@
 # Privacy Policy - Finance Tracker iOS
 
-Effective date: May 11, 2026
+Effective date: August 22, 2026
 
 ## Overview
 Finance Tracker iOS is designed to help users track personal expenses and recurring payments. We store sensitive API keys on our backend infrastructure (Railway) and do not embed provider secret keys in the mobile app.
@@ -8,25 +8,25 @@ Finance Tracker iOS is designed to help users track personal expenses and recurr
 ## Data We Process
 - Profile data: display name, email (user-provided)
 - Finance data: expenses, recurring expense entries, categories, notes
-- AI inputs: user prompts and receipt text submitted for parsing or insights
+- AI inputs: user prompts, recent assistant conversation context, receipt text, and a current finance snapshot (transactions, recurring items, budget, categories, dates, identifiers, and notes) when the user asks the assistant for help
 - Diagnostics: operational logs for app/server reliability
 
 ## Where Data Is Stored
 - On device: local app storage for app state and fast startup
 - Cloud sync: Firebase (profile and finance state)
-- AI processing: prompts/receipt text are sent to our backend, then relayed to the Anthropic API
+- AI processing: assistant prompts and the finance context needed to answer them, or receipt text submitted for parsing, are sent to our backend and relayed to the Anthropic API
 
 ## How We Use Data
 - Provide core expense tracking functionality
 - Sync user finance data between sessions/devices
-- Generate AI-based finance insights and structured receipt drafts
+- Generate AI-based finance guidance, propose user-requested finance actions, and create structured receipt drafts
 - Detect and debug service failures
 
 ## Data Sharing
 We share data only with service providers required for app functionality:
 - Firebase (cloud storage/sync)
 - Railway (backend hosting)
-- Anthropic (AI generation/receipt parsing via backend relay)
+- Anthropic (AI generation, finance-action proposals, and receipt parsing via backend relay)
 
 We do not sell personal data.
 
@@ -41,6 +41,7 @@ Users can:
 - Delete individual expenses/recurring items
 - Export data from Settings
 - Clear all local and synced finance data from Settings
+- Review and approve or dismiss every AI-proposed finance change before it is applied
 
 ## Security
 - Provider API secrets are stored as server-side environment variables.

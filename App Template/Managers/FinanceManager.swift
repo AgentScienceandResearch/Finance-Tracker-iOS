@@ -26,6 +26,7 @@ final class FinanceManager: ObservableObject {
     private let logger: Logging
     private let calendar: Calendar
     private let remoteSyncEnabled: Bool
+    private var isPerformingBatchUpdate = false
 
     init(
         databaseManager: DatabaseManager? = nil,
@@ -59,20 +60,20 @@ final class FinanceManager: ObservableObject {
     var thisMonthTotal: Decimal {
         let now = Date()
         return expenses
-            .filter { calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
+            .filter { !$0.category.isIncome && calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
             .reduce(Decimal.zero) { $0 + $1.amount }
     }
 
     var thisWeekTotal: Decimal {
         let now = Date()
         return expenses
-            .filter { calendar.isDate($0.date, equalTo: now, toGranularity: .weekOfYear) }
+            .filter { !$0.category.isIncome && calendar.isDate($0.date, equalTo: now, toGranularity: .weekOfYear) }
             .reduce(Decimal.zero) { $0 + $1.amount }
     }
 
     var recurringMonthlyTotal: Decimal {
         recurringExpenses
-            .filter(\.isActive)
+            .filter { $0.isActive && !$0.category.isIncome }
             .reduce(Decimal.zero) { $0 + $1.normalizedMonthlyCost }
     }
 
@@ -140,7 +141,7 @@ final class FinanceManager: ObservableObject {
         let now = Date()
 
         let grouped = Dictionary(grouping: expenses.filter {
-            calendar.isDate($0.date, equalTo: now, toGranularity: .month)
+            !$0.category.isIncome && calendar.isDate($0.date, equalTo: now, toGranularity: .month)
         }, by: \.category)
 
         return grouped
@@ -211,6 +212,57 @@ final class FinanceManager: ObservableObject {
         persistState()
     }
 
+    /// Coalesces a group of related mutations into one local and remote state
+    /// write. This prevents an approved multi-action AI batch from racing
+    /// several cloud snapshots against each other.
+    func performBatchUpdates(_ updates: () -> Void) {
+        guard !isPerformingBatchUpdate else {
+            updates()
+            return
+        }
+
+        isPerformingBatchUpdate = true
+        defer {
+            isPerformingBatchUpdate = false
+            persistState()
+        }
+        updates()
+    }
+
+    @discardableResult
+    func updateExpense(
+        id: UUID,
+        title: String? = nil,
+        amount: Decimal? = nil,
+        category: ExpenseCategory? = nil,
+        date: Date? = nil,
+        notes: String? = nil,
+        clearNotes: Bool = false
+    ) -> Bool {
+        guard let index = expenses.firstIndex(where: { $0.id == id }) else { return false }
+
+        if let title {
+            let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmedTitle.isEmpty else { return false }
+            expenses[index].title = trimmedTitle
+        }
+        if let amount {
+            guard amount > 0 else { return false }
+            expenses[index].amount = amount
+        }
+        if let category { expenses[index].category = category }
+        if let date { expenses[index].date = date }
+        if clearNotes {
+            expenses[index].notes = nil
+        } else if let notes {
+            let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+            expenses[index].notes = trimmedNotes.isEmpty ? nil : trimmedNotes
+        }
+
+        persistState()
+        return true
+    }
+
     func applyReceiptDraft(_ draft: ReceiptDraft) {
         let expense = Expense(
             title: draft.merchant,
@@ -222,9 +274,13 @@ final class FinanceManager: ObservableObject {
         addExpense(expense)
     }
 
-    func deleteExpense(id: UUID) {
+    @discardableResult
+    func deleteExpense(id: UUID) -> Bool {
+        let previousCount = expenses.count
         expenses.removeAll { $0.id == id }
+        guard expenses.count != previousCount else { return false }
         persistState()
+        return true
     }
 
     func addRecurringExpense(_ expense: RecurringExpense) {
@@ -232,12 +288,55 @@ final class FinanceManager: ObservableObject {
         persistState()
     }
 
-    func deleteRecurringExpense(id: UUID) {
-        recurringExpenses.removeAll { $0.id == id }
+    @discardableResult
+    func updateRecurringExpense(
+        id: UUID,
+        title: String? = nil,
+        amount: Decimal? = nil,
+        category: ExpenseCategory? = nil,
+        frequency: RecurrenceFrequency? = nil,
+        nextDueDate: Date? = nil,
+        isActive: Bool? = nil,
+        notes: String? = nil,
+        clearNotes: Bool = false
+    ) -> Bool {
+        guard let index = recurringExpenses.firstIndex(where: { $0.id == id }) else { return false }
+
+        if let title {
+            let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmedTitle.isEmpty else { return false }
+            recurringExpenses[index].title = trimmedTitle
+        }
+        if let amount {
+            guard amount > 0 else { return false }
+            recurringExpenses[index].amount = amount
+        }
+        if let category { recurringExpenses[index].category = category }
+        if let frequency { recurringExpenses[index].frequency = frequency }
+        if let nextDueDate { recurringExpenses[index].nextDueDate = nextDueDate }
+        if let isActive { recurringExpenses[index].isActive = isActive }
+        if clearNotes {
+            recurringExpenses[index].notes = nil
+        } else if let notes {
+            let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+            recurringExpenses[index].notes = trimmedNotes.isEmpty ? nil : trimmedNotes
+        }
+
         persistState()
+        return true
     }
 
-    func processDueRecurringExpenses(referenceDate: Date = Date()) {
+    @discardableResult
+    func deleteRecurringExpense(id: UUID) -> Bool {
+        let previousCount = recurringExpenses.count
+        recurringExpenses.removeAll { $0.id == id }
+        guard recurringExpenses.count != previousCount else { return false }
+        persistState()
+        return true
+    }
+
+    @discardableResult
+    func processDueRecurringExpenses(referenceDate: Date = Date()) -> Int {
         var updated = recurringExpenses
         var generatedExpenses: [Expense] = []
 
@@ -269,12 +368,13 @@ final class FinanceManager: ObservableObject {
         }
 
         guard !generatedExpenses.isEmpty || updated != recurringExpenses else {
-            return
+            return 0
         }
 
         recurringExpenses = updated
         expenses.append(contentsOf: generatedExpenses)
         persistState()
+        return generatedExpenses.count
     }
 
     func clearAllData() {
@@ -381,6 +481,7 @@ final class FinanceManager: ObservableObject {
     }
 
     private func persistState() {
+        guard !isPerformingBatchUpdate else { return }
         persistLocalState()
 
         guard remoteSyncEnabled else {

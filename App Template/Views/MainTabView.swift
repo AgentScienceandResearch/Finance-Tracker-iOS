@@ -2434,16 +2434,16 @@ private struct AIAssistantSheet: View {
                     .padding(16)
                 }
 
-                if let action = aiManager.pendingAction {
+                if !aiManager.pendingActions.isEmpty {
                     AIActionCard(
-                        action: action,
+                        actions: aiManager.pendingActions,
                         onApply: {
                             withAnimation(.spring(response: 0.3)) {
-                                aiManager.applyPendingAction(financeManager: financeManager)
+                                aiManager.applyPendingActions(financeManager: financeManager)
                             }
                         },
                         onDismiss: {
-                            withAnimation(.spring(response: 0.3)) { aiManager.dismissPendingAction() }
+                            withAnimation(.spring(response: 0.3)) { aiManager.dismissPendingActions() }
                         }
                     )
                     .padding(.horizontal, 16)
@@ -2492,32 +2492,47 @@ private struct AIAssistantSheet: View {
 }
 
 private struct AIActionCard: View {
-    let action: PendingAIAction
+    let actions: [PendingAIAction]
     let onApply: () -> Void
     let onDismiss: () -> Void
 
+    private var containsDestructiveAction: Bool {
+        actions.contains(where: \.isDestructive)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(FT.greenSub)
-                        .frame(width: 34, height: 34)
-                    Image(systemName: action.systemIcon)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(FT.green)
+            Text(actions.count == 1 ? "Review change" : "Review \(actions.count) changes")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(containsDestructiveAction ? .red : FT.green)
+
+            ScrollView(.vertical, showsIndicators: actions.count > 3) {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(actions) { action in
+                        HStack(spacing: 10) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                    .fill(action.isDestructive ? Color.red.opacity(0.12) : FT.greenSub)
+                                    .frame(width: 34, height: 34)
+                                Image(systemName: action.systemIcon)
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(action.isDestructive ? .red : FT.green)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(action.title)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(action.isDestructive ? .red : FT.t1)
+                                Text(action.detail)
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(FT.t2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer()
+                        }
+                    }
                 }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(action.title)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(FT.t1)
-                    Text(action.detail)
-                        .font(.system(size: 12))
-                        .foregroundStyle(FT.t2)
-                        .lineLimit(2)
-                }
-                Spacer()
             }
+            .frame(maxHeight: 190)
 
             HStack(spacing: 10) {
                 Button(action: onDismiss) {
@@ -2532,12 +2547,12 @@ private struct AIActionCard: View {
                 .buttonStyle(.plain)
 
                 Button(action: onApply) {
-                    Text("Apply")
+                    Text(actions.count == 1 ? "Apply" : "Apply all")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
-                        .background(FT.green)
+                        .background(containsDestructiveAction ? Color.red : FT.green)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
                 .buttonStyle(.plain)
@@ -2548,7 +2563,7 @@ private struct AIActionCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(FT.green.opacity(0.35), lineWidth: 1)
+                .stroke((containsDestructiveAction ? Color.red : FT.green).opacity(0.35), lineWidth: 1)
         )
         .shadow(color: .black.opacity(0.06), radius: 10, y: 3)
     }

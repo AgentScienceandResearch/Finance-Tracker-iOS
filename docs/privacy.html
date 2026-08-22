@@ -72,7 +72,7 @@
   <main>
     <section class="panel">
       <h1>Privacy Policy - Finance Tracker AI</h1>
-      <p><strong>Effective date:</strong> May 11, 2026</p>
+      <p><strong>Effective date:</strong> August 22, 2026</p>
 
       <h2>Overview</h2>
       <p>Finance Tracker AI helps users track personal expenses and recurring payments. We store sensitive API keys on backend infrastructure and do not embed provider secret keys in the mobile app.</p>
@@ -81,7 +81,7 @@
       <ul>
         <li>Profile data: display name and email, when provided</li>
         <li>Finance data: expenses, recurring expense entries, categories, and notes</li>
-        <li>AI inputs: user prompts and receipt text submitted for parsing or insights</li>
+        <li>AI inputs: user prompts, recent assistant conversation context, receipt text, and a current finance snapshot (transactions, recurring items, budget, categories, dates, identifiers, and notes) when the user asks the assistant for help</li>
         <li>Diagnostics: operational logs for app and server reliability</li>
       </ul>
 
@@ -89,14 +89,14 @@
       <ul>
         <li>On device: local app storage for app state and fast startup</li>
         <li>Cloud sync: Firebase for profile and finance state</li>
-        <li>AI processing: prompts and receipt text are sent to the app backend, then relayed to the configured AI provider</li>
+        <li>AI processing: assistant prompts and the finance context needed to answer them, or receipt text submitted for parsing, are sent to the app backend and relayed to the configured AI provider</li>
       </ul>
 
       <h2>How We Use Data</h2>
       <ul>
         <li>Provide expense tracking functionality</li>
         <li>Sync finance data between sessions and devices</li>
-        <li>Generate AI-based finance insights and structured receipt drafts</li>
+        <li>Generate AI-based finance guidance, propose user-requested finance actions, and create structured receipt drafts</li>
         <li>Detect and debug service failures</li>
       </ul>
 
@@ -116,6 +116,7 @@
         <li>Delete individual expenses and recurring items</li>
         <li>Export finance data from Settings</li>
         <li>Clear local and synced finance data from Settings</li>
+        <li>Review and approve or dismiss every AI-proposed finance change before it is applied</li>
       </ul>
 
       <h2>Security</h2>

@@ -2,10 +2,10 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm ci --prefix \"Server Template\""
+    "buildCommand": "npm ci --prefix Server"
   },
   "deploy": {
-    "startCommand": "npm --prefix \"Server Template\" start",
+    "startCommand": "npm --prefix Server start",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",

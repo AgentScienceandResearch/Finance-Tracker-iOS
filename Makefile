@@ -1,6 +1,6 @@
 PROJECT := FinanceTrackeriOS.xcodeproj
-SCHEME := TemplateApp
-DESTINATION := platform=iOS Simulator,name=iPhone 17
+SCHEME := FinanceTrackerAI
+DESTINATION := platform=iOS Simulator,name=iPhone 17 Pro Max
 
 .PHONY: help bootstrap tools generate-project ensure-project format lint build test build-fresh test-fresh ci ci-fresh demo-no-firebase clean
 

@@ -3,10 +3,80 @@ import Foundation
 protocol OpenAIServing: AnyObject {
     var isConfigured: Bool { get }
 
-    func generateFinanceInsight(prompt: String, financeSummary: String) async throws -> String
+    func generateFinanceAssistantReply(
+        prompt: String,
+        snapshot: FinanceAISnapshot,
+        conversation: [FinanceAIConversationTurn]
+    ) async throws -> FinanceAIServiceResponse
     func parseReceipt(from rawText: String) async throws -> ReceiptDraft
     func parseImage(imageBase64: String, mimeType: String) async throws -> [ReceiptDraft]
     func getCategoryInsight(category: String, amount: Double, percentage: Double, monthlyTotal: Double, recentTransactions: String) async throws -> String
+}
+
+struct FinanceAISnapshot: Encodable {
+    let generatedAt: Date
+    let currencyCode: String
+    let monthlyBudget: Decimal?
+    let spendingThisMonth: Decimal
+    let spendingThisWeek: Decimal
+    let recurringMonthlyTotal: Decimal
+    let transactions: [Expense]
+    let recurringTransactions: [RecurringExpense]
+}
+
+struct FinanceAIConversationTurn: Encodable {
+    let role: String
+    let content: String
+}
+
+struct FinanceAIServiceResponse: Decodable {
+    let message: String
+    let actions: [FinanceAIToolCall]
+
+    private enum CodingKeys: String, CodingKey {
+        case message
+        case actions
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        message = try container.decode(String.self, forKey: .message)
+        actions = try container.decodeIfPresent([FinanceAIToolCall].self, forKey: .actions) ?? []
+    }
+}
+
+struct FinanceAIToolCall: Decodable {
+    let id: String
+    let type: String
+    let input: FinanceAIToolInput
+}
+
+struct FinanceAIToolInput: Decodable {
+    let transactionID: String?
+    let recurringID: String?
+    let title: String?
+    let amount: Decimal?
+    let category: String?
+    let date: String?
+    let notes: String?
+    let clearNotes: Bool?
+    let frequency: String?
+    let nextDueDate: String?
+    let isActive: Bool?
+
+    private enum CodingKeys: String, CodingKey {
+        case transactionID = "transactionId"
+        case recurringID = "recurringId"
+        case title
+        case amount
+        case category
+        case date
+        case notes
+        case clearNotes
+        case frequency
+        case nextDueDate
+        case isActive
+    }
 }
 
 final class OpenAIService: OpenAIServing {
@@ -30,18 +100,27 @@ final class OpenAIService: OpenAIServing {
         config.apiURL.host != nil
     }
 
-    func generateFinanceInsight(prompt: String, financeSummary: String) async throws -> String {
-        let endpoint = try makeEndpoint(path: "/api/finance/ai/insights")
+    func generateFinanceAssistantReply(
+        prompt: String,
+        snapshot: FinanceAISnapshot,
+        conversation: [FinanceAIConversationTurn]
+    ) async throws -> FinanceAIServiceResponse {
+        let endpoint = try makeEndpoint(path: "/api/finance/ai/assistant")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.timeoutInterval = 45
+        request.timeoutInterval = 60
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let payload = InsightsRequest(prompt: prompt, financeSummary: financeSummary)
-        request.httpBody = try JSONEncoder().encode(payload)
+        let payload = FinanceAssistantRequest(
+            prompt: prompt,
+            snapshot: snapshot,
+            conversation: conversation
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try encoder.encode(payload)
 
-        let response: InsightsResponse = try await execute(request: request)
-        return response.message
+        return try await execute(request: request)
     }
 
     func parseReceipt(from rawText: String) async throws -> ReceiptDraft {
@@ -189,13 +268,10 @@ private struct CategoryInsightResponse: Decodable {
     let insight: String
 }
 
-private struct InsightsRequest: Encodable {
+private struct FinanceAssistantRequest: Encodable {
     let prompt: String
-    let financeSummary: String
-}
-
-private struct InsightsResponse: Decodable {
-    let message: String
+    let snapshot: FinanceAISnapshot
+    let conversation: [FinanceAIConversationTurn]
 }
 
 private struct ReceiptParseRequest: Encodable {

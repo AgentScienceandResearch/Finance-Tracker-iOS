@@ -1,10 +1,10 @@
-# Server Template Instructions
+# Finance Tracker Server Instructions
 
 Use this folder as the backend starter for each new iOS app.
 
 ## 1) Rename and initialize for your app
 
-1. Copy this folder into your app repo (or keep it as `Server Template/`).
+1. Keep this folder at `Server/` in the Finance Tracker repository.
 2. Update `package.json`:
    - `name`: set to your backend service slug (for example: `my-app-api`)
    - `description`: describe your API domain
@@ -26,7 +26,8 @@ Production minimum:
 Common optional variables:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
-- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY`
+- `CLAUDE_MODEL`
 - `RESEND_API_KEY`
 - Apple subscription vars (`APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_KEY_PATH`)
 
@@ -35,7 +36,7 @@ Store all secrets in Railway Variables. Never commit real secret values.
 ## 3) Local setup
 
 ```bash
-cd "Server Template"
+cd Server
 npm install
 cp .env.example .env
 npm run db:check
@@ -64,7 +65,7 @@ For each app, extend `db/schema.sql` with app-specific entities (for example `pr
    - API service (this Node app)
    - PostgreSQL service
 4. In API service, set Railway Variables (required + optional for your app).
-   - Fast path: run `./scripts/set-railway-vars.sh --openai-key ... --service ... --environment production`
+   - Fast path: run `./scripts/set-railway-vars.sh --anthropic-key ... --service ... --environment production`
    - Raw editor template: `railway.variables.example`
 5. Set `DATABASE_URL` from the PostgreSQL service connection.
 6. Deploy.

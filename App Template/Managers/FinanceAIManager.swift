@@ -5,9 +5,11 @@ final class FinanceAIManager: ObservableObject {
     @Published private(set) var messages: [AIChatMessage]
     @Published var isLoading = false
     @Published var errorMessage: String?
-    /// An action the AI has proposed (add expense/budget/recurring). The user must
-    /// confirm it before it is applied — the AI never changes data on its own.
-    @Published var pendingAction: PendingAIAction?
+    /// Typed actions proposed by the model. They are always review-only until the
+    /// user explicitly applies the batch in the assistant sheet.
+    @Published private(set) var pendingActions: [PendingAIAction] = []
+
+    var pendingAction: PendingAIAction? { pendingActions.first }
 
     private let service: OpenAIServing
     private let logger: Logging
@@ -24,7 +26,7 @@ final class FinanceAIManager: ObservableObject {
         self.messages = [
             AIChatMessage(
                 role: .assistant,
-                content: "I can analyze your spending, suggest savings targets, and parse receipt text into expenses."
+                content: "I can analyze your finances and help manage transactions, income, budgets, and recurring bills. Any change stays pending until you review and approve it."
             )
         ]
     }
@@ -34,28 +36,40 @@ final class FinanceAIManager: ObservableObject {
         guard !trimmedPrompt.isEmpty else { return }
 
         errorMessage = nil
-        pendingAction = nil
+        pendingActions = []
+        let conversation = messages
+            .suffix(16)
+            .map { FinanceAIConversationTurn(role: $0.role.rawValue, content: $0.content) }
         messages.append(AIChatMessage(role: .user, content: trimmedPrompt))
         analytics.track(event: AnalyticsEvent(name: "finance_ai_prompt_submitted"))
 
         isLoading = true
         defer { isLoading = false }
 
-        let summary = buildFinanceSummary(financeManager: financeManager) + "\n\n" + Self.actionInstructions
-
         do {
-            let response: String
             if service.isConfigured {
-                response = try await service.generateFinanceInsight(prompt: trimmedPrompt, financeSummary: summary)
+                let response = try await service.generateFinanceAssistantReply(
+                    prompt: trimmedPrompt,
+                    snapshot: buildFinanceSnapshot(financeManager: financeManager),
+                    conversation: conversation
+                )
+                let actions = response.actions.compactMap {
+                    PendingAIAction(toolCall: $0, financeManager: financeManager)
+                }
+                let message = response.message.trimmingCharacters(in: .whitespacesAndNewlines)
+                messages.append(AIChatMessage(
+                    role: .assistant,
+                    content: message.isEmpty
+                        ? (actions.isEmpty ? "I couldn't prepare that request. Could you rephrase it?" : "I prepared the requested changes. Review them below before applying.")
+                        : message
+                ))
+                pendingActions = actions
             } else {
-                response = localFallbackInsight(for: trimmedPrompt, financeManager: financeManager)
+                messages.append(AIChatMessage(
+                    role: .assistant,
+                    content: localFallbackInsight(for: trimmedPrompt, financeManager: financeManager)
+                ))
             }
-
-            // The AI may append a machine-readable action to its reply; pull it out
-            // so the chat shows only prose and the app can offer to apply it.
-            let parsed = Self.extractAction(from: response)
-            messages.append(AIChatMessage(role: .assistant, content: parsed.display))
-            pendingAction = parsed.action
         } catch {
             let fallback = localFallbackInsight(for: trimmedPrompt, financeManager: financeManager)
             messages.append(AIChatMessage(role: .assistant, content: fallback))
@@ -140,120 +154,163 @@ final class FinanceAIManager: ObservableObject {
     }
 
     func resetConversation() {
-        pendingAction = nil
+        pendingActions = []
         messages = [
             AIChatMessage(
                 role: .assistant,
-                content: "Session reset. Ask me about budgets, trends, or where to cut costs this month."
+                content: "Session reset. I can analyze or manage transactions, budgets, and recurring bills whenever you're ready."
             )
         ]
     }
 
     // MARK: - Applying AI-proposed actions
 
-    /// Apply the pending action to the user's data (only after the user confirms),
-    /// then confirm in the chat. The AI proposes; the user disposes.
-    func applyPendingAction(financeManager: FinanceManager) {
-        guard let action = pendingAction else { return }
-        let f = CurrencyFormatting.shared
-        let confirmation: String
+    /// Applies the full reviewed batch. Tool calls are never executed before this
+    /// method is invoked by the confirmation button in the UI.
+    func applyPendingActions(financeManager: FinanceManager) {
+        guard !pendingActions.isEmpty else { return }
+        let actions = pendingActions
+        pendingActions = []
+
+        var confirmations: [String] = []
+        var failures: [String] = []
+        financeManager.performBatchUpdates {
+            for action in actions {
+                let result = apply(action, financeManager: financeManager)
+                if result.succeeded {
+                    confirmations.append(result.message)
+                } else {
+                    failures.append(result.message)
+                }
+            }
+        }
+
+        let message: String
+        if failures.isEmpty {
+            message = confirmations.count == 1
+                ? (confirmations.first ?? "Change applied.")
+                : "Applied \(confirmations.count) changes:\n" + confirmations.map { "• \($0)" }.joined(separator: "\n")
+        } else {
+            let applied = confirmations.isEmpty
+                ? "No changes were applied."
+                : "Applied:\n" + confirmations.map { "• \($0)" }.joined(separator: "\n")
+            message = applied + "\nCouldn't apply:\n" + failures.map { "• \($0)" }.joined(separator: "\n")
+        }
+
+        messages.append(AIChatMessage(role: .assistant, content: message))
+        analytics.track(event: AnalyticsEvent(
+            name: "finance_ai_action_batch_applied",
+            properties: ["applied_count": "\(confirmations.count)", "failed_count": "\(failures.count)"]
+        ))
+    }
+
+    func dismissPendingActions() {
+        pendingActions = []
+    }
+
+    private func apply(_ action: PendingAIAction, financeManager: FinanceManager) -> (succeeded: Bool, message: String) {
+        let formatter = CurrencyFormatting.shared
 
         switch action.kind {
-        case let .addExpense(title, amount, category):
-            financeManager.addExpense(Expense(title: title, amount: amount, category: category))
-            confirmation = "Added \(title) (\(f.string(for: amount))) to \(category.rawValue)."
-        case let .addIncome(title, amount):
-            financeManager.addExpense(Expense(title: title, amount: amount, category: .income))
-            confirmation = "Logged income \(title) (\(f.string(for: amount)))."
+        case let .addTransaction(title, amount, category, date, notes):
+            financeManager.addExpense(Expense(
+                title: title,
+                amount: amount,
+                category: category,
+                date: date,
+                notes: notes
+            ))
+            let verb = category.isIncome ? "Logged income" : "Added"
+            return (true, "\(verb) \(title) (\(formatter.string(for: amount))).")
+
+        case let .updateTransaction(id, currentTitle, title, amount, category, date, notes, clearNotes):
+            let updated = financeManager.updateExpense(
+                id: id,
+                title: title,
+                amount: amount,
+                category: category,
+                date: date,
+                notes: notes,
+                clearNotes: clearNotes
+            )
+            return updated
+                ? (true, "Updated \(title ?? currentTitle).")
+                : (false, "\(currentTitle) changed or no longer exists.")
+
+        case let .deleteTransaction(id, title):
+            return financeManager.deleteExpense(id: id)
+                ? (true, "Deleted \(title).")
+                : (false, "\(title) no longer exists.")
+
         case let .setBudget(amount):
             financeManager.setMonthlyBudget(amount)
-            confirmation = "Set your monthly budget to \(f.string(for: amount))."
+            return (true, "Set the monthly budget to \(formatter.string(for: amount)).")
+
         case .clearBudget:
             financeManager.setMonthlyBudget(nil)
-            confirmation = "Cleared your monthly budget."
-        case let .addRecurring(title, amount, category, frequency):
-            financeManager.addRecurringExpense(
-                RecurringExpense(title: title, amount: amount, category: category,
-                                 frequency: frequency, nextDueDate: Self.nextDueDate(for: frequency))
+            return (true, "Cleared the monthly budget.")
+
+        case let .addRecurring(title, amount, category, frequency, nextDueDate, notes):
+            financeManager.addRecurringExpense(RecurringExpense(
+                title: title,
+                amount: amount,
+                category: category,
+                frequency: frequency,
+                nextDueDate: nextDueDate,
+                notes: notes
+            ))
+            return (true, "Added recurring bill \(title) (\(formatter.string(for: amount)), \(frequency.rawValue.lowercased())).")
+
+        case let .updateRecurring(id, currentTitle, title, amount, category, frequency, nextDueDate, notes, clearNotes):
+            let updated = financeManager.updateRecurringExpense(
+                id: id,
+                title: title,
+                amount: amount,
+                category: category,
+                frequency: frequency,
+                nextDueDate: nextDueDate,
+                notes: notes,
+                clearNotes: clearNotes
             )
-            confirmation = "Added recurring bill \(title) (\(f.string(for: amount)), \(frequency.rawValue))."
-        }
+            return updated
+                ? (true, "Updated recurring bill \(title ?? currentTitle).")
+                : (false, "\(currentTitle) changed or no longer exists.")
 
-        pendingAction = nil
-        messages.append(AIChatMessage(role: .assistant, content: confirmation))
-        analytics.track(event: AnalyticsEvent(name: "finance_ai_action_applied"))
+        case let .setRecurringActive(id, title, isActive):
+            let updated = financeManager.updateRecurringExpense(id: id, isActive: isActive)
+            let verb = isActive ? "Resumed" : "Paused"
+            return updated
+                ? (true, "\(verb) \(title).")
+                : (false, "\(title) changed or no longer exists.")
+
+        case let .deleteRecurring(id, title):
+            return financeManager.deleteRecurringExpense(id: id)
+                ? (true, "Deleted recurring bill \(title).")
+                : (false, "\(title) no longer exists.")
+
+        case .postDueRecurring:
+            let count = financeManager.processDueRecurringExpenses()
+            return count == 0
+                ? (true, "There were no due recurring bills to post.")
+                : (true, "Posted \(count) due recurring \(count == 1 ? "transaction" : "transactions").")
+
+        case let .clearAllData(transactionCount, recurringCount):
+            financeManager.clearAllData()
+            return (true, "Cleared \(transactionCount) transactions, \(recurringCount) recurring bills, and the monthly budget.")
+        }
     }
 
-    func dismissPendingAction() {
-        pendingAction = nil
-    }
-
-    private static func nextDueDate(for frequency: RecurrenceFrequency) -> Date {
-        let cal = Calendar.current
-        let now = Date()
-        switch frequency {
-        case .weekly:    return cal.date(byAdding: .day, value: 7, to: now) ?? now
-        case .biweekly:  return cal.date(byAdding: .day, value: 14, to: now) ?? now
-        case .monthly:   return cal.date(byAdding: .month, value: 1, to: now) ?? now
-        case .quarterly: return cal.date(byAdding: .month, value: 3, to: now) ?? now
-        case .yearly:    return cal.date(byAdding: .year, value: 1, to: now) ?? now
-        }
-    }
-
-    private func buildFinanceSummary(financeManager: FinanceManager) -> String {
-        let formatter = CurrencyFormatting.shared
-        let monthTotal = formatter.string(for: financeManager.thisMonthTotal)
-        let weekTotal = formatter.string(for: financeManager.thisWeekTotal)
-        let recurringTotal = formatter.string(for: financeManager.recurringMonthlyTotal)
-
-        let budgetLine: String = {
-            guard let budget = financeManager.monthlyBudget else { return "Not set" }
-            if let ratio = financeManager.monthlyBudgetUsageRatio {
-                return "\(formatter.string(for: budget)) (\(Int((ratio * 100).rounded()))% used)"
-            }
-            return formatter.string(for: budget)
-        }()
-
-        let incomeTotal = financeManager.expenses
-            .filter { $0.category == .income }
-            .reduce(Decimal.zero) { $0 + $1.amount }
-
-        // Spending grouped by category (excludes income), highest first.
-        let byCategory = Dictionary(grouping: financeManager.expenses.filter { $0.category != .income },
-                                    by: { $0.category })
-            .mapValues { $0.reduce(Decimal.zero) { $0 + $1.amount } }
-            .sorted { $0.value > $1.value }
-            .prefix(8)
-        let categoryRows = byCategory.map { "- \($0.key.rawValue): \(formatter.string(for: $0.value))" }
-
-        let recentRows = financeManager.recentExpenses(limit: 8).map {
-            "- \($0.title): \(formatter.string(for: $0.amount)) on \($0.date.formattedDate) [\($0.category.rawValue)]"
-        }
-
-        let activeRecurring = financeManager.recurringExpenses.filter { $0.isActive }
-        let recurringRows = activeRecurring.prefix(12).map {
-            "- \($0.title): \(formatter.string(for: $0.amount)) [\($0.frequency.rawValue)] next \($0.nextDueDate.formattedDate) [\($0.category.rawValue)]"
-        }
-
-        return """
-        USER FINANCE SNAPSHOT (their real data across the app):
-        Spending this month: \(monthTotal)
-        Spending this week: \(weekTotal)
-        Income logged (all time): \(formatter.string(for: incomeTotal))
-        Monthly budget: \(budgetLine)
-        Recurring monthly load: \(recurringTotal)
-        Total tracked expenses: \(financeManager.expenses.count)
-        Active recurring bills: \(financeManager.activeRecurringCount)
-
-        Spending by category:
-        \(categoryRows.isEmpty ? "- none yet" : categoryRows.joined(separator: "\n"))
-
-        Recent expenses:
-        \(recentRows.isEmpty ? "- none yet" : recentRows.joined(separator: "\n"))
-
-        Active recurring bills:
-        \(recurringRows.isEmpty ? "- none yet" : recurringRows.joined(separator: "\n"))
-        """
+    private func buildFinanceSnapshot(financeManager: FinanceManager) -> FinanceAISnapshot {
+        FinanceAISnapshot(
+            generatedAt: Date(),
+            currencyCode: Locale.current.currency?.identifier ?? "USD",
+            monthlyBudget: financeManager.monthlyBudget,
+            spendingThisMonth: financeManager.thisMonthTotal,
+            spendingThisWeek: financeManager.thisWeekTotal,
+            recurringMonthlyTotal: financeManager.recurringMonthlyTotal,
+            transactions: financeManager.expenses.sorted { $0.date > $1.date },
+            recurringTransactions: financeManager.recurringExpenses.sorted { $0.nextDueDate < $1.nextDueDate }
+        )
     }
 
     private func localCategoryInsight(category: String, amount: Double, percentage: Double) -> String {
@@ -322,38 +379,6 @@ final class FinanceAIManager: ObservableObject {
         return first.count > 45 ? String(first.prefix(45)) : first
     }
 
-    // MARK: - Action protocol
-
-    /// Appended to the data snapshot so the model knows it can propose an action.
-    /// The app parses any action out of the reply and asks the user to confirm it.
-    static let actionInstructions: String = {
-        let cats = ExpenseCategory.allCases.map(\.rawValue).joined(separator: ", ")
-        return """
-        ACTIONS — you can carry out ONE change to the user's data when they clearly ask for it (e.g. "add a $12 lunch", "set my budget to $2000", "add Netflix $15.99 monthly"). Rules:
-        - Only when the user gives the needed details. NEVER invent an amount, title, or category the user did not provide.
-        - Write your normal helpful reply first. Then, on a new line, append the marker below followed by ONE single-line JSON object. If no change was requested, omit the marker entirely.
-        [[FINANCE_ACTION]]{"type":"add_expense","title":"Lunch","amount":12,"category":"Food & Dining"}
-        Valid "type": add_expense, add_income, set_budget, clear_budget, add_recurring.
-        Fields: title (string), amount (number, no currency symbol), category (one of: \(cats)), frequency (Weekly, Biweekly, Monthly, Quarterly, or Yearly — add_recurring only).
-        """
-    }()
-
-    /// Split an AI reply into the prose to show and any action it proposed.
-    static func extractAction(from text: String) -> (display: String, action: PendingAIAction?) {
-        let marker = "[[FINANCE_ACTION]]"
-        guard let range = text.range(of: marker) else {
-            return (text.trimmingCharacters(in: .whitespacesAndNewlines), nil)
-        }
-        let display = String(text[..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-        let tail = String(text[range.upperBound...])
-        if let start = tail.firstIndex(of: "{"), let end = tail.lastIndex(of: "}"), start <= end,
-           let data = String(tail[start...end]).data(using: .utf8),
-           let raw = try? JSONDecoder().decode(RawAIAction.self, from: data),
-           let action = raw.toPending() {
-            return (display.isEmpty ? "Here's what I can do:" : display, action)
-        }
-        return (display.isEmpty ? "Sorry, I couldn't set that up. Could you rephrase?" : display, nil)
-    }
 }
 
 // MARK: - AI action types
@@ -363,79 +388,293 @@ struct PendingAIAction: Identifiable {
     let kind: Kind
 
     enum Kind {
-        case addExpense(title: String, amount: Decimal, category: ExpenseCategory)
-        case addIncome(title: String, amount: Decimal)
+        case addTransaction(title: String, amount: Decimal, category: ExpenseCategory, date: Date, notes: String?)
+        case updateTransaction(id: UUID, currentTitle: String, title: String?, amount: Decimal?, category: ExpenseCategory?, date: Date?, notes: String?, clearNotes: Bool)
+        case deleteTransaction(id: UUID, title: String)
         case setBudget(amount: Decimal)
         case clearBudget
-        case addRecurring(title: String, amount: Decimal, category: ExpenseCategory, frequency: RecurrenceFrequency)
+        case addRecurring(title: String, amount: Decimal, category: ExpenseCategory, frequency: RecurrenceFrequency, nextDueDate: Date, notes: String?)
+        case updateRecurring(id: UUID, currentTitle: String, title: String?, amount: Decimal?, category: ExpenseCategory?, frequency: RecurrenceFrequency?, nextDueDate: Date?, notes: String?, clearNotes: Bool)
+        case setRecurringActive(id: UUID, title: String, isActive: Bool)
+        case deleteRecurring(id: UUID, title: String)
+        case postDueRecurring
+        case clearAllData(transactionCount: Int, recurringCount: Int)
+    }
+
+    @MainActor
+    init?(toolCall: FinanceAIToolCall, financeManager: FinanceManager) {
+        let input = toolCall.input
+
+        func clean(_ value: String?) -> String? {
+            guard let value else { return nil }
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : String(trimmed.prefix(160))
+        }
+
+        func category(_ value: String?) -> ExpenseCategory? {
+            guard let value else { return nil }
+            return ExpenseCategory.allCases.first {
+                $0.rawValue.caseInsensitiveCompare(value) == .orderedSame
+            }
+        }
+
+        func frequency(_ value: String?) -> RecurrenceFrequency? {
+            guard let value else { return nil }
+            return RecurrenceFrequency.allCases.first {
+                $0.rawValue.caseInsensitiveCompare(value) == .orderedSame
+            }
+        }
+
+        func date(_ value: String?) -> Date? {
+            guard let value else { return nil }
+            return Self.dateFormatter.date(from: value)
+        }
+
+        switch toolCall.type {
+        case "add_transaction":
+            guard let title = clean(input.title),
+                  let amount = input.amount, amount > 0,
+                  let category = category(input.category)
+            else { return nil }
+            kind = .addTransaction(
+                title: title,
+                amount: amount,
+                category: category,
+                date: date(input.date) ?? Date(),
+                notes: clean(input.notes)
+            )
+
+        case "update_transaction":
+            guard let rawID = input.transactionID,
+                  let id = UUID(uuidString: rawID),
+                  let existing = financeManager.expenses.first(where: { $0.id == id })
+            else { return nil }
+            let newCategory = input.category == nil ? nil : category(input.category)
+            guard input.category == nil || newCategory != nil else { return nil }
+            let newDate = input.date == nil ? nil : date(input.date)
+            guard input.date == nil || newDate != nil else { return nil }
+            let hasChange = clean(input.title) != nil || input.amount != nil || newCategory != nil ||
+                newDate != nil || clean(input.notes) != nil || input.clearNotes == true
+            guard hasChange, input.amount.map({ $0 > 0 }) ?? true else { return nil }
+            kind = .updateTransaction(
+                id: id,
+                currentTitle: existing.title,
+                title: clean(input.title),
+                amount: input.amount,
+                category: newCategory,
+                date: newDate,
+                notes: clean(input.notes),
+                clearNotes: input.clearNotes == true
+            )
+
+        case "delete_transaction":
+            guard let rawID = input.transactionID,
+                  let id = UUID(uuidString: rawID),
+                  let existing = financeManager.expenses.first(where: { $0.id == id })
+            else { return nil }
+            kind = .deleteTransaction(id: id, title: existing.title)
+
+        case "set_monthly_budget":
+            guard let amount = input.amount, amount > 0 else { return nil }
+            kind = .setBudget(amount: amount)
+
+        case "clear_monthly_budget":
+            kind = .clearBudget
+
+        case "add_recurring_transaction":
+            guard let title = clean(input.title),
+                  let amount = input.amount, amount > 0,
+                  let category = category(input.category),
+                  let frequency = frequency(input.frequency)
+            else { return nil }
+            kind = .addRecurring(
+                title: title,
+                amount: amount,
+                category: category,
+                frequency: frequency,
+                nextDueDate: date(input.nextDueDate) ?? Self.defaultNextDueDate(for: frequency),
+                notes: clean(input.notes)
+            )
+
+        case "update_recurring_transaction":
+            guard let rawID = input.recurringID,
+                  let id = UUID(uuidString: rawID),
+                  let existing = financeManager.recurringExpenses.first(where: { $0.id == id })
+            else { return nil }
+            let newCategory = input.category == nil ? nil : category(input.category)
+            let newFrequency = input.frequency == nil ? nil : frequency(input.frequency)
+            let newDate = input.nextDueDate == nil ? nil : date(input.nextDueDate)
+            guard (input.category == nil || newCategory != nil),
+                  (input.frequency == nil || newFrequency != nil),
+                  (input.nextDueDate == nil || newDate != nil),
+                  input.amount.map({ $0 > 0 }) ?? true
+            else { return nil }
+            let hasChange = clean(input.title) != nil || input.amount != nil || newCategory != nil ||
+                newFrequency != nil || newDate != nil || clean(input.notes) != nil || input.clearNotes == true
+            guard hasChange else { return nil }
+            kind = .updateRecurring(
+                id: id,
+                currentTitle: existing.title,
+                title: clean(input.title),
+                amount: input.amount,
+                category: newCategory,
+                frequency: newFrequency,
+                nextDueDate: newDate,
+                notes: clean(input.notes),
+                clearNotes: input.clearNotes == true
+            )
+
+        case "set_recurring_active":
+            guard let rawID = input.recurringID,
+                  let id = UUID(uuidString: rawID),
+                  let isActive = input.isActive,
+                  let existing = financeManager.recurringExpenses.first(where: { $0.id == id })
+            else { return nil }
+            kind = .setRecurringActive(id: id, title: existing.title, isActive: isActive)
+
+        case "delete_recurring_transaction":
+            guard let rawID = input.recurringID,
+                  let id = UUID(uuidString: rawID),
+                  let existing = financeManager.recurringExpenses.first(where: { $0.id == id })
+            else { return nil }
+            kind = .deleteRecurring(id: id, title: existing.title)
+
+        case "post_due_recurring_transactions":
+            kind = .postDueRecurring
+
+        case "clear_all_finance_data":
+            kind = .clearAllData(
+                transactionCount: financeManager.expenses.count,
+                recurringCount: financeManager.recurringExpenses.count
+            )
+
+        default:
+            return nil
+        }
     }
 
     var title: String {
         switch kind {
-        case .addExpense:   return "Add expense"
-        case .addIncome:    return "Log income"
-        case .setBudget:    return "Set monthly budget"
-        case .clearBudget:  return "Clear budget"
+        case let .addTransaction(_, _, category, _, _):
+            return category.isIncome ? "Log income" : "Add transaction"
+        case .updateTransaction: return "Update transaction"
+        case .deleteTransaction: return "Delete transaction"
+        case .setBudget: return "Set monthly budget"
+        case .clearBudget: return "Clear budget"
         case .addRecurring: return "Add recurring bill"
+        case .updateRecurring: return "Update recurring bill"
+        case let .setRecurringActive(_, _, isActive): return isActive ? "Resume recurring bill" : "Pause recurring bill"
+        case .deleteRecurring: return "Delete recurring bill"
+        case .postDueRecurring: return "Post due recurring bills"
+        case .clearAllData: return "Clear all finance data"
         }
     }
 
     var detail: String {
-        let f = CurrencyFormatting.shared
+        let formatter = CurrencyFormatting.shared
         switch kind {
-        case let .addExpense(title, amount, category):
-            return "\(title) · \(f.string(for: amount)) · \(category.rawValue)"
-        case let .addIncome(title, amount):
-            return "\(title) · \(f.string(for: amount))"
+        case let .addTransaction(title, amount, category, date, _):
+            return "\(title) · \(formatter.string(for: amount)) · \(category.rawValue) · \(date.formattedDate)"
+        case let .updateTransaction(_, currentTitle, title, amount, category, date, notes, clearNotes):
+            return Self.changeSummary(
+                target: currentTitle,
+                title: title,
+                amount: amount,
+                category: category,
+                frequency: nil,
+                date: date,
+                notes: notes,
+                clearNotes: clearNotes
+            )
+        case let .deleteTransaction(_, title):
+            return title
         case let .setBudget(amount):
-            return "\(f.string(for: amount)) / month"
+            return "\(formatter.string(for: amount)) / month"
         case .clearBudget:
             return "Remove the current monthly budget"
-        case let .addRecurring(title, amount, category, frequency):
-            return "\(title) · \(f.string(for: amount)) · \(frequency.rawValue) · \(category.rawValue)"
+        case let .addRecurring(title, amount, category, frequency, nextDueDate, _):
+            return "\(title) · \(formatter.string(for: amount)) · \(frequency.rawValue) · next \(nextDueDate.formattedDate) · \(category.rawValue)"
+        case let .updateRecurring(_, currentTitle, title, amount, category, frequency, nextDueDate, notes, clearNotes):
+            return Self.changeSummary(
+                target: currentTitle,
+                title: title,
+                amount: amount,
+                category: category,
+                frequency: frequency,
+                date: nextDueDate,
+                notes: notes,
+                clearNotes: clearNotes
+            )
+        case let .setRecurringActive(_, title, _), let .deleteRecurring(_, title):
+            return title
+        case .postDueRecurring:
+            return "Create transactions for every recurring bill currently due"
+        case let .clearAllData(transactionCount, recurringCount):
+            return "Delete \(transactionCount) transactions, \(recurringCount) recurring bills, and the budget"
         }
     }
 
     var systemIcon: String {
         switch kind {
-        case .addExpense:              return "cart.fill"
-        case .addIncome:               return "dollarsign.circle.fill"
+        case let .addTransaction(_, _, category, _, _):
+            return category.isIncome ? "dollarsign.circle.fill" : "cart.fill"
+        case .updateTransaction:       return "pencil"
+        case .deleteTransaction:       return "trash.fill"
         case .setBudget, .clearBudget: return "chart.pie.fill"
-        case .addRecurring:            return "arrow.triangle.2.circlepath"
+        case .addRecurring, .updateRecurring, .setRecurringActive, .postDueRecurring:
+            return "arrow.triangle.2.circlepath"
+        case .deleteRecurring, .clearAllData:
+            return "trash.fill"
         }
     }
-}
 
-private struct RawAIAction: Decodable {
-    let type: String
-    let title: String?
-    let amount: Decimal?
-    let category: String?
-    let frequency: String?
-
-    func toPending() -> PendingAIAction? {
-        func resolvedCategory() -> ExpenseCategory {
-            guard let category else { return .other }
-            return ExpenseCategory(rawValue: category) ?? ExpenseCategory.from(freeform: category)
-        }
-        switch type.lowercased().replacingOccurrences(of: "-", with: "_") {
-        case "add_expense":
-            guard let title, let amount, amount > 0 else { return nil }
-            return PendingAIAction(kind: .addExpense(title: title, amount: amount, category: resolvedCategory()))
-        case "add_income":
-            guard let title, let amount, amount > 0 else { return nil }
-            return PendingAIAction(kind: .addIncome(title: title, amount: amount))
-        case "set_budget":
-            guard let amount, amount > 0 else { return nil }
-            return PendingAIAction(kind: .setBudget(amount: amount))
-        case "clear_budget":
-            return PendingAIAction(kind: .clearBudget)
-        case "add_recurring":
-            guard let title, let amount, amount > 0 else { return nil }
-            let freq = RecurrenceFrequency(rawValue: (frequency ?? "Monthly").capitalized) ?? .monthly
-            return PendingAIAction(kind: .addRecurring(title: title, amount: amount, category: resolvedCategory(), frequency: freq))
+    var isDestructive: Bool {
+        switch kind {
+        case .deleteTransaction, .deleteRecurring, .clearAllData:
+            return true
         default:
-            return nil
+            return false
         }
     }
+
+    private static func changeSummary(
+        target: String,
+        title: String?,
+        amount: Decimal?,
+        category: ExpenseCategory?,
+        frequency: RecurrenceFrequency?,
+        date: Date?,
+        notes: String?,
+        clearNotes: Bool
+    ) -> String {
+        var changes: [String] = []
+        if let title { changes.append("name to \(title)") }
+        if let amount { changes.append("amount to \(CurrencyFormatting.shared.string(for: amount))") }
+        if let category { changes.append("category to \(category.rawValue)") }
+        if let frequency { changes.append("frequency to \(frequency.rawValue)") }
+        if let date { changes.append("date to \(date.formattedDate)") }
+        if let notes { changes.append("notes to \(notes)") }
+        if clearNotes { changes.append("remove notes") }
+        return "\(target) · " + changes.joined(separator: ", ")
+    }
+
+    private static func defaultNextDueDate(for frequency: RecurrenceFrequency) -> Date {
+        let calendar = Calendar.current
+        let now = Date()
+        switch frequency {
+        case .weekly: return calendar.date(byAdding: .day, value: 7, to: now) ?? now
+        case .biweekly: return calendar.date(byAdding: .day, value: 14, to: now) ?? now
+        case .monthly: return calendar.date(byAdding: .month, value: 1, to: now) ?? now
+        case .quarterly: return calendar.date(byAdding: .month, value: 3, to: now) ?? now
+        case .yearly: return calendar.date(byAdding: .year, value: 1, to: now) ?? now
+        }
+    }
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 }

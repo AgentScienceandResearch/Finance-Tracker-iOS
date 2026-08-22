@@ -47,7 +47,7 @@ These commands preserve manual Xcode project edits. They only generate the proje
 open FinanceTrackeriOS.xcodeproj
 ```
 
-Run scheme `TemplateApp` on a simulator.
+Run scheme `FinanceTrackerAI` on a simulator.
 
 ## Runtime Configuration
 
@@ -85,7 +85,7 @@ make clean
 ## Troubleshooting
 
 - Build fails on simulator destination:
-  - run `xcodebuild -showdestinations -project FinanceTrackeriOS.xcodeproj -scheme TemplateApp`
+  - run `xcodebuild -showdestinations -project FinanceTrackeriOS.xcodeproj -scheme FinanceTrackerAI`
   - update `DESTINATION` in `Makefile` if needed
 
 - `xcodegen` missing:
