@@ -5,6 +5,9 @@ final class FinanceAIManager: ObservableObject {
     @Published private(set) var messages: [AIChatMessage]
     @Published var isLoading = false
     @Published var errorMessage: String?
+    /// Increments only when the configured AI service returns a valid response.
+    /// Offline fallbacks and failed requests do not consume the user's first use.
+    @Published private(set) var successfulAssistantResponseCount = 0
     /// Typed actions proposed by the model. They are always review-only until the
     /// user explicitly applies the batch in the assistant sheet.
     @Published private(set) var pendingActions: [PendingAIAction] = []
@@ -64,6 +67,7 @@ final class FinanceAIManager: ObservableObject {
                         : message
                 ))
                 pendingActions = actions
+                successfulAssistantResponseCount += 1
             } else {
                 messages.append(AIChatMessage(
                     role: .assistant,

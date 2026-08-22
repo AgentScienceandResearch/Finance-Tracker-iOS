@@ -9,7 +9,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: 5.10
-    CURRENT_PROJECT_VERSION: 10
+    CURRENT_PROJECT_VERSION: 11
     MARKETING_VERSION: 4.1.1
     DEVELOPMENT_TEAM: R79MH5A2VX
     ENABLE_TESTABILITY: YES
@@ -38,6 +38,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dakota.financetracker2025
         INFOPLIST_FILE: Config/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FinanceTrackerAI.entitlements
+        CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1,2"
       configs:
         Debug:

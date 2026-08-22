@@ -171,14 +171,24 @@ struct AuthenticationView: View {
                     }
                 }
 
-                AppleSignInButton { result in
+                AppleSignInButton { result, rawNonce in
                     Task {
                         switch result {
                         case .success(let auth):
-                            guard let cred = auth.credential as? ASAuthorizationAppleIDCredential else { return }
-                            await authManager.signInWithApple(credentials: cred)
+                            guard let cred = auth.credential as? ASAuthorizationAppleIDCredential else {
+                                appleError = "Apple Sign In returned an invalid credential."
+                                return
+                            }
+                            guard let rawNonce else {
+                                appleError = "Apple Sign In could not create a secure request. Please try again."
+                                return
+                            }
+                            await authManager.signInWithApple(credentials: cred, rawNonce: rawNonce)
                         case .failure(let err):
-                            appleError = err.localizedDescription
+                            let authorizationError = err as? ASAuthorizationError
+                            if authorizationError?.code != .canceled {
+                                appleError = "Apple Sign In failed. Please try again."
+                            }
                         }
                     }
                 }
@@ -344,12 +354,24 @@ private struct GoogleGLogo: View {
 // MARK: - Apple Sign In Button
 
 private struct AppleSignInButton: View {
-    let onCompletion: (Result<ASAuthorization, Error>) -> Void
+    let onCompletion: (Result<ASAuthorization, Error>, String?) -> Void
+    @State private var currentNonce: String?
 
     var body: some View {
         SignInWithAppleButton(
-            onRequest: { _ in },
-            onCompletion: onCompletion
+            onRequest: { request in
+                let nonce = AppleSignInNonce.generate()
+                currentNonce = nonce
+                request.requestedScopes = [.fullName, .email]
+                if let nonce {
+                    request.nonce = AppleSignInNonce.hash(nonce)
+                }
+            },
+            onCompletion: { result in
+                let nonce = currentNonce
+                currentNonce = nil
+                onCompletion(result, nonce)
+            }
         )
         .signInWithAppleButtonStyle(.black)
         .frame(height: 52)

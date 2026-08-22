@@ -1,6 +1,7 @@
 import SwiftUI
 import AuthenticationServices
 import CryptoKit
+import Security
 #if canImport(FirebaseAuth)
 import FirebaseAuth
 #endif
@@ -144,7 +145,7 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
 
     // MARK: - Apple Sign In
 
-    func signInWithApple(credentials: ASAuthorizationAppleIDCredential) async {
+    func signInWithApple(credentials: ASAuthorizationAppleIDCredential, rawNonce: String) async {
         isLoading = true
         defer { isLoading = false }
         errorMessage = nil
@@ -156,10 +157,9 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
             return
         }
 
-        // rawNonce is nil because no nonce was set in the Apple auth request
         let credential = OAuthProvider.appleCredential(
             withIDToken: idTokenString,
-            rawNonce: nil,
+            rawNonce: rawNonce,
             fullName: credentials.fullName
         )
 
@@ -385,6 +385,25 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
         return GoogleUserInfo(sub: sub, email: email,
                               name: json["name"] as? String,
                               picture: json["picture"] as? String)
+    }
+}
+
+enum AppleSignInNonce {
+    static func generate(length: Int = 32) -> String? {
+        guard length > 0 else { return nil }
+        var randomBytes = [UInt8](repeating: 0, count: length)
+        guard SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes) == errSecSuccess else {
+            return nil
+        }
+
+        let characters = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        return String(randomBytes.map { characters[Int($0) % characters.count] })
+    }
+
+    static func hash(_ nonce: String) -> String {
+        SHA256.hash(data: Data(nonce.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
     }
 }
 

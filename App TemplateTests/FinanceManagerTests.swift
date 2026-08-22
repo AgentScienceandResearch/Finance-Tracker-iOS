@@ -239,5 +239,50 @@ final class FinanceManagerTests: XCTestCase {
         XCTAssertEqual(amount, Decimal(50))
         XCTAssertEqual(category, .shopping)
     }
+
+    func testPaywallWaitsUntilFirstSuccessfulAIUse() {
+        let userID = "paywall-user"
+        let now = Date(timeIntervalSince1970: 1_750_000_000)
+
+        XCTAssertNil(PaywallAccessPolicy.modeAtLaunch(userID: userID, defaults: defaults, now: now))
+        XCTAssertEqual(
+            PaywallAccessPolicy.modeAfterSuccessfulAIUse(userID: userID, defaults: defaults, now: now),
+            .initial
+        )
+        XCTAssertNil(
+            PaywallAccessPolicy.modeAfterSuccessfulAIUse(
+                userID: userID,
+                defaults: defaults,
+                now: now.addingTimeInterval(60)
+            )
+        )
+    }
+
+    func testPaywallBecomesHardAfterSevenDaysFromFirstAIUse() {
+        let userID = "expired-paywall-user"
+        let now = Date(timeIntervalSince1970: 1_750_000_000)
+        _ = PaywallAccessPolicy.modeAfterSuccessfulAIUse(userID: userID, defaults: defaults, now: now)
+        let sevenDaysLater = now.addingTimeInterval(TimeInterval(7 * 24 * 60 * 60))
+
+        XCTAssertEqual(
+            PaywallAccessPolicy.modeAtLaunch(userID: userID, defaults: defaults, now: sevenDaysLater),
+            .yearlyHard
+        )
+    }
+
+    func testAppleSignInNonceUsesFirebaseSHA256Format() {
+        XCTAssertEqual(
+            AppleSignInNonce.hash("test"),
+            "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        )
+    }
+
+    func testAppleSignInNonceIsSecurelyGeneratedAtRequestedLength() throws {
+        let nonce = try XCTUnwrap(AppleSignInNonce.generate(length: 48))
+        let allowedCharacters = CharacterSet(charactersIn: "0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+
+        XCTAssertEqual(nonce.count, 48)
+        XCTAssertNil(nonce.unicodeScalars.first(where: { !allowedCharacters.contains($0) }))
+    }
 }
 #endif

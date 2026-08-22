@@ -69,6 +69,8 @@ private enum FinanceTab: String, CaseIterable, Identifiable {
 struct MainTabView: View {
     @EnvironmentObject private var financeManager: FinanceManager
     @EnvironmentObject private var financeAIManager: FinanceAIManager
+    @EnvironmentObject private var authManager: AuthenticationManager
+    @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @Environment(\.analyticsTracker) private var analytics
     @Environment(\.requestReview) private var requestReview
 
@@ -79,6 +81,8 @@ struct MainTabView: View {
     @State private var showReceiptScanner = false
     @State private var showImport        = false
     @State private var showAIAssistant   = false
+    @State private var showAIUsePaywall  = false
+    @State private var aiUsePaywallMode: PaywallMode = .initial
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -111,6 +115,13 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showAIAssistant) {
             AIAssistantSheet(financeManager: financeManager, aiManager: financeAIManager)
+                .fullScreenCover(isPresented: $showAIUsePaywall) {
+                    PaywallView(
+                        subscriptionManager: subscriptionManager,
+                        mode: aiUsePaywallMode,
+                        onDismiss: aiUsePaywallMode == .initial ? { showAIUsePaywall = false } : nil
+                    )
+                }
         }
         .onAppear {
             financeManager.processDueRecurringExpenses()
@@ -119,6 +130,12 @@ struct MainTabView: View {
         }
         .onChange(of: financeManager.expenses.count) { _, newCount in
             requestReviewIfAppropriate(expenseCount: newCount)
+        }
+        .onChange(of: financeAIManager.successfulAssistantResponseCount) { _, _ in
+            presentPaywallAfterSuccessfulAIUse()
+        }
+        .onChange(of: subscriptionManager.isSubscribed) { _, isSubscribed in
+            if isSubscribed { showAIUsePaywall = false }
         }
     }
 
@@ -136,6 +153,15 @@ struct MainTabView: View {
         }
     }
 
+    private func presentPaywallAfterSuccessfulAIUse() {
+        guard !subscriptionManager.isSubscribed,
+              let userID = authManager.currentUser?.id,
+              let mode = PaywallAccessPolicy.modeAfterSuccessfulAIUse(userID: userID) else { return }
+
+        aiUsePaywallMode = mode
+        showAIUsePaywall = true
+    }
+
     @ViewBuilder
     private var activeTabView: some View {
         switch selectedTab {
@@ -144,6 +170,8 @@ struct MainTabView: View {
                 financeManager: financeManager,
                 onViewAll:       { selectedTab = .expenses },
                 onViewInsights:  { selectedTab = .insights },
+                onViewRecurring: { selectedTab = .recurring },
+                onOpenSettings:  { selectedTab = .settings },
                 onAddExpense:    { analytics.track(event: AnalyticsEvent(name: "dash_add_expense")); showAddExpense = true },
                 onScanReceipt:   { analytics.track(event: AnalyticsEvent(name: "dash_scan")); showReceiptScanner = true },
                 onAddIncome:     { showAddIncome = true },
@@ -226,6 +254,8 @@ private struct DashboardTabView: View {
     @ObservedObject var financeManager: FinanceManager
     let onViewAll:      () -> Void
     let onViewInsights: () -> Void
+    let onViewRecurring: () -> Void
+    let onOpenSettings: () -> Void
     let onAddExpense:   () -> Void
     let onScanReceipt:  () -> Void
     let onAddIncome:    () -> Void
@@ -249,15 +279,15 @@ private struct DashboardTabView: View {
             VStack(spacing: 18) {
                 GreetingHeader(
                     greeting: greeting, name: firstName,
-                    onNotification: {},
+                    onNotification: onOpenSettings,
                     onAI: onAskAI
                 )
 
-                HeroBalanceCard(financeManager: financeManager)
+                HeroBalanceCard(financeManager: financeManager, onViewTransactions: onViewAll)
 
                 AnalyticsRow(financeManager: financeManager)
 
-                RecurringBillsCard(financeManager: financeManager)
+                RecurringBillsCard(financeManager: financeManager, onTap: onViewRecurring)
 
                 QuickActionsGrid(
                     onAddExpense:  onAddExpense,
@@ -346,6 +376,7 @@ private struct IconPill: View {
 
 private struct HeroBalanceCard: View {
     @ObservedObject var financeManager: FinanceManager
+    let onViewTransactions: () -> Void
 
     private var spentDouble: Double {
         NSDecimalNumber(decimal: financeManager.thisMonthTotal).doubleValue
@@ -420,10 +451,9 @@ private struct HeroBalanceCard: View {
 
                 Spacer()
 
-                Button {
-                } label: {
+                Button(action: onViewTransactions) {
                     HStack(spacing: 4) {
-                        Text("All Accounts")
+                        Text("Transactions")
                             .font(.system(size: 12, weight: .semibold))
                         Image(systemName: "chevron.right")
                             .font(.system(size: 11, weight: .semibold))
@@ -730,6 +760,7 @@ private struct AnalyticsRow: View {
 
 private struct RecurringBillsCard: View {
     @ObservedObject var financeManager: FinanceManager
+    let onTap: () -> Void
 
     private var topRecurring: [RecurringExpense] {
         Array(financeManager.recurringExpenses
@@ -739,49 +770,52 @@ private struct RecurringBillsCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Recurring Bills")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(FT.t2)
-                Text(CurrencyFormatting.shared.string(for: financeManager.recurringMonthlyTotal))
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(FT.t1)
-                Text("\(financeManager.activeRecurringCount) active")
-                    .font(.system(size: 11, weight: .regular))
-                    .foregroundStyle(FT.t3)
-            }
+        Button(action: onTap) {
+            HStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Recurring Bills")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(FT.t2)
+                    Text(CurrencyFormatting.shared.string(for: financeManager.recurringMonthlyTotal))
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(FT.t1)
+                    Text("\(financeManager.activeRecurringCount) active")
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundStyle(FT.t3)
+                }
 
-            Spacer()
+                Spacer()
 
-            if topRecurring.isEmpty {
-                Text("None yet")
-                    .font(.system(size: 12))
-                    .foregroundStyle(FT.t3)
-            } else {
-                HStack(spacing: -10) {
-                    ForEach(Array(topRecurring.prefix(3).enumerated()), id: \.offset) { idx, expense in
-                        MerchantLogoView(merchant: expense.title, category: expense.category, size: 36)
-                            .overlay(Circle().stroke(FT.card, lineWidth: 2))
-                            .zIndex(Double(3 - idx))
-                    }
-                    if topRecurring.count > 3 {
-                        ZStack {
-                            Circle().fill(FT.bg)
-                            Text("+\(topRecurring.count - 3)")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(FT.t2)
+                if topRecurring.isEmpty {
+                    Text("None yet")
+                        .font(.system(size: 12))
+                        .foregroundStyle(FT.t3)
+                } else {
+                    HStack(spacing: -10) {
+                        ForEach(Array(topRecurring.prefix(3).enumerated()), id: \.offset) { idx, expense in
+                            MerchantLogoView(merchant: expense.title, category: expense.category, size: 36)
+                                .overlay(Circle().stroke(FT.card, lineWidth: 2))
+                                .zIndex(Double(3 - idx))
                         }
-                        .frame(width: 36, height: 36)
-                        .overlay(Circle().stroke(FT.card, lineWidth: 2))
+                        if topRecurring.count > 3 {
+                            ZStack {
+                                Circle().fill(FT.bg)
+                                Text("+\(topRecurring.count - 3)")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(FT.t2)
+                            }
+                            .frame(width: 36, height: 36)
+                            .overlay(Circle().stroke(FT.card, lineWidth: 2))
+                        }
                     }
                 }
-            }
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(FT.t3)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(FT.t3)
+            }
         }
+        .buttonStyle(.plain)
         .ftCard()
     }
 }
@@ -1780,11 +1814,14 @@ private struct FinanceSettingsTabView: View {
     @ObservedObject var financeManager: FinanceManager
     @ObservedObject private var billReminders = BillReminderManager.shared
     @EnvironmentObject private var authManager: AuthenticationManager
+    @EnvironmentObject private var subscriptionManager: SubscriptionManager
 
     @State private var showDeleteConfirmation = false
     @State private var showSignOutConfirmation = false
     @State private var showEditProfile        = false
     @State private var showBudgetEditor       = false
+    @State private var showCategories         = false
+    @State private var showSubscriptionPaywall = false
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -1798,6 +1835,36 @@ private struct FinanceSettingsTabView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(FT.t3)
 
+                SettingsSection(label: "Subscription") {
+                    if !subscriptionManager.subscriptionStatusLoaded {
+                        PremiumSettingsRowLabel(
+                            icon: "crown.fill",
+                            color: FT.green,
+                            title: "Subscription Status",
+                            detail: "Checking…",
+                            showsChevron: false
+                        )
+                    } else if subscriptionManager.isSubscribed {
+                        Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                            PremiumSettingsRowLabel(
+                                icon: "checkmark.seal.fill",
+                                color: FT.green,
+                                title: "Subscription Status",
+                                detail: "Active"
+                            )
+                        }
+                    } else {
+                        PremiumSettingsRow(
+                            icon: "crown.fill",
+                            color: FT.green,
+                            title: "Subscription Status",
+                            detail: "Free plan"
+                        ) {
+                            showSubscriptionPaywall = true
+                        }
+                    }
+                }
+
                 SettingsSection(label: "Budget & Categories") {
                     PremiumSettingsRow(icon: "chart.pie.fill", color: FT.green,
                                        title: "Monthly Budget",
@@ -1807,7 +1874,9 @@ private struct FinanceSettingsTabView: View {
                     SettingsDivider()
                     PremiumSettingsRow(icon: "tag.fill", color: Color(red: 0.2, green: 0.5, blue: 0.9),
                                        title: "Categories",
-                                       detail: "\(ExpenseCategory.allCases.count)") { }
+                                       detail: "\(ExpenseCategory.allCases.count)") {
+                        showCategories = true
+                    }
                 }
 
                 SettingsSection(label: "Reminders") {
@@ -1855,8 +1924,9 @@ private struct FinanceSettingsTabView: View {
                 }
 
                 SettingsSection(label: "About") {
-                    PremiumSettingsRow(icon: "info.circle.fill", color: FT.t2,
-                                       title: "Version", detail: appVersionString) { }
+                    PremiumSettingsRowLabel(icon: "info.circle.fill", color: FT.t2,
+                                            title: "Version", detail: appVersionString,
+                                            showsChevron: false)
                     SettingsDivider()
                     Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/issues")!) {
                         PremiumSettingsRowLabel(icon: "questionmark.circle.fill", color: FT.t2,
@@ -1880,6 +1950,17 @@ private struct FinanceSettingsTabView: View {
         }
         .sheet(isPresented: $showEditProfile)  { EditProfileSheet(financeManager: financeManager) }
         .sheet(isPresented: $showBudgetEditor) { BudgetEditorSheet(financeManager: financeManager) }
+        .sheet(isPresented: $showCategories) { CategoryOverviewSheet(financeManager: financeManager) }
+        .fullScreenCover(isPresented: $showSubscriptionPaywall) {
+            PaywallView(
+                subscriptionManager: subscriptionManager,
+                mode: .initial,
+                onDismiss: { showSubscriptionPaywall = false }
+            )
+        }
+        .onChange(of: subscriptionManager.isSubscribed) { _, isSubscribed in
+            if isSubscribed { showSubscriptionPaywall = false }
+        }
     }
 
     private var appVersionString: String {
@@ -1933,6 +2014,7 @@ private struct PremiumSettingsRowLabel: View {
     let title: String
     let detail: String?
     var isDestructive: Bool = false
+    var showsChevron: Bool = true
 
     var body: some View {
         HStack(spacing: 12) {
@@ -1959,12 +2041,61 @@ private struct PremiumSettingsRowLabel: View {
                     .truncationMode(.middle)
             }
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(FT.t3)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(FT.t3)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
+    }
+}
+
+private struct CategoryOverviewSheet: View {
+    @ObservedObject var financeManager: FinanceManager
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List(ExpenseCategory.allCases) { category in
+                let transactions = financeManager.expenses.filter { $0.category == category }
+                let total = transactions.reduce(Decimal.zero) { $0 + $1.amount }
+
+                HStack(spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(category.color.opacity(0.12))
+                            .frame(width: 38, height: 38)
+                        Image(systemName: category.sfSymbol)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(category.color)
+                    }
+
+                    Text(category.rawValue)
+                        .font(.system(size: 15, weight: .medium))
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(CurrencyFormatting.shared.string(for: total))
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("\(transactions.count) \(transactions.count == 1 ? "transaction" : "transactions")")
+                            .font(.system(size: 11))
+                            .foregroundStyle(FT.t3)
+                    }
+                }
+                .padding(.vertical, 3)
+            }
+            .navigationTitle("Categories")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .tint(FT.green)
+        }
     }
 }
 
@@ -2748,5 +2879,7 @@ private enum DecimalParser {
     MainTabView()
         .environmentObject(FinanceManager.shared)
         .environmentObject(FinanceAIManager(service: OpenAIService.shared))
+        .environmentObject(AuthenticationManager())
+        .environmentObject(SubscriptionManager.shared)
 }
 #endif

@@ -27,6 +27,7 @@ struct TemplateApp: App {
                         .environmentObject(environment.financeManager)
                         .environmentObject(environment.financeAIManager)
                         .environmentObject(environment.authManager)
+                        .environmentObject(environment.subscriptionManager)
                         .environment(\.analyticsTracker, environment.analytics)
                         .dismissKeyboardOnTapOutsideTextInput()
                         .transition(.opacity)
@@ -65,22 +66,50 @@ struct TemplateApp: App {
 
     private func evaluatePaywall() {
         guard !environment.subscriptionManager.isSubscribed else { return }
-        let userID = environment.authManager.currentUser?.id ?? "anonymous"
-        let key = "freeTrialStart_\(userID)"
+        guard let userID = environment.authManager.currentUser?.id,
+              let mode = PaywallAccessPolicy.modeAtLaunch(userID: userID) else { return }
 
-        if let startDate = UserDefaults.standard.object(forKey: key) as? Date {
-            let days = Calendar.current.dateComponents([.day], from: startDate, to: .now).day ?? 0
-            if days >= 7 {
-                paywallMode = .yearlyHard
-                showPaywall = true
-            }
-            // Within 7 days: free access, no paywall
-        } else {
-            // First time this user has launched — show trial offer and start the clock
-            UserDefaults.standard.set(Date.now, forKey: key)
-            paywallMode = .initial
-            showPaywall = true
+        paywallMode = mode
+        showPaywall = true
+    }
+}
+
+enum PaywallAccessPolicy {
+    static let freePeriodDays = 7
+
+    static func modeAtLaunch(
+        userID: String,
+        defaults: UserDefaults = .standard,
+        now: Date = .now
+    ) -> PaywallMode? {
+        guard let startDate = defaults.object(forKey: startDateKey(userID: userID)) as? Date else {
+            // A new free user is not interrupted on launch. Their free period starts
+            // only after the first successful AI response.
+            return nil
         }
+        return isExpired(startDate: startDate, now: now) ? .yearlyHard : nil
+    }
+
+    static func modeAfterSuccessfulAIUse(
+        userID: String,
+        defaults: UserDefaults = .standard,
+        now: Date = .now
+    ) -> PaywallMode? {
+        let key = startDateKey(userID: userID)
+        if let startDate = defaults.object(forKey: key) as? Date {
+            return isExpired(startDate: startDate, now: now) ? .yearlyHard : nil
+        }
+
+        defaults.set(now, forKey: key)
+        return .initial
+    }
+
+    private static func startDateKey(userID: String) -> String {
+        "freeTrialStart_\(userID)"
+    }
+
+    private static func isExpired(startDate: Date, now: Date) -> Bool {
+        now.timeIntervalSince(startDate) >= TimeInterval(freePeriodDays * 24 * 60 * 60)
     }
 }
 

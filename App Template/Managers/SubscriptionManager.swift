@@ -23,6 +23,7 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
     @Published var isLoading = false
     @Published var loadError: String?
     @Published var productsLoaded = false
+    @Published private(set) var subscriptionStatusLoaded = false
     
     // MARK: - UserDefaults Keys
     private static let subscriptionStatusKey = "cachedSubscriptionStatus"
@@ -164,6 +165,7 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
         
         self.isSubscribed = subscribed
         UserDefaults.standard.set(subscribed, forKey: Self.subscriptionStatusKey)
+        subscriptionStatusLoaded = true
     }
     
     // MARK: - Listen for Transactions
