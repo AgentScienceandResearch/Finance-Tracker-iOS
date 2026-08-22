@@ -294,7 +294,7 @@ final class FinanceManagerTests: XCTestCase {
         XCTAssertTrue(AIWelcomePolicy.shouldPresent(userID: "new-user", defaults: defaults))
         XCTAssertFalse(AIWelcomePolicy.shouldPresent(userID: "existing-user", defaults: defaults))
 
-        AIWelcomePolicy.markCompleted(userID: "new-user", defaults: defaults)
+        AIWelcomePolicy.markPresented(userID: "new-user", defaults: defaults)
 
         XCTAssertFalse(AIWelcomePolicy.shouldPresent(userID: "new-user", defaults: defaults))
     }

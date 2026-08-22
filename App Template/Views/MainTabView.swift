@@ -186,15 +186,12 @@ struct MainTabView: View {
               let userID = authManager.currentUser?.id,
               AIWelcomePolicy.shouldPresent(userID: userID) else { return }
 
+        AIWelcomePolicy.markPresented(userID: userID)
         analytics.track(event: AnalyticsEvent(name: "ai_welcome_viewed"))
         showAIWelcome = true
     }
 
     private func completeAIWelcome(openAssistant: Bool) {
-        if let userID = authManager.currentUser?.id {
-            AIWelcomePolicy.markCompleted(userID: userID)
-        }
-
         analytics.track(event: AnalyticsEvent(name: openAssistant ? "ai_welcome_try_ai" : "ai_welcome_dismissed"))
         showAIWelcome = false
 

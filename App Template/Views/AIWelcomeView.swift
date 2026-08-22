@@ -11,7 +11,7 @@ enum AIWelcomePolicy {
         defaults.set(true, forKey: eligibilityKey(userID: userID))
     }
 
-    static func markCompleted(userID: String, defaults: UserDefaults = .standard) {
+    static func markPresented(userID: String, defaults: UserDefaults = .standard) {
         defaults.set(true, forKey: completionKey(userID: userID))
         defaults.removeObject(forKey: eligibilityKey(userID: userID))
     }
