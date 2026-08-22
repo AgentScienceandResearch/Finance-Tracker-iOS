@@ -23,7 +23,7 @@ struct TemplateApp: App {
         WindowGroup {
             ZStack {
                 if environment.authManager.isAuthenticated {
-                    MainTabView()
+                    MainTabView(canPresentAIWelcome: !showSplash && !showPaywall)
                         .environmentObject(environment.financeManager)
                         .environmentObject(environment.financeAIManager)
                         .environmentObject(environment.authManager)

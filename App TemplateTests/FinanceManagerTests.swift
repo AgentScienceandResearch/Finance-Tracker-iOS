@@ -284,5 +284,19 @@ final class FinanceManagerTests: XCTestCase {
         XCTAssertEqual(nonce.count, 48)
         XCTAssertNil(nonce.unicodeScalars.first(where: { !allowedCharacters.contains($0) }))
     }
+
+    func testAIWelcomeAppearsOnceForNewAccountsOnly() {
+        XCTAssertFalse(AIWelcomePolicy.shouldPresent(userID: "existing-user", defaults: defaults))
+        XCTAssertFalse(AIWelcomePolicy.shouldPresent(userID: "new-user", defaults: defaults))
+
+        AIWelcomePolicy.markEligibleForNewAccount(userID: "new-user", defaults: defaults)
+
+        XCTAssertTrue(AIWelcomePolicy.shouldPresent(userID: "new-user", defaults: defaults))
+        XCTAssertFalse(AIWelcomePolicy.shouldPresent(userID: "existing-user", defaults: defaults))
+
+        AIWelcomePolicy.markCompleted(userID: "new-user", defaults: defaults)
+
+        XCTAssertFalse(AIWelcomePolicy.shouldPresent(userID: "new-user", defaults: defaults))
+    }
 }
 #endif

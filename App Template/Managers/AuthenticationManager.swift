@@ -117,6 +117,7 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
 #if canImport(FirebaseAuth)
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            AIWelcomePolicy.markEligibleForNewAccount(userID: result.user.uid)
             let changeRequest = result.user.createProfileChangeRequest()
             changeRequest.displayName = displayName
             try await changeRequest.commitChanges()
@@ -165,6 +166,9 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
 
         do {
             let result = try await Auth.auth().signIn(with: credential)
+            if result.additionalUserInfo?.isNewUser == true {
+                AIWelcomePolicy.markEligibleForNewAccount(userID: result.user.uid)
+            }
             let displayName: String = {
                 let given  = credentials.fullName?.givenName ?? ""
                 let family = credentials.fullName?.familyName ?? ""
@@ -252,6 +256,9 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
                 accessToken: tokens.accessToken ?? ""
             )
             let result = try await Auth.auth().signIn(with: firebaseCredential)
+            if result.additionalUserInfo?.isNewUser == true {
+                AIWelcomePolicy.markEligibleForNewAccount(userID: result.user.uid)
+            }
             let userInfo = try decodeGoogleIDToken(tokens.idToken)
 
             let user = User(

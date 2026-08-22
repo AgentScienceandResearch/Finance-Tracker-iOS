@@ -81,8 +81,15 @@ struct MainTabView: View {
     @State private var showReceiptScanner = false
     @State private var showImport        = false
     @State private var showAIAssistant   = false
+    @State private var showAIWelcome     = false
     @State private var showAIUsePaywall  = false
     @State private var aiUsePaywallMode: PaywallMode = .initial
+
+    let canPresentAIWelcome: Bool
+
+    init(canPresentAIWelcome: Bool = true) {
+        self.canPresentAIWelcome = canPresentAIWelcome
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -123,6 +130,18 @@ struct MainTabView: View {
                     )
                 }
         }
+        .fullScreenCover(isPresented: $showAIWelcome) {
+            AIWelcomeView(
+                onTryAI: { completeAIWelcome(openAssistant: true) },
+                onContinue: { completeAIWelcome(openAssistant: false) }
+            )
+        }
+        .task(id: canPresentAIWelcome) {
+            guard canPresentAIWelcome else { return }
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else { return }
+            presentAIWelcomeIfNeeded()
+        }
         .onAppear {
             financeManager.processDueRecurringExpenses()
             BillReminderManager.shared.reschedule(with: financeManager.upcomingRecurringExpenses)
@@ -160,6 +179,31 @@ struct MainTabView: View {
 
         aiUsePaywallMode = mode
         showAIUsePaywall = true
+    }
+
+    private func presentAIWelcomeIfNeeded() {
+        guard canPresentAIWelcome,
+              let userID = authManager.currentUser?.id,
+              AIWelcomePolicy.shouldPresent(userID: userID) else { return }
+
+        analytics.track(event: AnalyticsEvent(name: "ai_welcome_viewed"))
+        showAIWelcome = true
+    }
+
+    private func completeAIWelcome(openAssistant: Bool) {
+        if let userID = authManager.currentUser?.id {
+            AIWelcomePolicy.markCompleted(userID: userID)
+        }
+
+        analytics.track(event: AnalyticsEvent(name: openAssistant ? "ai_welcome_try_ai" : "ai_welcome_dismissed"))
+        showAIWelcome = false
+
+        guard openAssistant else { return }
+        Task {
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            guard !Task.isCancelled else { return }
+            showAIAssistant = true
+        }
     }
 
     @ViewBuilder
