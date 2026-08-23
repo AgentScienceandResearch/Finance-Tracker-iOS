@@ -37,8 +37,8 @@ final class AuthenticationFlowViewModel: ObservableObject {
     func submit() async -> Bool {
         guard canSubmit else {
             inlineError = isSignUp
-                ? "Enter a valid email, 8+ character password, and display name."
-                : "Enter a valid email and 8+ character password."
+                ? String(localized: "Enter a valid email, 8+ character password, and display name.")
+                : String(localized: "Enter a valid email and 8+ character password.")
             return false
         }
 

@@ -27,6 +27,33 @@ enum ExpenseCategory: String, CaseIterable, Codable, Identifiable {
 
     var id: String { rawValue }
 
+    var localizedName: String {
+        switch self {
+        case .foodDining:        return String(localized: "Food & Dining")
+        case .transportation:    return String(localized: "Transportation")
+        case .housing:           return String(localized: "Housing")
+        case .utilities:         return String(localized: "Utilities")
+        case .entertainment:     return String(localized: "Entertainment")
+        case .shopping:          return String(localized: "Shopping")
+        case .health:            return String(localized: "Health")
+        case .travel:            return String(localized: "Travel")
+        case .education:         return String(localized: "Education")
+        case .subscriptions:     return String(localized: "Subscriptions")
+        case .incomeOffset:      return String(localized: "Income Offset")
+        case .medical:           return String(localized: "Medical")
+        case .personalCare:      return String(localized: "Personal Care")
+        case .fitness:           return String(localized: "Fitness")
+        case .pets:              return String(localized: "Pets")
+        case .giftsAndDonations: return String(localized: "Gifts & Donations")
+        case .insurance:         return String(localized: "Insurance")
+        case .homeMaintenance:   return String(localized: "Home Maintenance")
+        case .savings:           return String(localized: "Savings")
+        case .business:          return String(localized: "Business")
+        case .income:            return String(localized: "Income")
+        case .other:             return String(localized: "Other")
+        }
+    }
+
     var isIncome: Bool {
         self == .income || self == .incomeOffset
     }

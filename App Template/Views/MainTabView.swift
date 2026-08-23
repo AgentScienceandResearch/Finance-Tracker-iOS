@@ -53,6 +53,16 @@ private enum FinanceTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var localizedName: String {
+        switch self {
+        case .dashboard: return String(localized: "Dashboard")
+        case .expenses:  return String(localized: "Expenses")
+        case .recurring: return String(localized: "Recurring")
+        case .insights:  return String(localized: "Insights")
+        case .settings:  return String(localized: "Settings")
+        }
+    }
+
     var icon: String {
         switch self {
         case .dashboard: return "chart.pie.fill"
@@ -261,7 +271,7 @@ private struct PremiumTabBar: View {
                         Image(systemName: tab.icon)
                             .font(.system(size: 20, weight: selectedTab == tab ? .semibold : .regular))
                             .symbolEffect(.bounce, value: selectedTab == tab)
-                        Text(tab.rawValue)
+                        Text(verbatim: tab.localizedName)
                             .font(.system(size: 10, weight: .semibold))
                     }
                     .foregroundStyle(selectedTab == tab ? FT.green : FT.t3)
@@ -305,14 +315,14 @@ private struct DashboardTabView: View {
 
     private var firstName: String {
         financeManager.currentProfile.displayName
-            .components(separatedBy: .whitespaces).first ?? "there"
+            .components(separatedBy: .whitespaces).first ?? String(localized: "there")
     }
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        if h < 12 { return "Good morning" }
-        if h < 17 { return "Good afternoon" }
-        return "Good evening"
+        if h < 12 { return String(localized: "Good morning") }
+        if h < 17 { return String(localized: "Good afternoon") }
+        return String(localized: "Good evening")
     }
 
     var body: some View {
@@ -482,7 +492,7 @@ private struct HeroBalanceCard: View {
                         HStack(spacing: 3) {
                             Image(systemName: trendUp ? "arrow.up" : "arrow.down")
                                 .font(.system(size: 11, weight: .bold))
-                            Text(String(format: "%.1f%% vs last month", abs(trendPct)))
+                            Text("\(abs(trendPct), format: .number.precision(.fractionLength(1)))% vs last month")
                                 .font(.system(size: 12, weight: .medium))
                         }
                         // spending up = red (over-spending), spending down = green (saving more)
@@ -713,7 +723,7 @@ private struct AnalyticsRow: View {
                     HStack(spacing: 3) {
                         Image(systemName: spendingTrendPct > 0 ? "arrow.up" : "arrow.down")
                             .font(.system(size: 10, weight: .bold))
-                        Text(String(format: "%.1f%% vs last month", abs(spendingTrendPct)))
+                        Text("\(abs(spendingTrendPct), format: .number.precision(.fractionLength(1)))% vs last month")
                             .font(.system(size: 11, weight: .medium))
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
@@ -929,8 +939,8 @@ private struct TransactionRow: View {
 
     private var relativeDate: String {
         let cal = Calendar.current
-        if cal.isDateInToday(expense.date) { return "Today" }
-        if cal.isDateInYesterday(expense.date) { return "Yesterday" }
+        if cal.isDateInToday(expense.date) { return String(localized: "Today") }
+        if cal.isDateInYesterday(expense.date) { return String(localized: "Yesterday") }
         return expense.date.formattedDate
     }
 
@@ -944,7 +954,7 @@ private struct TransactionRow: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(FT.t1)
                 HStack(spacing: 5) {
-                    Text(expense.category.rawValue)
+                    Text(verbatim: expense.category.localizedName)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(FT.t2)
                     Circle()
@@ -981,16 +991,16 @@ private struct AIInsightCard: View {
         let top = financeManager.topCategoriesThisMonth(limit: 1).first
         if let ratio = financeManager.monthlyBudgetUsageRatio {
             if ratio > 0.9 {
-                return "You've used \(Int(ratio * 100))% of your monthly budget. Consider reviewing discretionary spending. 💡"
+                return String(localized: "You've used \(Int(ratio * 100))% of your monthly budget. Consider reviewing discretionary spending. 💡")
             }
             if ratio < 0.5 {
-                return "Great pace — you've only used \(Int(ratio * 100))% of your budget this month. Keep it up! 🎯"
+                return String(localized: "Great pace — you've only used \(Int(ratio * 100))% of your budget this month. Keep it up! 🎯")
             }
         }
         if let cat = top {
-            return "Your top spend this month is \(cat.category.rawValue) at \(CurrencyFormatting.shared.string(for: cat.total)). Want to set a category budget? 💬"
+            return String(localized: "Your top spend this month is \(cat.category.localizedName) at \(CurrencyFormatting.shared.string(for: cat.total)). Want to set a category budget? 💬")
         }
-        return "Ask me anything about your spending, budgets, or savings goals. I'm here to help! ✨"
+        return String(localized: "Ask me anything about your spending, budgets, or savings goals. I'm here to help! ✨")
     }
 
     var body: some View {
@@ -1052,7 +1062,7 @@ private struct SpendingAnalysisCard: View {
 
     private var subtitle: String {
         let count = financeManager.topCategoriesThisMonth(limit: 10).count
-        return count > 0 ? "\(count) categories this month" : "AI-powered breakdown"
+        return count > 0 ? String(localized: "\(count) categories this month") : String(localized: "AI-powered breakdown")
     }
 
     var body: some View {
@@ -1070,7 +1080,7 @@ private struct SpendingAnalysisCard: View {
                     Text("Spending Analysis")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(FT.t1)
-                    Text(subtitle)
+                    Text(verbatim: subtitle)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(FT.t2)
                 }
@@ -1111,7 +1121,7 @@ private struct QuickActionsGrid: View {
 
 private struct DashQuickAction: View {
     let icon: String
-    let title: String
+    let title: LocalizedStringKey
     let color: Color
     let action: () -> Void
 
@@ -1217,10 +1227,10 @@ private struct ExpensesTabView: View {
             // Category filter chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    FilterChip(title: "All", color: FT.green,
+                    FilterChip(title: String(localized: "All"), color: FT.green,
                                isSelected: selectedCategory == nil) { selectedCategory = nil }
                     ForEach(ExpenseCategory.allCases) { cat in
-                        FilterChip(title: cat.rawValue, color: cat.color,
+                        FilterChip(title: cat.localizedName, color: cat.color,
                                    isSelected: selectedCategory == cat) { selectedCategory = cat }
                     }
                 }
@@ -1268,7 +1278,7 @@ private struct FilterChip: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
+            Text(verbatim: title)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(isSelected ? .white : FT.t2)
                 .padding(.horizontal, 14)
@@ -1400,7 +1410,7 @@ private struct RecurringRow: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(FT.t1)
                 HStack(spacing: 5) {
-                    Text(expense.frequency.rawValue)
+                    Text(verbatim: expense.frequency.localizedName)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(FT.t2)
                     Circle().fill(FT.t3).frame(width: 3, height: 3)
@@ -1418,7 +1428,7 @@ private struct RecurringRow: View {
                 Text(CurrencyFormatting.shared.string(for: expense.amount))
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(FT.t1)
-                Text(expense.category.rawValue)
+                Text(verbatim: expense.category.localizedName)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundStyle(expense.category.color)
             }
@@ -1515,7 +1525,7 @@ private struct InsightsTabView: View {
 
                             VStack(spacing: 3) {
                                 if let item = selectedItem {
-                                    Text(item.category.rawValue)
+                                    Text(verbatim: item.category.localizedName)
                                         .font(.system(size: 11, weight: .semibold))
                                         .foregroundStyle(item.category.color)
                                         .multilineTextAlignment(.center)
@@ -1554,7 +1564,7 @@ private struct InsightsTabView: View {
                                         Circle()
                                             .fill(item.category.color)
                                             .frame(width: 9, height: 9)
-                                        Text(item.category.rawValue)
+                                        Text(verbatim: item.category.localizedName)
                                             .font(.system(size: 11, weight: .medium))
                                             .foregroundStyle(FT.t1)
                                             .lineLimit(1)
@@ -1784,7 +1794,7 @@ private struct CategoryInsightCard: View {
                         .foregroundStyle(category.color)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("AI Insight · \(category.rawValue)")
+                    Text("AI Insight · \(category.localizedName)")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(category.color)
                     Text("\(CurrencyFormatting.shared.string(for: amount)) · \(Int(percentage * 100))% of spending")
@@ -1798,7 +1808,7 @@ private struct CategoryInsightCard: View {
                     ProgressView()
                         .scaleEffect(0.75)
                         .tint(category.color)
-                    Text("Analyzing \(category.rawValue) spending…")
+                    Text("Analyzing \(category.localizedName) spending…")
                         .font(.system(size: 13))
                         .foregroundStyle(FT.t2)
                 }
@@ -1830,7 +1840,7 @@ private struct CategoryInsightCard: View {
 }
 
 private struct InsightMetric: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     let color: Color
 
@@ -1881,8 +1891,8 @@ private struct FinanceSettingsTabView: View {
                         PremiumSettingsRowLabel(
                             icon: "crown.fill",
                             color: FT.green,
-                            title: "Subscription Status",
-                            detail: "Checking…",
+                            title: String(localized: "Subscription Status"),
+                            detail: String(localized: "Checking…"),
                             showsChevron: false
                         )
                     } else if subscriptionManager.isSubscribed {
@@ -1890,16 +1900,16 @@ private struct FinanceSettingsTabView: View {
                             PremiumSettingsRowLabel(
                                 icon: "checkmark.seal.fill",
                                 color: FT.green,
-                                title: "Subscription Status",
-                                detail: "Active"
+                                title: String(localized: "Subscription Status"),
+                                detail: String(localized: "Active")
                             )
                         }
                     } else {
                         PremiumSettingsRow(
                             icon: "crown.fill",
                             color: FT.green,
-                            title: "Subscription Status",
-                            detail: "Free plan"
+                            title: String(localized: "Subscription Status"),
+                            detail: String(localized: "Free plan")
                         ) {
                             showSubscriptionPaywall = true
                         }
@@ -1908,13 +1918,13 @@ private struct FinanceSettingsTabView: View {
 
                 SettingsSection(label: "Budget & Categories") {
                     PremiumSettingsRow(icon: "chart.pie.fill", color: FT.green,
-                                       title: "Monthly Budget",
-                                       detail: financeManager.monthlyBudget.map { CurrencyFormatting.shared.string(for: $0) } ?? "Not set") {
+                                       title: String(localized: "Monthly Budget"),
+                                       detail: financeManager.monthlyBudget.map { CurrencyFormatting.shared.string(for: $0) } ?? String(localized: "Not set")) {
                         showBudgetEditor = true
                     }
                     SettingsDivider()
                     PremiumSettingsRow(icon: "tag.fill", color: Color(red: 0.2, green: 0.5, blue: 0.9),
-                                       title: "Categories",
+                                       title: String(localized: "Categories"),
                                        detail: "\(ExpenseCategory.allCases.count)") {
                         showCategories = true
                     }
@@ -1942,11 +1952,11 @@ private struct FinanceSettingsTabView: View {
                               message: Text("Finance Tracker JSON export")) {
                         PremiumSettingsRowLabel(icon: "square.and.arrow.up",
                                                color: Color(red: 0.6, green: 0.2, blue: 0.9),
-                                               title: "Export Data", detail: nil)
+                                               title: String(localized: "Export Data"), detail: nil)
                     }
                     SettingsDivider()
                     PremiumSettingsRow(icon: "trash.fill", color: .red,
-                                       title: "Clear All Data", detail: nil, isDestructive: true) {
+                                       title: String(localized: "Clear All Data"), detail: nil, isDestructive: true) {
                         showDeleteConfirmation = true
                     }
                 }
@@ -1959,24 +1969,24 @@ private struct FinanceSettingsTabView: View {
                     }
                     SettingsDivider()
                     PremiumSettingsRow(icon: "rectangle.portrait.and.arrow.right", color: .red,
-                                       title: "Sign Out", detail: nil, isDestructive: true) {
+                                       title: String(localized: "Sign Out"), detail: nil, isDestructive: true) {
                         showSignOutConfirmation = true
                     }
                 }
 
                 SettingsSection(label: "About") {
                     PremiumSettingsRowLabel(icon: "info.circle.fill", color: FT.t2,
-                                            title: "Version", detail: appVersionString,
+                                            title: String(localized: "Version"), detail: appVersionString,
                                             showsChevron: false)
                     SettingsDivider()
                     Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/issues")!) {
                         PremiumSettingsRowLabel(icon: "questionmark.circle.fill", color: FT.t2,
-                                               title: "Help & Support", detail: nil)
+                                               title: String(localized: "Help & Support"), detail: nil)
                     }
                     SettingsDivider()
                     Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/blob/main/PRIVACY_POLICY.md")!) {
                         PremiumSettingsRowLabel(icon: "hand.raised.fill", color: FT.t2,
-                                               title: "Privacy Policy", detail: nil)
+                                               title: String(localized: "Privacy Policy"), detail: nil)
                     }
                 }
             }
@@ -2013,12 +2023,13 @@ private struct FinanceSettingsTabView: View {
 }
 
 private struct SettingsSection<Content: View>: View {
-    let label: String
+    let label: LocalizedStringKey
     @ViewBuilder let content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(label.uppercased())
+            Text(label)
+                .textCase(.uppercase)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(FT.t3)
                 .padding(.leading, 4)
@@ -2068,18 +2079,18 @@ private struct PremiumSettingsRowLabel: View {
                     .foregroundStyle(isDestructive ? .red : color)
             }
 
-            Text(title)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(isDestructive ? .red : FT.t1)
+            Text(verbatim: title)
+            .font(.system(size: 15, weight: .medium))
+            .foregroundStyle(isDestructive ? .red : FT.t1)
 
             Spacer()
 
             if let detail {
-                Text(detail)
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundStyle(FT.t3)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+                Text(verbatim: detail)
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(FT.t3)
+                .lineLimit(1)
+                .truncationMode(.middle)
             }
 
             if showsChevron {
@@ -2113,7 +2124,7 @@ private struct CategoryOverviewSheet: View {
                             .foregroundStyle(category.color)
                     }
 
-                    Text(category.rawValue)
+                    Text(verbatim: category.localizedName)
                         .font(.system(size: 15, weight: .medium))
 
                     Spacer()
@@ -2143,8 +2154,8 @@ private struct CategoryOverviewSheet: View {
 private struct SettingsToggleRow: View {
     let icon: String
     let color: Color
-    let title: String
-    let detail: String?
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey?
     @Binding var isOn: Bool
 
     var body: some View {
@@ -2190,8 +2201,8 @@ private struct SettingsDivider: View {
 
 private struct PremiumEmptyState: View {
     let icon: String
-    let title: String
-    let message: String
+    let title: LocalizedStringKey
+    let message: LocalizedStringKey
 
     var body: some View {
         VStack(spacing: 12) {
@@ -2239,7 +2250,7 @@ private struct AddExpenseSheet: View {
                     TextField("Title", text: $title)
                     TextField("Amount", text: $amount).keyboardType(.decimalPad)
                     Picker("Category", selection: $category) {
-                        ForEach(ExpenseCategory.allCases) { opt in Text(opt.rawValue).tag(opt) }
+                        ForEach(ExpenseCategory.allCases) { opt in Text(verbatim: opt.localizedName).tag(opt) }
                     }
                     DatePicker("Date", selection: $date, displayedComponents: .date)
                     TextField("Notes", text: $notes, axis: .vertical).lineLimit(2...4)
@@ -2307,10 +2318,10 @@ private struct AddRecurringExpenseSheet: View {
 
                     TextField("Amount", text: $amount).keyboardType(.decimalPad)
                     Picker("Category", selection: $category) {
-                        ForEach(ExpenseCategory.allCases) { opt in Text(opt.rawValue).tag(opt) }
+                        ForEach(ExpenseCategory.allCases) { opt in Text(verbatim: opt.localizedName).tag(opt) }
                     }
                     Picker("Frequency", selection: $frequency) {
-                        ForEach(RecurrenceFrequency.allCases) { opt in Text(opt.rawValue).tag(opt) }
+                        ForEach(RecurrenceFrequency.allCases) { opt in Text(verbatim: opt.localizedName).tag(opt) }
                     }
                     DatePicker("Next Due Date", selection: $nextDueDate, displayedComponents: .date)
                     TextField("Notes", text: $notes, axis: .vertical).lineLimit(2...4)
@@ -2539,7 +2550,7 @@ private struct ScannerDraftRow: View {
                         .foregroundStyle(FT.t1)
                         .lineLimit(1)
                     HStack(spacing: 6) {
-                        Text(item.draft.category.rawValue)
+                        Text(verbatim: item.draft.category.localizedName)
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(item.draft.category.color)
                             .padding(.horizontal, 7)

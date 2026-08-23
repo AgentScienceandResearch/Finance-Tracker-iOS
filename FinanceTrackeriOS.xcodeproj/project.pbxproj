@@ -27,6 +27,7 @@
 		5CA8EDCE055DDDCEB041C0FD /* APIServing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4CD8FA777A6A20D7150FDAF /* APIServing.swift */; };
 		5D73B4222FAED5DD71156585 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1CF324109C7C79368B05CCCC /* FirebaseAnalytics */; };
 		61DA1F39A00026AD57A53E61 /* SubscriptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88B6315141820448B1DA332D /* SubscriptionManagerTests.swift */; };
+		6346730FC58C00A597369EBB /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 18D1CFDAE6841866BC5DE828 /* Localizable.xcstrings */; };
 		65660EA3EF8E0F37996C3FC3 /* AnalyticsProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8901995848E592614B6754 /* AnalyticsProvider.swift */; };
 		7049EF9668E872C14943DC8F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4B88D1194AAABB29D9089FCB /* FirebaseAuth */; };
 		74F5A11D1F05E09725771ABC /* FinanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11536BD245143056CF16EDC0 /* FinanceManager.swift */; };
@@ -87,6 +88,7 @@
 		133AB98515546BCFAB61B22E /* AIChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatMessage.swift; sourceTree = "<group>"; };
 		16092F6CED0B7BDD3163FC19 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		172965080010172944303FC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		18D1CFDAE6841866BC5DE828 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		1A4357B693A9A8D1CFC172C0 /* AIWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWelcomeView.swift; sourceTree = "<group>"; };
 		230F65786883781A66EF931E /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		29EDA968A520A7D7FE07A9D5 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 				29EDA968A520A7D7FE07A9D5 /* App.swift */,
 				D1414BE1DFA4B061D65D6614 /* AppEnvironment.swift */,
 				B1807BA494EAE5290BB8CDD8 /* GoogleService-Info.plist */,
+				18D1CFDAE6841866BC5DE828 /* Localizable.xcstrings */,
 				04A324F0470CD6B71A891F21 /* Config */,
 				13DA7D171C2AF582C1E70D86 /* Design */,
 				A4BE5D8237DC7725D350D0C3 /* Managers */,
@@ -415,7 +418,44 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				"ar-SA",
+				"bn-BD",
+				"de-DE",
 				en,
+				"en-AU",
+				"en-CA",
+				"en-GB",
+				"en-US",
+				"es-MX",
+				"fr-CA",
+				"fr-FR",
+				"gu-IN",
+				he,
+				hi,
+				hr,
+				id,
+				it,
+				ja,
+				"kn-IN",
+				ko,
+				"ml-IN",
+				"mr-IN",
+				ms,
+				nb,
+				"nl-NL",
+				no,
+				"or-IN",
+				"pa-IN",
+				"pt-BR",
+				"ta-IN",
+				"te-IN",
+				th,
+				tr,
+				uk,
+				"ur-PK",
+				vi,
+				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = C3C37817033109C66F8119F1;
 			minimizedProjectReferenceProxies = 1;
@@ -441,6 +481,7 @@
 				AB71253BC13553E893F01B87 /* .env.example in Resources */,
 				25747DD09E22D7F28C6F9A4B /* Assets.xcassets in Resources */,
 				76BC09EAED87737333A47735 /* GoogleService-Info.plist in Resources */,
+				6346730FC58C00A597369EBB /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,7 +637,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -617,6 +658,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.1;
 			};
@@ -709,7 +751,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -736,6 +778,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.1;
 			};
@@ -795,7 +838,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -816,6 +859,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.1;
 			};

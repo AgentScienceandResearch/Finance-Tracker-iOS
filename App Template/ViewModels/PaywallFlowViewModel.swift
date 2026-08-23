@@ -46,7 +46,7 @@ final class PaywallFlowViewModel: ObservableObject {
         let success = await subscriptionManager.purchase(planID: selectedPlanID)
         syncFromManager()
         if !success {
-            statusMessage = loadError ?? "Purchase could not be completed."
+            statusMessage = loadError ?? String(localized: "Purchase could not be completed.")
         } else {
             statusMessage = nil
         }

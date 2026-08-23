@@ -226,7 +226,7 @@ struct AuthenticationView: View {
 // MARK: - Auth Field
 
 private struct AuthField<Field: View>: View {
-    let label: String
+    let label: LocalizedStringKey
     let icon: String
     @Binding var text: String
     @ViewBuilder let field: Field

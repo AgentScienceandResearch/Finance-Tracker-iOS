@@ -207,7 +207,7 @@ final class OpenAIService: OpenAIServing {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
-            let message = parseErrorMessage(from: data) ?? "Server AI request failed with status \(httpResponse.statusCode)."
+            let message = parseErrorMessage(from: data) ?? String(localized: "Server AI request failed with status \(httpResponse.statusCode).")
             logger.error("Server AI request failed: \(message)", category: "openai")
             throw OpenAIServiceError.requestFailed(message)
         }
@@ -307,13 +307,13 @@ enum OpenAIServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidRequest:
-            return "Unable to prepare the AI request."
+            return String(localized: "Unable to prepare the AI request.")
         case .invalidResponse:
-            return "Received an invalid response from the finance server."
+            return String(localized: "Received an invalid response from the finance server.")
         case .requestFailed(let message):
             return message
         case .invalidStructuredResponse:
-            return "AI response could not be decoded."
+            return String(localized: "AI response could not be decoded.")
         }
     }
 }
