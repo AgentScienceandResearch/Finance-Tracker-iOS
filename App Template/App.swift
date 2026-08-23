@@ -1,6 +1,116 @@
 import SwiftUI
 import UIKit
 
+enum AppLanguage {
+    static let storageKey = "app.displayLanguage"
+    static let systemDefaultIdentifier = ""
+
+    /// These identifiers mirror the 36 Localizable.strings folders emitted by
+    /// the string catalog. Norwegian is emitted by Xcode as `nb.lproj`.
+    static let supportedIdentifiers = [
+        "ar-SA", "bn-BD", "de-DE", "en-AU", "en-CA", "en-GB", "en-US",
+        "es-MX", "fr-CA", "fr-FR", "gu-IN", "he", "hi", "hr", "id", "it",
+        "ja", "kn-IN", "ko", "ml-IN", "mr-IN", "ms", "nb", "nl-NL",
+        "or-IN", "pa-IN", "pt-BR", "ta-IN", "te-IN", "th", "tr", "uk",
+        "ur-PK", "vi", "zh-Hans", "zh-Hant"
+    ]
+
+    static func persistedIdentifier(defaults: UserDefaults = .standard) -> String {
+        sanitized(defaults.string(forKey: storageKey) ?? systemDefaultIdentifier)
+    }
+
+    static func persist(_ identifier: String, defaults: UserDefaults = .standard) {
+        let identifier = sanitized(identifier)
+        if identifier == systemDefaultIdentifier {
+            defaults.removeObject(forKey: storageKey)
+        } else {
+            defaults.set(identifier, forKey: storageKey)
+        }
+    }
+
+    static func locale(for identifier: String) -> Locale {
+        let identifier = sanitized(identifier)
+        return identifier.isEmpty ? .autoupdatingCurrent : Locale(identifier: identifier)
+    }
+
+    static var currentLocale: Locale {
+        locale(for: persistedIdentifier())
+    }
+
+    static var requestIdentifier: String {
+        currentLocale.identifier
+    }
+
+    static var responseLanguageName: String {
+        let locale = currentLocale
+        return locale.localizedString(forIdentifier: locale.identifier) ?? locale.identifier
+    }
+
+    static func localized(_ key: String.LocalizationValue) -> String {
+        String(localized: key, bundle: localizationBundle, locale: currentLocale)
+    }
+
+    static func nativeDisplayName(for identifier: String) -> String {
+        guard !identifier.isEmpty else {
+            let systemLocale = Locale.autoupdatingCurrent
+            let systemName = systemLocale.localizedString(forIdentifier: systemLocale.identifier)
+                ?? systemLocale.identifier
+            return "System Default — \(systemName)"
+        }
+
+        let locale = Locale(identifier: identifier)
+        return locale.localizedString(forIdentifier: identifier) ?? identifier
+    }
+
+    static func isRightToLeft(_ identifier: String) -> Bool {
+        Locale.Language(identifier: locale(for: identifier).identifier).characterDirection == .rightToLeft
+    }
+
+    private static func sanitized(_ identifier: String) -> String {
+        supportedIdentifiers.contains(identifier) ? identifier : systemDefaultIdentifier
+    }
+
+    private static var localizationBundle: Bundle {
+        let identifier = persistedIdentifier()
+        guard !identifier.isEmpty,
+              let path = Bundle.main.path(forResource: identifier, ofType: "lproj"),
+              let bundle = Bundle(path: path) else {
+            return .main
+        }
+        return bundle
+    }
+}
+
+@MainActor
+final class AppLanguageController: ObservableObject {
+    static let shared = AppLanguageController()
+
+    @Published private(set) var selectedIdentifier: String
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        selectedIdentifier = AppLanguage.persistedIdentifier(defaults: defaults)
+    }
+
+    var locale: Locale {
+        AppLanguage.locale(for: selectedIdentifier)
+    }
+
+    var layoutDirection: LayoutDirection {
+        AppLanguage.isRightToLeft(selectedIdentifier) ? .rightToLeft : .leftToRight
+    }
+
+    var selectedDisplayName: String {
+        AppLanguage.nativeDisplayName(for: selectedIdentifier)
+    }
+
+    func select(_ identifier: String) {
+        AppLanguage.persist(identifier, defaults: defaults)
+        selectedIdentifier = AppLanguage.persistedIdentifier(defaults: defaults)
+    }
+}
+
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(
         _ application: UIApplication,
@@ -14,6 +124,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct TemplateApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject private var languageController = AppLanguageController.shared
     @StateObject private var environment = AppEnvironment()
     @State private var showSplash = true
     @State private var showPaywall = false
@@ -43,6 +154,9 @@ struct TemplateApp: App {
             }
             .animation(.easeInOut(duration: 0.4), value: showSplash)
             .animation(.easeInOut(duration: 0.35), value: environment.authManager.isAuthenticated)
+            .environmentObject(languageController)
+            .environment(\.locale, languageController.locale)
+            .environment(\.layoutDirection, languageController.layoutDirection)
             .fullScreenCover(isPresented: $showPaywall) {
                 PaywallView(
                     subscriptionManager: environment.subscriptionManager,
@@ -55,6 +169,9 @@ struct TemplateApp: App {
             }
             .onChange(of: environment.subscriptionManager.isSubscribed) { _, isSubscribed in
                 if isSubscribed { showPaywall = false }
+            }
+            .onChange(of: languageController.selectedIdentifier) { _, _ in
+                environment.financeAIManager.refreshLocalizedWelcomeIfIdle()
             }
             .task {
                 if environment.authManager.isAuthenticated { evaluatePaywall() }

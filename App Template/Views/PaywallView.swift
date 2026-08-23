@@ -54,18 +54,18 @@ struct PaywallView: View {
             case .yearlyHard:
                 hardPaywall(
                     plan: yearlyPlan,
-                    headline: String(localized: "Your free period has ended"),
-                    subhead: String(localized: "Subscribe to keep your finances on track."),
+                    headline: AppLanguage.localized("Your free period has ended"),
+                    subhead: AppLanguage.localized("Subscribe to keep your finances on track."),
                     ctaLabel: trialCTALabel(for: yearlyPlan),
-                    notNowLabel: String(localized: "See monthly plan"),
+                    notNowLabel: AppLanguage.localized("See monthly plan"),
                     onNotNow: { activeMode = .monthlyHard }
                 )
             case .monthlyHard:
                 hardPaywall(
                     plan: monthlyPlan,
-                    headline: String(localized: "Continue with Finance Tracker AI"),
-                    subhead: String(localized: "Subscribe monthly to keep tracking."),
-                    ctaLabel: String(localized: "Subscribe Monthly"),
+                    headline: AppLanguage.localized("Continue with Finance Tracker AI"),
+                    subhead: AppLanguage.localized("Subscribe monthly to keep tracking."),
+                    ctaLabel: AppLanguage.localized("Subscribe Monthly"),
                     notNowLabel: nil,
                     onNotNow: nil
                 )
@@ -100,9 +100,9 @@ struct PaywallView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 0) {
                 logoHeader(
-                    badge: String(localized: "7 DAYS FREE"),
-                    headline: String(localized: "Try Finance Tracker AI free"),
-                    subhead: String(localized: "Every feature, zero charge until your trial ends.")
+                    badge: AppLanguage.localized("7 DAYS FREE"),
+                    headline: AppLanguage.localized("Try Finance Tracker AI free"),
+                    subhead: AppLanguage.localized("Every feature, zero charge until your trial ends.")
                 )
 
                 planCard(plan: yearlyPlan, isSelected: true)
@@ -149,8 +149,8 @@ struct PaywallView: View {
             VStack(spacing: 0) {
                 logoHeader(
                     badge: nil,
-                    headline: String(localized: "Monthly plan"),
-                    subhead: String(localized: "Full access, billed each month.")
+                    headline: AppLanguage.localized("Monthly plan"),
+                    subhead: AppLanguage.localized("Full access, billed each month.")
                 )
 
                 planCard(plan: monthlyPlan, isSelected: true)
@@ -158,7 +158,7 @@ struct PaywallView: View {
                     .padding(.bottom, 20)
 
                 ctaButton(
-                    label: String(localized: "Subscribe Monthly"),
+                    label: AppLanguage.localized("Subscribe Monthly"),
                     isLoading: flow.isPurchasing,
                     action: { Task { _ = await flow.purchaseSelectedPlan(monthlyPlan) } }
                 )
@@ -295,7 +295,7 @@ struct PaywallView: View {
                             .foregroundStyle(PW.t1)
 
                         if let trial = plan.trialDuration {
-                            badge(text: String(localized: "\(trial) free"), color: PW.green)
+                            badge(text: AppLanguage.localized("\(trial) free"), color: PW.green)
                         }
                         if let savings = plan.savingsLabel {
                             badge(text: savings, color: Color(red: 0.2, green: 0.5, blue: 0.9))
@@ -366,9 +366,9 @@ struct PaywallView: View {
             if let plan {
                 let note: String = {
                     if let trial = plan.trialDuration {
-                        return String(localized: "Free for \(trial), then \(plan.displayPrice)/\(plan.billingPeriod). Cancel anytime.")
+                        return AppLanguage.localized("Free for \(trial), then \(plan.displayPrice)/\(plan.billingPeriod). Cancel anytime.")
                     }
-                    return String(localized: "\(plan.displayPrice)/\(plan.billingPeriod). Cancel anytime.")
+                    return AppLanguage.localized("\(plan.displayPrice)/\(plan.billingPeriod). Cancel anytime.")
                 }()
                 Text(verbatim: note)
                     .font(.system(size: 12))
@@ -446,7 +446,7 @@ struct PaywallView: View {
                 Image(systemName: "exclamationmark.circle")
                     .font(.system(size: 28))
                     .foregroundStyle(PW.t3)
-                Text(verbatim: flow.loadError ?? String(localized: "Couldn't load plans. Please try again."))
+                Text(verbatim: flow.loadError ?? AppLanguage.localized("Couldn't load plans. Please try again."))
                     .font(.system(size: 14))
                     .foregroundStyle(PW.t2)
                     .multilineTextAlignment(.center)
@@ -467,8 +467,8 @@ struct PaywallView: View {
     }
 
     private func trialCTALabel(for plan: SubscriptionPlan?) -> String {
-        if let trial = plan?.trialDuration { return String(localized: "Start Free Trial — \(trial) free") }
-        return String(localized: "Subscribe Now")
+        if let trial = plan?.trialDuration { return AppLanguage.localized("Start Free Trial — \(trial) free") }
+        return AppLanguage.localized("Subscribe Now")
     }
 }
 

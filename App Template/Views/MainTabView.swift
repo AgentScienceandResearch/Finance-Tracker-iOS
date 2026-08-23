@@ -55,11 +55,11 @@ private enum FinanceTab: String, CaseIterable, Identifiable {
 
     var localizedName: String {
         switch self {
-        case .dashboard: return String(localized: "Dashboard")
-        case .expenses:  return String(localized: "Expenses")
-        case .recurring: return String(localized: "Recurring")
-        case .insights:  return String(localized: "Insights")
-        case .settings:  return String(localized: "Settings")
+        case .dashboard: return AppLanguage.localized("Dashboard")
+        case .expenses:  return AppLanguage.localized("Expenses")
+        case .recurring: return AppLanguage.localized("Recurring")
+        case .insights:  return AppLanguage.localized("Insights")
+        case .settings:  return AppLanguage.localized("Settings")
         }
     }
 
@@ -315,14 +315,14 @@ private struct DashboardTabView: View {
 
     private var firstName: String {
         financeManager.currentProfile.displayName
-            .components(separatedBy: .whitespaces).first ?? String(localized: "there")
+            .components(separatedBy: .whitespaces).first ?? AppLanguage.localized("there")
     }
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        if h < 12 { return String(localized: "Good morning") }
-        if h < 17 { return String(localized: "Good afternoon") }
-        return String(localized: "Good evening")
+        if h < 12 { return AppLanguage.localized("Good morning") }
+        if h < 17 { return AppLanguage.localized("Good afternoon") }
+        return AppLanguage.localized("Good evening")
     }
 
     var body: some View {
@@ -939,8 +939,8 @@ private struct TransactionRow: View {
 
     private var relativeDate: String {
         let cal = Calendar.current
-        if cal.isDateInToday(expense.date) { return String(localized: "Today") }
-        if cal.isDateInYesterday(expense.date) { return String(localized: "Yesterday") }
+        if cal.isDateInToday(expense.date) { return AppLanguage.localized("Today") }
+        if cal.isDateInYesterday(expense.date) { return AppLanguage.localized("Yesterday") }
         return expense.date.formattedDate
     }
 
@@ -991,16 +991,16 @@ private struct AIInsightCard: View {
         let top = financeManager.topCategoriesThisMonth(limit: 1).first
         if let ratio = financeManager.monthlyBudgetUsageRatio {
             if ratio > 0.9 {
-                return String(localized: "You've used \(Int(ratio * 100))% of your monthly budget. Consider reviewing discretionary spending. 💡")
+                return AppLanguage.localized("You've used \(Int(ratio * 100))% of your monthly budget. Consider reviewing discretionary spending. 💡")
             }
             if ratio < 0.5 {
-                return String(localized: "Great pace — you've only used \(Int(ratio * 100))% of your budget this month. Keep it up! 🎯")
+                return AppLanguage.localized("Great pace — you've only used \(Int(ratio * 100))% of your budget this month. Keep it up! 🎯")
             }
         }
         if let cat = top {
-            return String(localized: "Your top spend this month is \(cat.category.localizedName) at \(CurrencyFormatting.shared.string(for: cat.total)). Want to set a category budget? 💬")
+            return AppLanguage.localized("Your top spend this month is \(cat.category.localizedName) at \(CurrencyFormatting.shared.string(for: cat.total)). Want to set a category budget? 💬")
         }
-        return String(localized: "Ask me anything about your spending, budgets, or savings goals. I'm here to help! ✨")
+        return AppLanguage.localized("Ask me anything about your spending, budgets, or savings goals. I'm here to help! ✨")
     }
 
     var body: some View {
@@ -1062,7 +1062,7 @@ private struct SpendingAnalysisCard: View {
 
     private var subtitle: String {
         let count = financeManager.topCategoriesThisMonth(limit: 10).count
-        return count > 0 ? String(localized: "\(count) categories this month") : String(localized: "AI-powered breakdown")
+        return count > 0 ? AppLanguage.localized("\(count) categories this month") : AppLanguage.localized("AI-powered breakdown")
     }
 
     var body: some View {
@@ -1227,7 +1227,7 @@ private struct ExpensesTabView: View {
             // Category filter chips
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    FilterChip(title: String(localized: "All"), color: FT.green,
+                    FilterChip(title: AppLanguage.localized("All"), color: FT.green,
                                isSelected: selectedCategory == nil) { selectedCategory = nil }
                     ForEach(ExpenseCategory.allCases) { cat in
                         FilterChip(title: cat.localizedName, color: cat.color,
@@ -1866,6 +1866,7 @@ private struct FinanceSettingsTabView: View {
     @ObservedObject private var billReminders = BillReminderManager.shared
     @EnvironmentObject private var authManager: AuthenticationManager
     @EnvironmentObject private var subscriptionManager: SubscriptionManager
+    @EnvironmentObject private var languageController: AppLanguageController
 
     @State private var showDeleteConfirmation = false
     @State private var showSignOutConfirmation = false
@@ -1886,13 +1887,39 @@ private struct FinanceSettingsTabView: View {
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(FT.t3)
 
+                SettingsSection(label: "Settings") {
+                    Picker(
+                        selection: Binding(
+                            get: { languageController.selectedIdentifier },
+                            set: { languageController.select($0) }
+                        )
+                    ) {
+                        Text(verbatim: AppLanguage.nativeDisplayName(for: AppLanguage.systemDefaultIdentifier))
+                            .tag(AppLanguage.systemDefaultIdentifier)
+                        ForEach(AppLanguage.supportedIdentifiers, id: \.self) { identifier in
+                            Text(verbatim: AppLanguage.nativeDisplayName(for: identifier))
+                                .tag(identifier)
+                        }
+                    } label: {
+                        PremiumSettingsRowLabel(
+                            icon: "globe",
+                            color: Color(red: 0.2, green: 0.5, blue: 0.9),
+                            title: languageController.selectedDisplayName,
+                            detail: nil
+                        )
+                    }
+                    .pickerStyle(.menu)
+                    .tint(FT.t1)
+                    .accessibilityLabel("Language")
+                }
+
                 SettingsSection(label: "Subscription") {
                     if !subscriptionManager.subscriptionStatusLoaded {
                         PremiumSettingsRowLabel(
                             icon: "crown.fill",
                             color: FT.green,
-                            title: String(localized: "Subscription Status"),
-                            detail: String(localized: "Checking…"),
+                            title: AppLanguage.localized("Subscription Status"),
+                            detail: AppLanguage.localized("Checking…"),
                             showsChevron: false
                         )
                     } else if subscriptionManager.isSubscribed {
@@ -1900,16 +1927,16 @@ private struct FinanceSettingsTabView: View {
                             PremiumSettingsRowLabel(
                                 icon: "checkmark.seal.fill",
                                 color: FT.green,
-                                title: String(localized: "Subscription Status"),
-                                detail: String(localized: "Active")
+                                title: AppLanguage.localized("Subscription Status"),
+                                detail: AppLanguage.localized("Active")
                             )
                         }
                     } else {
                         PremiumSettingsRow(
                             icon: "crown.fill",
                             color: FT.green,
-                            title: String(localized: "Subscription Status"),
-                            detail: String(localized: "Free plan")
+                            title: AppLanguage.localized("Subscription Status"),
+                            detail: AppLanguage.localized("Free plan")
                         ) {
                             showSubscriptionPaywall = true
                         }
@@ -1918,13 +1945,13 @@ private struct FinanceSettingsTabView: View {
 
                 SettingsSection(label: "Budget & Categories") {
                     PremiumSettingsRow(icon: "chart.pie.fill", color: FT.green,
-                                       title: String(localized: "Monthly Budget"),
-                                       detail: financeManager.monthlyBudget.map { CurrencyFormatting.shared.string(for: $0) } ?? String(localized: "Not set")) {
+                                       title: AppLanguage.localized("Monthly Budget"),
+                                       detail: financeManager.monthlyBudget.map { CurrencyFormatting.shared.string(for: $0) } ?? AppLanguage.localized("Not set")) {
                         showBudgetEditor = true
                     }
                     SettingsDivider()
                     PremiumSettingsRow(icon: "tag.fill", color: Color(red: 0.2, green: 0.5, blue: 0.9),
-                                       title: String(localized: "Categories"),
+                                       title: AppLanguage.localized("Categories"),
                                        detail: "\(ExpenseCategory.allCases.count)") {
                         showCategories = true
                     }
@@ -1952,11 +1979,11 @@ private struct FinanceSettingsTabView: View {
                               message: Text("Finance Tracker JSON export")) {
                         PremiumSettingsRowLabel(icon: "square.and.arrow.up",
                                                color: Color(red: 0.6, green: 0.2, blue: 0.9),
-                                               title: String(localized: "Export Data"), detail: nil)
+                                               title: AppLanguage.localized("Export Data"), detail: nil)
                     }
                     SettingsDivider()
                     PremiumSettingsRow(icon: "trash.fill", color: .red,
-                                       title: String(localized: "Clear All Data"), detail: nil, isDestructive: true) {
+                                       title: AppLanguage.localized("Clear All Data"), detail: nil, isDestructive: true) {
                         showDeleteConfirmation = true
                     }
                 }
@@ -1969,24 +1996,24 @@ private struct FinanceSettingsTabView: View {
                     }
                     SettingsDivider()
                     PremiumSettingsRow(icon: "rectangle.portrait.and.arrow.right", color: .red,
-                                       title: String(localized: "Sign Out"), detail: nil, isDestructive: true) {
+                                       title: AppLanguage.localized("Sign Out"), detail: nil, isDestructive: true) {
                         showSignOutConfirmation = true
                     }
                 }
 
                 SettingsSection(label: "About") {
                     PremiumSettingsRowLabel(icon: "info.circle.fill", color: FT.t2,
-                                            title: String(localized: "Version"), detail: appVersionString,
+                                            title: AppLanguage.localized("Version"), detail: appVersionString,
                                             showsChevron: false)
                     SettingsDivider()
                     Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/issues")!) {
                         PremiumSettingsRowLabel(icon: "questionmark.circle.fill", color: FT.t2,
-                                               title: String(localized: "Help & Support"), detail: nil)
+                                               title: AppLanguage.localized("Help & Support"), detail: nil)
                     }
                     SettingsDivider()
                     Link(destination: URL(string: "https://github.com/AgentScienceandResearch/Finance-Tracker-iOS/blob/main/PRIVACY_POLICY.md")!) {
                         PremiumSettingsRowLabel(icon: "hand.raised.fill", color: FT.t2,
-                                               title: String(localized: "Privacy Policy"), detail: nil)
+                                               title: AppLanguage.localized("Privacy Policy"), detail: nil)
                     }
                 }
             }

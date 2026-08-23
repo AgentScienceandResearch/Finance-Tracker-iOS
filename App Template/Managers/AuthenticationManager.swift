@@ -306,13 +306,13 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
     private func firebaseAuthErrorMessage(_ error: Error) -> String {
 #if canImport(FirebaseAuth)
         switch (error as NSError).code {
-        case AuthErrorCode.wrongPassword.rawValue:        return String(localized: "Incorrect password.")
-        case AuthErrorCode.invalidEmail.rawValue:         return String(localized: "Invalid email address.")
-        case AuthErrorCode.userNotFound.rawValue:         return String(localized: "No account found. Try signing up.")
-        case AuthErrorCode.emailAlreadyInUse.rawValue:    return String(localized: "Email already in use. Try signing in.")
-        case AuthErrorCode.weakPassword.rawValue:         return String(localized: "Password is too weak.")
-        case AuthErrorCode.networkError.rawValue:         return String(localized: "Network error. Check your connection.")
-        default:                                          return String(localized: "Authentication failed. Please try again.")
+        case AuthErrorCode.wrongPassword.rawValue:        return AppLanguage.localized("Incorrect password.")
+        case AuthErrorCode.invalidEmail.rawValue:         return AppLanguage.localized("Invalid email address.")
+        case AuthErrorCode.userNotFound.rawValue:         return AppLanguage.localized("No account found. Try signing up.")
+        case AuthErrorCode.emailAlreadyInUse.rawValue:    return AppLanguage.localized("Email already in use. Try signing in.")
+        case AuthErrorCode.weakPassword.rawValue:         return AppLanguage.localized("Password is too weak.")
+        case AuthErrorCode.networkError.rawValue:         return AppLanguage.localized("Network error. Check your connection.")
+        default:                                          return AppLanguage.localized("Authentication failed. Please try again.")
         }
 #else
         return error.localizedDescription

@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "locales": {
+    "ar-SA": {
+      "description": "يساعدك Finance Tracker AI على إدارة أموالك اليومية بوضوح. تتبّع الدخل والمصروفات، ونظّم الفواتير والاشتراكات المتكررة، وامسح الإيصالات ضوئيًا، وافهم إنفاقك من خلال مخططات واضحة. اطلب من المساعد المالي الذكي اقتراح معاملات أو ميزانيات أو تغييرات في الدفعات المتكررة، ثم راجع كل تغيير قبل تطبيقه.\n\nتحافظ مساحة التخزين السحابية الخاصة بكل مستخدم على مزامنة معلوماتك بين الجلسات.واجهة التطبيق مترجمة إلى هذه اللغة.\n\nشروط الاستخدام: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nسياسة الخصوصية: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "تتبّع الإنفاق، وامسح الإيصالات، واطلب من Finance AI اقتراح تغييرات في الميزانية أو المعاملات؛ لن يُطبّق شيء قبل موافقتك.",
+      "whatsNew": "يضيف هذا التحديث معلومات مترجمة في App Store وتغطية بحث أوسع، إلى جانب تحسينات في الموثوقية والمزامنة السحابية وطلبات الذكاء الاصطناعي."
+    },
+    "bn-BD": {
+      "description": "Finance Tracker AI দৈনন্দিন অর্থ পরিষ্কারভাবে পরিচালনা করতে সাহায্য করে। আয় ও ব্যয় ট্র্যাক করুন, নিয়মিত বিল ও সাবস্ক্রিপশন পরিচালনা করুন, রসিদ স্ক্যান করুন এবং সহজ চার্টে খরচ বুঝুন। আর্থিক AI-কে লেনদেন, বাজেট বা নিয়মিত পেমেন্টের পরিবর্তন প্রস্তাব করতে বলুন, তারপর প্রয়োগের আগে প্রতিটি পরিবর্তন পর্যালোচনা করুন।\n\nব্যবহারকারীভিত্তিক ক্লাউড স্টোরেজ আপনার তথ্য বিভিন্ন সেশনে সিঙ্ক রাখে।অ্যাপের ইন্টারফেস এই ভাষায় স্থানীয়করণ করা হয়েছে।\n\nব্যবহারের শর্ত: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nগোপনীয়তা নীতি: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "খরচ ট্র্যাক করুন, রসিদ স্ক্যান করুন এবং Finance AI-কে বাজেট বা লেনদেনের পরিবর্তন প্রস্তাব করতে বলুন—অনুমোদনের আগে কিছুই প্রয়োগ হয় না।",
+      "whatsNew": "এই আপডেটে স্থানীয়কৃত App Store তথ্য, আরও বিস্তৃত সার্চ কভারেজ এবং নির্ভরযোগ্যতা, ক্লাউড সিঙ্ক ও AI অনুরোধের উন্নতি যোগ হয়েছে।"
+    },
+    "zh-Hans": {
+      "description": "Finance Tracker AI 帮助你清晰管理日常财务。记录收入与支出，管理周期性账单和订阅，扫描收据，并通过直观图表了解消费情况。你可以让财务 AI 提议新增或调整交易、预算和周期性付款，并在应用任何变更前逐项审核。\n\n按用户隔离的云端存储可让信息在不同使用会话之间保持同步。应用界面已提供本语言版本。\n\n使用条款：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\n隐私政策：https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "记录消费、扫描收据，并让 Finance AI 提议预算或交易变更；只有在你批准后才会应用。",
+      "whatsNew": "本次更新新增本地化的 App Store 信息与更广泛的搜索覆盖，并改进了可靠性、云同步和 AI 请求处理。"
+    },
+    "zh-Hant": {
+      "description": "Finance Tracker AI 協助你清楚管理日常財務。記錄收入與支出，管理週期性帳單和訂閱，掃描收據，並透過直觀圖表了解消費情況。你可以讓財務 AI 提議新增或調整交易、預算和週期性付款，並在套用任何變更前逐項審核。\n\n按使用者隔離的雲端儲存可讓資訊在不同使用階段保持同步。應用程式介面已提供本語言版本。\n\n使用條款：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\n隱私權政策：https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "記錄消費、掃描收據，並讓 Finance AI 提議預算或交易變更；只有在你核准後才會套用。",
+      "whatsNew": "此更新加入本地化的 App Store 資訊與更廣泛的搜尋涵蓋範圍，並改善可靠性、雲端同步與 AI 要求處理。"
+    },
+    "hr": {
+      "description": "Finance Tracker AI pomaže vam jasno upravljati svakodnevnim financijama. Pratite prihode i troškove, upravljajte ponavljajućim računima i pretplatama, skenirajte račune te analizirajte potrošnju pomoću preglednih grafikona. Zatražite od financijskog AI-ja prijedloge transakcija, proračuna ili promjena ponavljajućih plaćanja, a zatim pregledajte svaku promjenu prije primjene.\n\nKorisnički odvojena pohrana u oblaku održava vaše podatke sinkroniziranima između sesija.Sučelje aplikacije lokalizirano je na ovaj jezik.\n\nUvjeti korištenja: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPravila privatnosti: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Pratite potrošnju, skenirajte račune i zatražite od Finance AI-ja prijedloge promjena — ništa se ne primjenjuje bez vašeg odobrenja.",
+      "whatsNew": "Ažuriranje donosi lokalizirane podatke u App Storeu i širu pokrivenost pretraživanja te poboljšanja pouzdanosti, sinkronizacije i AI zahtjeva."
+    },
+    "nl-NL": {
+      "description": "Finance Tracker AI helpt je dagelijkse financiën overzichtelijk te beheren. Houd inkomsten en uitgaven bij, beheer terugkerende rekeningen en abonnementen, scan bonnetjes en begrijp je uitgaven met duidelijke grafieken. Vraag de financiële AI om transacties, budgetten of wijzigingen in terugkerende betalingen voor te stellen en controleer elke wijziging voordat deze wordt toegepast.\n\nGebruikersgebonden cloudopslag houdt je gegevens tussen sessies gesynchroniseerd.De app-interface is in deze taal gelokaliseerd.\n\nGebruiksvoorwaarden: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPrivacybeleid: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Volg uitgaven, scan bonnetjes en laat Finance AI budget- of transactiewijzigingen voorstellen; niets gebeurt zonder je goedkeuring.",
+      "whatsNew": "Deze update voegt gelokaliseerde App Store-informatie en een groter zoekbereik toe, plus verbeteringen in betrouwbaarheid, cloudsynchronisatie en AI-verzoeken."
+    },
+    "en-AU": {
+      "description": "Finance Tracker AI helps you stay in control of everyday money. Track income and expenses, manage recurring bills and subscriptions, scan receipts and understand spending with clear charts. Ask the financial AI to propose transaction, budget or recurring-payment updates, then review every change before it is applied.\n\nUser-scoped cloud storage keeps your information synced across sessions.The app interface is localized for this language.\n\nTerms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPrivacy Policy: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Track spending, scan receipts and ask Finance AI to propose budget or transaction changes—nothing is applied until you approve it.",
+      "whatsNew": "This update adds more App Store localisations and broader search coverage, plus reliability, cloud sync and AI request improvements."
+    },
+    "en-CA": {
+      "description": "Finance Tracker AI helps you stay in control of everyday money. Track income and expenses, manage recurring bills and subscriptions, scan receipts and understand spending with clear charts. Ask the financial AI to propose transaction, budget or recurring-payment updates, then review every change before it is applied.\n\nUser-scoped cloud storage keeps your information synced across sessions.The app interface is localized for this language.\n\nTerms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPrivacy Policy: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Track spending, scan receipts and ask Finance AI to propose budget or transaction changes—nothing is applied until you approve it.",
+      "whatsNew": "This update adds more App Store localizations and broader search coverage, plus reliability, cloud sync and AI request improvements."
+    },
+    "en-GB": {
+      "description": "Finance Tracker AI helps you stay in control of everyday money. Track income and expenses, manage recurring bills and subscriptions, scan receipts and understand spending with clear charts. Ask the financial AI to propose transaction, budget or recurring-payment updates, then review every change before it is applied.\n\nUser-scoped cloud storage keeps your information synced across sessions.The app interface is localized for this language.\n\nTerms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPrivacy Policy: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Track spending, scan receipts and ask Finance AI to propose budget or transaction changes—nothing is applied until you approve it.",
+      "whatsNew": "This update adds more App Store localisations and broader search coverage, plus reliability, cloud sync and AI request improvements."
+    },
+    "en-US": {
+      "description": "Finance Tracker AI helps you stay in control of everyday money. Track income and expenses, manage recurring bills and subscriptions, scan receipts and understand spending with clear charts. Ask the financial AI to propose transaction, budget or recurring-payment updates, then review every change before it is applied.\n\nUser-scoped cloud storage keeps your information synced across sessions.The app interface is localized for this language.\n\nTerms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPrivacy Policy: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Track spending, scan receipts and ask Finance AI to propose budget or transaction changes—nothing is applied until you approve it.",
+      "whatsNew": "This update adds more App Store localizations and broader search coverage, plus reliability, cloud sync and AI request improvements."
+    },
+    "fr-FR": {
+      "description": "Finance Tracker AI vous aide à gérer clairement vos finances quotidiennes. Suivez revenus et dépenses, gérez les factures récurrentes et les abonnements, numérisez vos reçus et analysez vos dépenses grâce à des graphiques lisibles. Demandez à l’IA financière de proposer des opérations, des budgets ou des changements de paiements récurrents, puis vérifiez chaque modification avant son application.\n\nLe stockage infonuagique propre à chaque utilisateur synchronise vos informations entre les sessions.L’interface de l’application est localisée dans cette langue.\n\nConditions d’utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPolitique de confidentialité : https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Suivez vos dépenses, numérisez vos reçus et laissez Finance AI proposer des changements; rien n’est appliqué sans votre approbation.",
+      "whatsNew": "Cette mise à jour ajoute des informations App Store localisées et une recherche élargie, ainsi que des améliorations de fiabilité, de synchronisation et des requêtes IA."
+    },
+    "fr-CA": {
+      "description": "Finance Tracker AI vous aide à gérer clairement vos finances quotidiennes. Faites le suivi des revenus et dépenses, gérez les factures récurrentes et les abonnements, numérisez vos reçus et analysez vos dépenses à l’aide de graphiques clairs. Demandez à l’IA financière de proposer des opérations, des budgets ou des changements de paiements récurrents, puis vérifiez chaque modification avant son application.\n\nLe stockage infonuagique propre à chaque utilisateur synchronise vos renseignements entre les sessions.L’interface de l’application est localisée dans cette langue.\n\nConditions d’utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPolitique de confidentialité : https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Suivez vos dépenses, numérisez vos reçus et laissez Finance AI proposer des changements; rien n’est appliqué sans votre approbation.",
+      "whatsNew": "Cette mise à jour ajoute des renseignements App Store localisés et une recherche élargie, ainsi que des améliorations de fiabilité, de synchronisation et des requêtes IA."
+    },
+    "de-DE": {
+      "description": "Finance Tracker AI hilft dir, deine täglichen Finanzen übersichtlich zu verwalten. Erfasse Einnahmen und Ausgaben, verwalte wiederkehrende Rechnungen und Abos, scanne Belege und analysiere deine Ausgaben mit klaren Diagrammen. Bitte die Finanz-KI um Vorschläge für Transaktionen, Budgets oder wiederkehrende Zahlungen und prüfe jede Änderung, bevor sie übernommen wird.\n\nNutzerbezogener Cloudspeicher hält deine Daten über Sitzungen hinweg synchron.Die Benutzeroberfläche ist für diese Sprache lokalisiert.\n\nNutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nDatenschutzrichtlinie: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Erfasse Ausgaben, scanne Belege und lass Finance AI Änderungen vorschlagen – nichts wird ohne deine Zustimmung übernommen.",
+      "whatsNew": "Dieses Update ergänzt lokalisierte App Store-Informationen und eine größere Suchabdeckung sowie Verbesserungen bei Zuverlässigkeit, Cloud-Synchronisierung und KI-Anfragen."
+    },
+    "gu-IN": {
+      "description": "Finance Tracker AI રોજિંદા નાણાંને સ્પષ્ટ રીતે સંચાલિત કરવામાં મદદ કરે છે. આવક અને ખર્ચ ટ્રૅક કરો, નિયમિત બિલ અને સબ્સ્ક્રિપ્શન સંભાળો, રસીદો સ્કેન કરો અને સરળ ચાર્ટથી ખર્ચ સમજો. નાણાકીય AI પાસે ટ્રાન્ઝેક્શન, બજેટ અથવા નિયમિત ચુકવણીમાં ફેરફાર સૂચવાવો અને લાગુ કરતાં પહેલાં દરેક ફેરફાર તપાસો.\n\nવપરાશકર્તા-આધારિત ક્લાઉડ સ્ટોરેજ તમારી માહિતી સત્રો વચ્ચે સિંક રાખે છે.એપનું ઇન્ટરફેસ આ ભાષામાં સ્થાનિકીકૃત છે.\n\nઉપયોગની શરતો: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nગોપનીયતા નીતિ: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ખર્ચ ટ્રૅક કરો, રસીદો સ્કેન કરો અને Finance AI પાસે બજેટ કે ટ્રાન્ઝેક્શન ફેરફાર સૂચવાવો—મંજૂરી પહેલાં કંઈ લાગુ થતું નથી.",
+      "whatsNew": "આ અપડેટ સ્થાનિક App Store માહિતી, વધુ વ્યાપક શોધ અને વિશ્વસનીયતા, ક્લાઉડ સિંક તથા AI વિનંતીઓમાં સુધારા ઉમેરે છે."
+    },
+    "he": {
+      "description": "Finance Tracker AI עוזר לכם לנהל את הכסף היומיומי בצורה ברורה. עקבו אחר הכנסות והוצאות, נהלו חשבונות ומינויים חוזרים, סרקו קבלות והבינו את ההוצאות בעזרת תרשימים ברורים. בקשו מה-AI הפיננסי להציע עסקאות, תקציבים או שינויים בתשלומים חוזרים, ובדקו כל שינוי לפני החלתו.\n\nאחסון ענן המופרד לכל משתמש שומר את המידע מסונכרן בין הפעלות.ממשק האפליקציה מותאם לשפה זו.\n\nתנאי שימוש: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nמדיניות פרטיות: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "עקבו אחר הוצאות, סרקו קבלות ובקשו מ-Finance AI להציע שינויים; דבר לא מוחל ללא אישורכם.",
+      "whatsNew": "העדכון מוסיף מידע מקומי ב-App Store וכיסוי חיפוש רחב יותר, לצד שיפורים באמינות, בסנכרון הענן ובבקשות AI."
+    },
+    "hi": {
+      "description": "Finance Tracker AI रोज़मर्रा के पैसों को साफ़ और आसान तरीके से संभालने में मदद करता है। आय और खर्च ट्रैक करें, नियमित बिल व सदस्यताएँ प्रबंधित करें, रसीदें स्कैन करें और स्पष्ट चार्ट से खर्च समझें। वित्तीय AI से लेनदेन, बजट या नियमित भुगतान में बदलाव सुझाने को कहें, फिर लागू होने से पहले हर बदलाव की समीक्षा करें।\n\nउपयोगकर्ता-आधारित क्लाउड स्टोरेज आपकी जानकारी को सत्रों के बीच सिंक रखता है।ऐप का इंटरफ़ेस इस भाषा में स्थानीयकृत है।\n\nउपयोग की शर्तें: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nगोपनीयता नीति: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "खर्च ट्रैक करें, रसीदें स्कैन करें और Finance AI से बजट या लेनदेन बदलाव सुझवाएँ—मंज़ूरी से पहले कुछ लागू नहीं होता।",
+      "whatsNew": "इस अपडेट में स्थानीयकृत App Store जानकारी, व्यापक खोज कवरेज और विश्वसनीयता, क्लाउड सिंक व AI अनुरोधों में सुधार जोड़े गए हैं।"
+    },
+    "id": {
+      "description": "Finance Tracker AI membantu Anda mengelola keuangan sehari-hari dengan jelas. Catat pemasukan dan pengeluaran, kelola tagihan berulang dan langganan, pindai struk, serta pahami pengeluaran melalui grafik yang mudah dibaca. Minta AI keuangan mengusulkan transaksi, anggaran, atau perubahan pembayaran berulang, lalu tinjau setiap perubahan sebelum diterapkan.\n\nPenyimpanan cloud yang terpisah untuk setiap pengguna menjaga informasi tetap tersinkron antar sesi.Antarmuka aplikasi dilokalkan dalam bahasa ini.\n\nKetentuan Penggunaan: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nKebijakan Privasi: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Catat pengeluaran, pindai struk, dan minta Finance AI mengusulkan perubahan—tidak ada yang diterapkan tanpa persetujuan Anda.",
+      "whatsNew": "Pembaruan ini menambahkan informasi App Store yang dilokalkan dan pencarian lebih luas, serta peningkatan keandalan, sinkronisasi cloud, dan permintaan AI."
+    },
+    "it": {
+      "description": "Finance Tracker AI ti aiuta a gestire con chiarezza le finanze quotidiane. Tieni traccia di entrate e spese, gestisci bollette ricorrenti e abbonamenti, scansiona ricevute e comprendi le uscite con grafici chiari. Chiedi all’IA finanziaria di proporre transazioni, budget o modifiche ai pagamenti ricorrenti, quindi controlla ogni cambiamento prima che venga applicato.\n\nL’archiviazione cloud separata per utente mantiene i dati sincronizzati tra le sessioni.L’interfaccia dell’app è localizzata in questa lingua.\n\nCondizioni d’uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nInformativa sulla privacy: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Tieni traccia delle spese, scansiona ricevute e lascia che Finance AI proponga modifiche: nulla viene applicato senza la tua approvazione.",
+      "whatsNew": "Questo aggiornamento aggiunge informazioni App Store localizzate e una ricerca più ampia, oltre a miglioramenti di affidabilità, sincronizzazione cloud e richieste IA."
+    },
+    "ja": {
+      "description": "Finance Tracker AI は、日々のお金を分かりやすく管理するためのアプリです。収入と支出を記録し、定期的な請求やサブスクリプションを管理し、レシートをスキャンして、見やすいグラフで支出を把握できます。金融 AI に取引、予算、定期支払いの変更を提案させ、適用前にすべて確認できます。\n\nユーザーごとに分離されたクラウドストレージで、セッション間の情報が同期されます。アプリのインターフェイスはこの言語にローカライズされています。\n\n利用規約：https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nプライバシーポリシー：https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "支出を記録し、レシートをスキャン。Finance AI が予算や取引の変更を提案し、承認するまで適用されません。",
+      "whatsNew": "このアップデートでは、App Store 情報の多言語対応と検索範囲の拡大に加え、信頼性、クラウド同期、AI リクエスト処理を改善しました。"
+    },
+    "kn-IN": {
+      "description": "Finance Tracker AI ದೈನಂದಿನ ಹಣಕಾಸನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ನಿರ್ವಹಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ. ಆದಾಯ ಮತ್ತು ವೆಚ್ಚಗಳನ್ನು ದಾಖಲಿಸಿ, ಮರುಕಳಿಸುವ ಬಿಲ್‌ಗಳು ಮತ್ತು ಚಂದಾದಾರಿಕೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ, ರಸೀದಿಗಳನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಹಾಗೂ ಸರಳ ಚಾರ್ಟ್‌ಗಳಿಂದ ಖರ್ಚನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ. ವ್ಯವಹಾರ, ಬಜೆಟ್ ಅಥವಾ ಮರುಕಳಿಸುವ ಪಾವತಿ ಬದಲಾವಣೆಗಳನ್ನು ಸೂಚಿಸಲು ಹಣಕಾಸು AIಗೆ ಕೇಳಿ; ಅನ್ವಯಿಸುವ ಮೊದಲು ಪ್ರತಿಯೊಂದನ್ನೂ ಪರಿಶೀಲಿಸಿ.\n\nಬಳಕೆದಾರ-ಆಧಾರಿತ ಕ್ಲೌಡ್ ಸಂಗ್ರಹವು ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ಸೆಷನ್‌ಗಳ ನಡುವೆ ಸಿಂಕ್ ಮಾಡುತ್ತದೆ.ಆ್ಯಪ್ ಇಂಟರ್ಫೇಸ್ ಈ ಭಾಷೆಗೆ ಸ್ಥಳೀಕರಿಸಲಾಗಿದೆ.\n\nಬಳಕೆಯ ನಿಯಮಗಳು: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nಗೌಪ್ಯತಾ ನೀತಿ: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ವೆಚ್ಚ ದಾಖಲಿಸಿ, ರಸೀದಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಮತ್ತು Finance AIಯಿಂದ ಬದಲಾವಣೆ ಸೂಚಿಸಿ—ನಿಮ್ಮ ಅನುಮೋದನೆಯವರೆಗೆ ಯಾವುದೂ ಅನ್ವಯಿಸುವುದಿಲ್ಲ.",
+      "whatsNew": "ಈ ಅಪ್‌ಡೇಟ್ ಸ್ಥಳೀಕರಿಸಿದ App Store ಮಾಹಿತಿ, ವಿಶಾಲ ಹುಡುಕಾಟ ಮತ್ತು ವಿಶ್ವಾಸಾರ್ಹತೆ, ಕ್ಲೌಡ್ ಸಿಂಕ್ ಹಾಗೂ AI ವಿನಂತಿಗಳ ಸುಧಾರಣೆಗಳನ್ನು ಸೇರಿಸುತ್ತದೆ."
+    },
+    "ko": {
+      "description": "Finance Tracker AI는 일상 재정을 명확하게 관리하도록 도와줍니다. 수입과 지출을 기록하고, 반복 청구와 구독을 관리하며, 영수증을 스캔하고 보기 쉬운 차트로 소비를 파악하세요. 금융 AI에게 거래, 예산 또는 반복 결제 변경을 제안하도록 요청한 뒤 적용 전에 모든 변경 사항을 검토할 수 있습니다.\n\n사용자별로 분리된 클라우드 저장 공간이 세션 간 정보를 동기화합니다.앱 인터페이스는 이 언어로 현지화되어 있습니다.\n\n이용 약관: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\n개인정보 처리방침: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "지출을 기록하고 영수증을 스캔하세요. Finance AI가 변경을 제안하며 승인 전에는 적용되지 않습니다.",
+      "whatsNew": "이번 업데이트에는 현지화된 App Store 정보와 더 넓은 검색 범위, 안정성, 클라우드 동기화 및 AI 요청 처리 개선이 포함됩니다."
+    },
+    "ms": {
+      "description": "Finance Tracker AI membantu anda mengurus kewangan harian dengan jelas. Jejaki pendapatan dan perbelanjaan, urus bil berulang dan langganan, imbas resit serta fahami perbelanjaan melalui carta yang mudah dibaca. Minta AI kewangan mencadangkan transaksi, bajet atau perubahan bayaran berulang, kemudian semak setiap perubahan sebelum digunakan.\n\nStoran awan khusus pengguna memastikan maklumat disegerakkan antara sesi.Antara muka aplikasi disetempatkan dalam bahasa ini.\n\nTerma Penggunaan: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nDasar Privasi: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Jejaki belanja, imbas resit dan minta Finance AI mencadangkan perubahan—tiada apa digunakan tanpa kelulusan anda.",
+      "whatsNew": "Kemas kini ini menambah maklumat App Store setempat dan carian lebih luas, serta peningkatan kebolehpercayaan, penyegerakan awan dan permintaan AI."
+    },
+    "ml-IN": {
+      "description": "Finance Tracker AI ദൈനംദിന പണം വ്യക്തമായി കൈകാര്യം ചെയ്യാൻ സഹായിക്കുന്നു. വരുമാനവും ചെലവും രേഖപ്പെടുത്തുക, ആവർത്തന ബില്ലുകളും സബ്‌സ്‌ക്രിപ്‌ഷനുകളും നിയന്ത്രിക്കുക, രസീതുകൾ സ്കാൻ ചെയ്യുക, വ്യക്തമായ ചാർട്ടുകളിലൂടെ ചെലവ് മനസ്സിലാക്കുക. ഇടപാട്, ബജറ്റ്, ആവർത്തന പേയ്‌മെന്റ് മാറ്റങ്ങൾ നിർദേശിക്കാൻ സാമ്പത്തിക AIയോട് ആവശ്യപ്പെടുക; നടപ്പാക്കുന്നതിന് മുമ്പ് ഓരോ മാറ്റവും പരിശോധിക്കുക.\n\nഉപയോക്താവിനായി വേർതിരിച്ച ക്ലൗഡ് സ്റ്റോറേജ് സെഷനുകൾക്കിടയിൽ വിവരങ്ങൾ സിങ്ക് ചെയ്യുന്നു.ആപ്പ് ഇന്റർഫേസ് ഈ ഭാഷയിൽ പ്രാദേശികവൽക്കരിച്ചിട്ടുണ്ട്.\n\nഉപയോഗ നിബന്ധനകൾ: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nസ്വകാര്യതാ നയം: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ചെലവ് രേഖപ്പെടുത്തൂ, രസീത് സ്കാൻ ചെയ്യൂ, Finance AIയിൽ നിന്ന് മാറ്റങ്ങൾ നിർദേശിക്കൂ—അംഗീകാരമില്ലാതെ ഒന്നും നടപ്പാകില്ല.",
+      "whatsNew": "ഈ അപ്‌ഡേറ്റ് പ്രാദേശിക App Store വിവരങ്ങൾ, കൂടുതൽ തിരയൽ, വിശ്വാസ്യത, ക്ലൗഡ് സിങ്ക്, AI അഭ്യർത്ഥനകൾ എന്നിവ മെച്ചപ്പെടുത്തുന്നു."
+    },
+    "mr-IN": {
+      "description": "Finance Tracker AI रोजच्या पैशांचे स्पष्ट व्यवस्थापन करण्यास मदत करतो. उत्पन्न आणि खर्च नोंदवा, आवर्ती बिले व सदस्यत्वे सांभाळा, पावत्या स्कॅन करा आणि सोप्या चार्टमधून खर्च समजा. आर्थिक AI कडून व्यवहार, बजेट किंवा आवर्ती पेमेंटमधील बदल सुचवून घ्या आणि लागू करण्यापूर्वी प्रत्येक बदल तपासा.\n\nवापरकर्तानिहाय क्लाउड स्टोरेज तुमची माहिती सत्रांदरम्यान सिंक ठेवते.अॅपचा इंटरफेस या भाषेत स्थानिकीकृत आहे.\n\nवापराच्या अटी: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nगोपनीयता धोरण: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "खर्च नोंदवा, पावत्या स्कॅन करा आणि Finance AI कडून बदल सुचवून घ्या—तुमच्या मंजुरीशिवाय काहीही लागू होत नाही.",
+      "whatsNew": "या अपडेटमध्ये स्थानिक App Store माहिती, व्यापक शोध आणि विश्वसनीयता, क्लाउड सिंक व AI विनंत्यांमध्ये सुधारणा जोडल्या आहेत."
+    },
+    "no": {
+      "description": "Finance Tracker AI hjelper deg med å holde oversikt over hverdagsøkonomien. Registrer inntekter og utgifter, administrer faste regninger og abonnementer, skann kvitteringer og forstå forbruket med tydelige diagrammer. Be finans-KI-en foreslå transaksjoner, budsjetter eller endringer i faste betalinger, og gjennomgå hver endring før den brukes.\n\nBrukertilpasset skylagring holder informasjonen synkronisert mellom økter.Appgrensesnittet er lokalisert til dette språket.\n\nBruksvilkår: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPersonvernerklæring: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Følg utgifter, skann kvitteringer og la Finance AI foreslå endringer – ingenting brukes uten din godkjenning.",
+      "whatsNew": "Oppdateringen legger til lokalisert App Store-informasjon og bredere søk, samt forbedringer i pålitelighet, skysynkronisering og KI-forespørsler."
+    },
+    "or-IN": {
+      "description": "Finance Tracker AI ଦୈନନ୍ଦିନ ଅର୍ଥ ପରିଚାଳନାକୁ ସହଜ ଓ ସ୍ପଷ୍ଟ କରେ। ଆୟ ଓ ଖର୍ଚ୍ଚ ଟ୍ରାକ୍ କରନ୍ତୁ, ପୁନରାବୃତ୍ତି ବିଲ୍ ଓ ସବସ୍କ୍ରିପ୍ସନ୍ ପରିଚାଳନା କରନ୍ତୁ, ରସିଦ ସ୍କାନ୍ କରନ୍ତୁ ଏବଂ ସ୍ପଷ୍ଟ ଚାର୍ଟରେ ଖର୍ଚ୍ଚ ବୁଝନ୍ତୁ। ଆର୍ଥିକ AIକୁ ଟ୍ରାଞ୍ଜାକ୍ସନ୍, ବଜେଟ୍ କିମ୍ବା ପୁନରାବୃତ୍ତି ପେମେଣ୍ଟର ପରିବର୍ତ୍ତନ ସୁପାରିଶ କରିବାକୁ କହନ୍ତୁ ଏବଂ ପ୍ରୟୋଗ ପୂର୍ବରୁ ପ୍ରତ୍ୟେକଟି ସମୀକ୍ଷା କରନ୍ତୁ।\n\nବ୍ୟବହାରକାରୀ-ଆଧାରିତ କ୍ଲାଉଡ୍ ଷ୍ଟୋରେଜ୍ ସେସନ୍ ମଧ୍ୟରେ ସୂଚନା ସିଙ୍କ୍ ରଖେ।ଆପ୍ ଇଣ୍ଟରଫେସ୍ ଏହି ଭାଷାରେ ସ୍ଥାନୀୟୀକୃତ ହୋଇଛି।\n\nବ୍ୟବହାର ସର୍ତ୍ତ: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nଗୋପନୀୟତା ନୀତି: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ଖର୍ଚ୍ଚ ଟ୍ରାକ୍ ଓ ରସିଦ ସ୍କାନ୍ କରନ୍ତୁ; Finance AI ପରିବର୍ତ୍ତନ ସୁପାରିଶ କରେ—ଅନୁମୋଦନ ବିନା କିଛି ପ୍ରୟୋଗ ହୁଏ ନାହିଁ।",
+      "whatsNew": "ଏହି ଅପଡେଟ୍ ସ୍ଥାନୀୟ App Store ସୂଚନା, ବ୍ୟାପକ ସନ୍ଧାନ ଏବଂ ବିଶ୍ୱସନୀୟତା, କ୍ଲାଉଡ୍ ସିଙ୍କ୍ ଓ AI ଅନୁରୋଧର ଉନ୍ନତି ଯୋଡ଼େ।"
+    },
+    "pt-BR": {
+      "description": "Finance Tracker AI ajuda você a cuidar das finanças do dia a dia com clareza. Registre receitas e despesas, gerencie contas recorrentes e assinaturas, digitalize recibos e entenda seus gastos com gráficos claros. Peça à IA financeira para sugerir transações, orçamentos ou mudanças em pagamentos recorrentes e revise cada alteração antes que ela seja aplicada.\n\nO armazenamento em nuvem separado por usuário mantém suas informações sincronizadas entre as sessões.A interface do app está localizada neste idioma.\n\nTermos de Uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPolítica de Privacidade: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Acompanhe gastos, digitalize recibos e deixe o Finance AI sugerir mudanças; nada é aplicado sem a sua aprovação.",
+      "whatsNew": "Esta atualização adiciona informações localizadas na App Store e busca ampliada, além de melhorias de confiabilidade, sincronização na nuvem e solicitações à IA."
+    },
+    "pa-IN": {
+      "description": "Finance Tracker AI ਰੋਜ਼ਾਨਾ ਪੈਸੇ ਨੂੰ ਸਪਸ਼ਟ ਢੰਗ ਨਾਲ ਸੰਭਾਲਣ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ। ਆਮਦਨ ਅਤੇ ਖਰਚੇ ਟ੍ਰੈਕ ਕਰੋ, ਮੁੜ ਆਉਣ ਵਾਲੇ ਬਿੱਲ ਅਤੇ ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਸੰਭਾਲੋ, ਰਸੀਦਾਂ ਸਕੈਨ ਕਰੋ ਅਤੇ ਸਾਫ਼ ਚਾਰਟਾਂ ਨਾਲ ਖਰਚ ਸਮਝੋ। ਵਿੱਤੀ AI ਨੂੰ ਲੈਣ-ਦੇਣ, ਬਜਟ ਜਾਂ ਮੁੜ ਆਉਣ ਵਾਲੀ ਅਦਾਇਗੀ ਵਿੱਚ ਬਦਲਾਅ ਸੁਝਾਉਣ ਲਈ ਕਹੋ ਅਤੇ ਲਾਗੂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਹਰ ਬਦਲਾਅ ਦੀ ਸਮੀਖਿਆ ਕਰੋ।\n\nਵਰਤੋਂਕਾਰ-ਅਧਾਰਿਤ ਕਲਾਉਡ ਸਟੋਰੇਜ ਸੈਸ਼ਨਾਂ ਵਿਚਕਾਰ ਜਾਣਕਾਰੀ ਸਿੰਕ ਰੱਖਦੀ ਹੈ।ਐਪ ਦਾ ਇੰਟਰਫੇਸ ਇਸ ਭਾਸ਼ਾ ਵਿੱਚ ਸਥਾਨਕ ਬਣਾਇਆ ਗਿਆ ਹੈ।\n\nਵਰਤੋਂ ਦੀਆਂ ਸ਼ਰਤਾਂ: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nਪਰਦੇਦਾਰੀ ਨੀਤੀ: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ਖਰਚ ਟ੍ਰੈਕ ਕਰੋ, ਰਸੀਦਾਂ ਸਕੈਨ ਕਰੋ ਅਤੇ Finance AI ਤੋਂ ਬਦਲਾਅ ਸੁਝਵਾਓ—ਤੁਹਾਡੀ ਮਨਜ਼ੂਰੀ ਤੋਂ ਬਿਨਾਂ ਕੁਝ ਲਾਗੂ ਨਹੀਂ ਹੁੰਦਾ।",
+      "whatsNew": "ਇਸ ਅੱਪਡੇਟ ਵਿੱਚ ਸਥਾਨਕ App Store ਜਾਣਕਾਰੀ, ਵਧੇਰੇ ਖੋਜ ਅਤੇ ਭਰੋਸੇਯੋਗਤਾ, ਕਲਾਉਡ ਸਿੰਕ ਤੇ AI ਬੇਨਤੀਆਂ ਵਿੱਚ ਸੁਧਾਰ ਸ਼ਾਮਲ ਹਨ।"
+    },
+    "es-MX": {
+      "description": "Finance Tracker AI te ayuda a administrar con claridad el dinero de todos los días. Registra ingresos y gastos, administra pagos recurrentes y suscripciones, escanea recibos y entiende tus gastos con gráficas claras. Pídele a la IA financiera que proponga transacciones, presupuestos o cambios en pagos recurrentes y revisa cada modificación antes de que se aplique.\n\nEl almacenamiento en la nube separado por usuario mantiene tu información sincronizada entre sesiones.La interfaz de la app está localizada en este idioma.\n\nTérminos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nPolítica de privacidad: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Registra gastos, escanea recibos y deja que Finance AI proponga cambios; nada se aplica sin tu aprobación.",
+      "whatsNew": "Esta actualización agrega información localizada en App Store y búsquedas más amplias, además de mejoras de confiabilidad, sincronización y solicitudes a la IA."
+    },
+    "ta-IN": {
+      "description": "Finance Tracker AI அன்றாட பணத்தைத் தெளிவாக நிர்வகிக்க உதவுகிறது. வருமானம் மற்றும் செலவுகளைப் பதிவு செய்யுங்கள், தொடர் பில்கள் மற்றும் சந்தாக்களை நிர்வகியுங்கள், ரசீதுகளை ஸ்கேன் செய்யுங்கள், தெளிவான வரைபடங்களில் செலவுகளைப் புரிந்துகொள்ளுங்கள். பரிவர்த்தனை, பட்ஜெட் அல்லது தொடர் கட்டண மாற்றங்களை நிதி AI மூலம் பரிந்துரைக்கச் செய்து, செயல்படுத்தும் முன் ஒவ்வொன்றையும் சரிபாருங்கள்.\n\nபயனர் அடிப்படையிலான கிளவுட் சேமிப்பு அமர்வுகளுக்கு இடையில் தகவலை ஒத்திசைக்கிறது.ஆப் இடைமுகம் இந்த மொழியில் உள்ளூர்மயமாக்கப்பட்டுள்ளது.\n\nபயன்பாட்டு விதிமுறைகள்: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nதனியுரிமைக் கொள்கை: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "செலவைப் பதிவு செய்து ரசீதுகளை ஸ்கேன் செய்யுங்கள்; Finance AI மாற்றங்களைப் பரிந்துரைக்கும்—உங்கள் ஒப்புதலின்றி எதுவும் செயல்படாது.",
+      "whatsNew": "இந்தப் புதுப்பிப்பு உள்ளூர்மயமான App Store தகவல், விரிவான தேடல் மற்றும் நம்பகத்தன்மை, கிளவுட் ஒத்திசைவு, AI கோரிக்கைகளில் மேம்பாடுகளைச் சேர்க்கிறது."
+    },
+    "te-IN": {
+      "description": "Finance Tracker AI రోజువారీ డబ్బును స్పష్టంగా నిర్వహించడంలో సహాయపడుతుంది. ఆదాయం, ఖర్చులను నమోదు చేయండి, పునరావృత బిల్లులు మరియు సబ్‌స్క్రిప్షన్‌లను నిర్వహించండి, రసీదులను స్కాన్ చేయండి మరియు స్పష్టమైన చార్ట్‌లతో ఖర్చును అర్థం చేసుకోండి. లావాదేవీ, బడ్జెట్ లేదా పునరావృత చెల్లింపు మార్పులను సూచించమని ఆర్థిక AIని అడిగి, అమలు చేసే ముందు ప్రతిదాన్ని సమీక్షించండి.\n\nవినియోగదారు-ఆధారిత క్లౌడ్ స్టోరేజ్ సెషన్‌ల మధ్య సమాచారాన్ని సింక్‌లో ఉంచుతుంది.యాప్ ఇంటర్‌ఫేస్ ఈ భాషలో స్థానికీకరించబడింది.\n\nవినియోగ నిబంధనలు: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nగోప్యతా విధానం: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ఖర్చును నమోదు చేసి రసీదులు స్కాన్ చేయండి; Finance AI మార్పులను సూచిస్తుంది—మీ ఆమోదం లేకుండా ఏదీ అమలు కాదు.",
+      "whatsNew": "ఈ అప్‌డేట్ స్థానికీకరించిన App Store సమాచారం, విస్తృత శోధన మరియు విశ్వసనీయత, క్లౌడ్ సింక్, AI అభ్యర్థనల మెరుగుదలలను జోడిస్తుంది."
+    },
+    "th": {
+      "description": "Finance Tracker AI ช่วยให้คุณจัดการเงินในชีวิตประจำวันได้อย่างชัดเจน บันทึกรายรับและรายจ่าย จัดการบิลประจำและการสมัครสมาชิก สแกนใบเสร็จ และดูพฤติกรรมการใช้จ่ายผ่านแผนภูมิที่เข้าใจง่าย ขอให้ AI ด้านการเงินเสนอรายการ งบประมาณ หรือการเปลี่ยนแปลงการชำระเงินประจำ แล้วตรวจสอบทุกการเปลี่ยนแปลงก่อนนำไปใช้\n\nพื้นที่เก็บข้อมูลบนคลาวด์ที่แยกตามผู้ใช้ช่วยซิงค์ข้อมูลระหว่างเซสชัน อินเทอร์เฟซของแอปได้รับการแปลเป็นภาษานี้แล้ว\n\nข้อกำหนดการใช้งาน: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nนโยบายความเป็นส่วนตัว: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "ติดตามค่าใช้จ่าย สแกนใบเสร็จ และให้ Finance AI เสนอการเปลี่ยนแปลง โดยจะไม่ใช้สิ่งใดจนกว่าคุณจะอนุมัติ",
+      "whatsNew": "อัปเดตนี้เพิ่มข้อมูล App Store ที่แปลแล้วและขยายการค้นหา พร้อมปรับปรุงความน่าเชื่อถือ การซิงค์คลาวด์ และคำขอ AI"
+    },
+    "tr": {
+      "description": "Finance Tracker AI, günlük paranızı anlaşılır biçimde yönetmenize yardımcı olur. Gelir ve giderleri takip edin, yinelenen faturaları ve abonelikleri yönetin, makbuzları tarayın ve harcamaları net grafiklerle anlayın. Finansal yapay zekâdan işlem, bütçe veya yinelenen ödeme değişiklikleri önermesini isteyin ve her değişikliği uygulanmadan önce inceleyin.\n\nKullanıcıya özel bulut depolama, bilgilerinizi oturumlar arasında eşitler.Uygulama arayüzü bu dil için yerelleştirilmiştir.\n\nKullanım Koşulları: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nGizlilik Politikası: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Harcamaları izleyin, makbuzları tarayın ve Finance AI’dan değişiklik önerileri alın; onayınız olmadan hiçbir şey uygulanmaz.",
+      "whatsNew": "Bu güncelleme yerelleştirilmiş App Store bilgileri ve daha geniş aramanın yanı sıra güvenilirlik, bulut eşitleme ve yapay zekâ isteklerinde iyileştirmeler ekler."
+    },
+    "uk": {
+      "description": "Finance Tracker AI допомагає зрозуміло керувати щоденними фінансами. Відстежуйте доходи й витрати, керуйте регулярними рахунками та підписками, скануйте чеки й аналізуйте витрати за допомогою наочних діаграм. Попросіть фінансовий ШІ запропонувати операції, бюджети або зміни регулярних платежів і перегляньте кожну зміну до її застосування.\n\nІзольоване для кожного користувача хмарне сховище синхронізує інформацію між сеансами.Інтерфейс застосунку локалізовано цією мовою.\n\nУмови використання: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nПолітика конфіденційності: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Відстежуйте витрати, скануйте чеки й отримуйте пропозиції від Finance AI — без вашого схвалення нічого не застосовується.",
+      "whatsNew": "Оновлення додає локалізовану інформацію в App Store і ширший пошук, а також покращення надійності, хмарної синхронізації та запитів до ШІ."
+    },
+    "ur-PK": {
+      "description": "Finance Tracker AI روزمرہ مالیات کو واضح انداز میں سنبھالنے میں مدد کرتا ہے۔ آمدنی اور اخراجات ریکارڈ کریں، بار بار آنے والے بل اور سبسکرپشنز منظم کریں، رسیدیں اسکین کریں اور آسان چارٹس سے خرچ سمجھیں۔ مالی AI سے لین دین، بجٹ یا بار بار ادائیگی میں تبدیلی تجویز کروائیں اور لاگو ہونے سے پہلے ہر تبدیلی کا جائزہ لیں۔\n\nصارف کے لیے الگ کلاؤڈ اسٹوریج آپ کی معلومات کو سیشنز کے درمیان سنک رکھتا ہے۔ایپ کا انٹرفیس اس زبان میں مقامی بنایا گیا ہے۔\n\nاستعمال کی شرائط: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nرازداری کی پالیسی: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "اخراجات ریکارڈ کریں، رسیدیں اسکین کریں اور Finance AI سے تبدیلیاں تجویز کروائیں—آپ کی منظوری کے بغیر کچھ لاگو نہیں ہوتا۔",
+      "whatsNew": "اس اپ ڈیٹ میں مقامی App Store معلومات، وسیع تلاش اور قابل اعتماد کارکردگی، کلاؤڈ سنک و AI درخواستوں میں بہتری شامل ہے۔"
+    },
+    "vi": {
+      "description": "Finance Tracker AI giúp bạn quản lý tài chính hằng ngày một cách rõ ràng. Theo dõi thu nhập và chi tiêu, quản lý hóa đơn định kỳ và gói đăng ký, quét biên lai, đồng thời hiểu thói quen chi tiêu qua biểu đồ dễ đọc. Yêu cầu AI tài chính đề xuất giao dịch, ngân sách hoặc thay đổi khoản thanh toán định kỳ, rồi xem lại từng thay đổi trước khi áp dụng.\n\nBộ nhớ đám mây tách biệt theo người dùng giúp thông tin được đồng bộ giữa các phiên.Giao diện ứng dụng đã được bản địa hóa cho ngôn ngữ này.\n\nĐiều khoản sử dụng: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/\nChính sách quyền riêng tư: https://agentscix.com/apps/finance-tracker/privacy",
+      "promotionalText": "Theo dõi chi tiêu, quét biên lai và để Finance AI đề xuất thay đổi; không nội dung nào được áp dụng nếu bạn chưa phê duyệt.",
+      "whatsNew": "Bản cập nhật này bổ sung thông tin App Store được bản địa hóa và tìm kiếm rộng hơn, cùng các cải tiến về độ tin cậy, đồng bộ đám mây và yêu cầu AI."
+    }
+  }
+}

@@ -29,7 +29,7 @@ final class FinanceAIManager: ObservableObject {
         self.messages = [
             AIChatMessage(
                 role: .assistant,
-                content: String(localized: "I can analyze your finances and help manage transactions, income, budgets, and recurring bills. Any change stays pending until you review and approve it.")
+                content: AppLanguage.localized("I can analyze your finances and help manage transactions, income, budgets, and recurring bills. Any change stays pending until you review and approve it.")
             )
         ]
     }
@@ -63,7 +63,7 @@ final class FinanceAIManager: ObservableObject {
                 messages.append(AIChatMessage(
                     role: .assistant,
                     content: message.isEmpty
-                        ? (actions.isEmpty ? String(localized: "I couldn't prepare that request. Could you rephrase it?") : String(localized: "I prepared the requested changes. Review them below before applying."))
+                        ? (actions.isEmpty ? AppLanguage.localized("I couldn't prepare that request. Could you rephrase it?") : AppLanguage.localized("I prepared the requested changes. Review them below before applying."))
                         : message
                 ))
                 pendingActions = actions
@@ -94,7 +94,7 @@ final class FinanceAIManager: ObservableObject {
     func parseReceipt(rawText: String) async -> ReceiptDraft? {
         let trimmedText = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedText.isEmpty else {
-            errorMessage = String(localized: "Paste receipt text to continue.")
+            errorMessage = AppLanguage.localized("Paste receipt text to continue.")
             return nil
         }
 
@@ -110,7 +110,7 @@ final class FinanceAIManager: ObservableObject {
             return localReceiptFallback(rawText: trimmedText)
         } catch {
             logger.warning("Receipt parsing failed: \(error.localizedDescription)", category: "finance_ai")
-            errorMessage = String(localized: "Couldn't read that receipt automatically. Please review the details.")
+            errorMessage = AppLanguage.localized("Couldn't read that receipt automatically. Please review the details.")
             return localReceiptFallback(rawText: trimmedText)
         }
     }
@@ -121,7 +121,7 @@ final class FinanceAIManager: ObservableObject {
         defer { isLoading = false }
 
         guard service.isConfigured else {
-            errorMessage = String(localized: "AI server not reachable. Check your connection.")
+            errorMessage = AppLanguage.localized("AI server not reachable. Check your connection.")
             return []
         }
 
@@ -129,7 +129,7 @@ final class FinanceAIManager: ObservableObject {
             return try await service.parseImage(imageBase64: imageBase64, mimeType: mimeType)
         } catch {
             logger.warning("Image parsing failed: \(error.localizedDescription)", category: "finance_ai")
-            errorMessage = String(localized: "Couldn't scan that image. Try again or add the expense manually.")
+            errorMessage = AppLanguage.localized("Couldn't scan that image. Try again or add the expense manually.")
             return []
         }
     }
@@ -162,7 +162,19 @@ final class FinanceAIManager: ObservableObject {
         messages = [
             AIChatMessage(
                 role: .assistant,
-                content: String(localized: "Session reset. I can analyze or manage transactions, budgets, and recurring bills whenever you're ready.")
+                content: AppLanguage.localized("Session reset. I can analyze or manage transactions, budgets, and recurring bills whenever you're ready.")
+            )
+        ]
+    }
+
+    func refreshLocalizedWelcomeIfIdle() {
+        guard messages.count == 1,
+              messages.first?.role == .assistant,
+              pendingActions.isEmpty else { return }
+        messages = [
+            AIChatMessage(
+                role: .assistant,
+                content: AppLanguage.localized("I can analyze your finances and help manage transactions, income, budgets, and recurring bills. Any change stays pending until you review and approve it.")
             )
         ]
     }
@@ -192,13 +204,13 @@ final class FinanceAIManager: ObservableObject {
         let message: String
         if failures.isEmpty {
             message = confirmations.count == 1
-                ? (confirmations.first ?? String(localized: "Change applied."))
-                : String(localized: "Applied \(confirmations.count) changes:\n") + confirmations.map { "• \($0)" }.joined(separator: "\n")
+                ? (confirmations.first ?? AppLanguage.localized("Change applied."))
+                : AppLanguage.localized("Applied \(confirmations.count) changes:\n") + confirmations.map { "• \($0)" }.joined(separator: "\n")
         } else {
             let applied = confirmations.isEmpty
-                ? String(localized: "No changes were applied.")
-                : String(localized: "Applied:\n") + confirmations.map { "• \($0)" }.joined(separator: "\n")
-            message = applied + String(localized: "\nCouldn't apply:\n") + failures.map { "• \($0)" }.joined(separator: "\n")
+                ? AppLanguage.localized("No changes were applied.")
+                : AppLanguage.localized("Applied:\n") + confirmations.map { "• \($0)" }.joined(separator: "\n")
+            message = applied + AppLanguage.localized("\nCouldn't apply:\n") + failures.map { "• \($0)" }.joined(separator: "\n")
         }
 
         messages.append(AIChatMessage(role: .assistant, content: message))
@@ -224,8 +236,8 @@ final class FinanceAIManager: ObservableObject {
                 date: date,
                 notes: notes
             ))
-            let verb = category.isIncome ? String(localized: "Logged income") : String(localized: "Added")
-            return (true, String(localized: "\(verb) \(title) (\(formatter.string(for: amount)))."))
+            let verb = category.isIncome ? AppLanguage.localized("Logged income") : AppLanguage.localized("Added")
+            return (true, AppLanguage.localized("\(verb) \(title) (\(formatter.string(for: amount)))."))
 
         case let .updateTransaction(id, currentTitle, title, amount, category, date, notes, clearNotes):
             let updated = financeManager.updateExpense(
@@ -238,21 +250,21 @@ final class FinanceAIManager: ObservableObject {
                 clearNotes: clearNotes
             )
             return updated
-                ? (true, String(localized: "Updated \(title ?? currentTitle)."))
-                : (false, String(localized: "\(currentTitle) changed or no longer exists."))
+                ? (true, AppLanguage.localized("Updated \(title ?? currentTitle)."))
+                : (false, AppLanguage.localized("\(currentTitle) changed or no longer exists."))
 
         case let .deleteTransaction(id, title):
             return financeManager.deleteExpense(id: id)
-                ? (true, String(localized: "Deleted \(title)."))
-                : (false, String(localized: "\(title) no longer exists."))
+                ? (true, AppLanguage.localized("Deleted \(title)."))
+                : (false, AppLanguage.localized("\(title) no longer exists."))
 
         case let .setBudget(amount):
             financeManager.setMonthlyBudget(amount)
-            return (true, String(localized: "Set the monthly budget to \(formatter.string(for: amount))."))
+            return (true, AppLanguage.localized("Set the monthly budget to \(formatter.string(for: amount))."))
 
         case .clearBudget:
             financeManager.setMonthlyBudget(nil)
-            return (true, String(localized: "Cleared the monthly budget."))
+            return (true, AppLanguage.localized("Cleared the monthly budget."))
 
         case let .addRecurring(title, amount, category, frequency, nextDueDate, notes):
             financeManager.addRecurringExpense(RecurringExpense(
@@ -263,7 +275,7 @@ final class FinanceAIManager: ObservableObject {
                 nextDueDate: nextDueDate,
                 notes: notes
             ))
-            return (true, String(localized: "Added recurring bill \(title) (\(formatter.string(for: amount)), \(frequency.localizedName.lowercased()))."))
+            return (true, AppLanguage.localized("Added recurring bill \(title) (\(formatter.string(for: amount)), \(frequency.localizedName.lowercased()))."))
 
         case let .updateRecurring(id, currentTitle, title, amount, category, frequency, nextDueDate, notes, clearNotes):
             let updated = financeManager.updateRecurringExpense(
@@ -277,30 +289,30 @@ final class FinanceAIManager: ObservableObject {
                 clearNotes: clearNotes
             )
             return updated
-                ? (true, String(localized: "Updated recurring bill \(title ?? currentTitle)."))
-                : (false, String(localized: "\(currentTitle) changed or no longer exists."))
+                ? (true, AppLanguage.localized("Updated recurring bill \(title ?? currentTitle)."))
+                : (false, AppLanguage.localized("\(currentTitle) changed or no longer exists."))
 
         case let .setRecurringActive(id, title, isActive):
             let updated = financeManager.updateRecurringExpense(id: id, isActive: isActive)
-            let verb = isActive ? String(localized: "Resumed") : String(localized: "Paused")
+            let verb = isActive ? AppLanguage.localized("Resumed") : AppLanguage.localized("Paused")
             return updated
-                ? (true, String(localized: "\(verb) \(title)."))
-                : (false, String(localized: "\(title) changed or no longer exists."))
+                ? (true, AppLanguage.localized("\(verb) \(title)."))
+                : (false, AppLanguage.localized("\(title) changed or no longer exists."))
 
         case let .deleteRecurring(id, title):
             return financeManager.deleteRecurringExpense(id: id)
-                ? (true, String(localized: "Deleted recurring bill \(title)."))
-                : (false, String(localized: "\(title) no longer exists."))
+                ? (true, AppLanguage.localized("Deleted recurring bill \(title)."))
+                : (false, AppLanguage.localized("\(title) no longer exists."))
 
         case .postDueRecurring:
             let count = financeManager.processDueRecurringExpenses()
             return count == 0
-                ? (true, String(localized: "There were no due recurring bills to post."))
-                : (true, String(localized: "Posted \(count) due recurring transactions."))
+                ? (true, AppLanguage.localized("There were no due recurring bills to post."))
+                : (true, AppLanguage.localized("Posted \(count) due recurring transactions."))
 
         case let .clearAllData(transactionCount, recurringCount):
             financeManager.clearAllData()
-            return (true, String(localized: "Cleared \(transactionCount) transactions, \(recurringCount) recurring bills, and the monthly budget."))
+            return (true, AppLanguage.localized("Cleared \(transactionCount) transactions, \(recurringCount) recurring bills, and the monthly budget."))
         }
     }
 
@@ -319,7 +331,7 @@ final class FinanceAIManager: ObservableObject {
 
     private func localCategoryInsight(category: String, amount: Double, percentage: Double) -> String {
         let amountStr = CurrencyFormatting.shared.string(for: Decimal(amount))
-        return String(localized: "You spent \(amountStr) on \(category) this month, which is \(Int(percentage * 100))% of total spending.")
+        return AppLanguage.localized("You spent \(amountStr) on \(category) this month, which is \(Int(percentage * 100))% of total spending.")
     }
 
     private func localFallbackInsight(for prompt: String, financeManager: FinanceManager) -> String {
@@ -328,7 +340,7 @@ final class FinanceAIManager: ObservableObject {
         let weekTotal = formatter.string(for: financeManager.thisWeekTotal)
         let recurring = formatter.string(for: financeManager.recurringMonthlyTotal)
 
-        return String(localized: """
+        return AppLanguage.localized("""
         Here's a quick summary from your records:
         • This month: \(monthTotal)
         • This week: \(weekTotal)
@@ -560,17 +572,17 @@ struct PendingAIAction: Identifiable {
     var title: String {
         switch kind {
         case let .addTransaction(_, _, category, _, _):
-            return category.isIncome ? String(localized: "Log income") : String(localized: "Add transaction")
-        case .updateTransaction: return String(localized: "Update transaction")
-        case .deleteTransaction: return String(localized: "Delete transaction")
-        case .setBudget: return String(localized: "Set monthly budget")
-        case .clearBudget: return String(localized: "Clear budget")
-        case .addRecurring: return String(localized: "Add recurring bill")
-        case .updateRecurring: return String(localized: "Update recurring bill")
-        case let .setRecurringActive(_, _, isActive): return isActive ? String(localized: "Resume recurring bill") : String(localized: "Pause recurring bill")
-        case .deleteRecurring: return String(localized: "Delete recurring bill")
-        case .postDueRecurring: return String(localized: "Post due recurring bills")
-        case .clearAllData: return String(localized: "Clear all finance data")
+            return category.isIncome ? AppLanguage.localized("Log income") : AppLanguage.localized("Add transaction")
+        case .updateTransaction: return AppLanguage.localized("Update transaction")
+        case .deleteTransaction: return AppLanguage.localized("Delete transaction")
+        case .setBudget: return AppLanguage.localized("Set monthly budget")
+        case .clearBudget: return AppLanguage.localized("Clear budget")
+        case .addRecurring: return AppLanguage.localized("Add recurring bill")
+        case .updateRecurring: return AppLanguage.localized("Update recurring bill")
+        case let .setRecurringActive(_, _, isActive): return isActive ? AppLanguage.localized("Resume recurring bill") : AppLanguage.localized("Pause recurring bill")
+        case .deleteRecurring: return AppLanguage.localized("Delete recurring bill")
+        case .postDueRecurring: return AppLanguage.localized("Post due recurring bills")
+        case .clearAllData: return AppLanguage.localized("Clear all finance data")
         }
     }
 
@@ -593,11 +605,11 @@ struct PendingAIAction: Identifiable {
         case let .deleteTransaction(_, title):
             return title
         case let .setBudget(amount):
-            return String(localized: "\(formatter.string(for: amount)) / month")
+            return AppLanguage.localized("\(formatter.string(for: amount)) / month")
         case .clearBudget:
-            return String(localized: "Remove the current monthly budget")
+            return AppLanguage.localized("Remove the current monthly budget")
         case let .addRecurring(title, amount, category, frequency, nextDueDate, _):
-            return String(localized: "\(title) · \(formatter.string(for: amount)) · \(frequency.localizedName) · next \(nextDueDate.formattedDate) · \(category.localizedName)")
+            return AppLanguage.localized("\(title) · \(formatter.string(for: amount)) · \(frequency.localizedName) · next \(nextDueDate.formattedDate) · \(category.localizedName)")
         case let .updateRecurring(_, currentTitle, title, amount, category, frequency, nextDueDate, notes, clearNotes):
             return Self.changeSummary(
                 target: currentTitle,
@@ -612,9 +624,9 @@ struct PendingAIAction: Identifiable {
         case let .setRecurringActive(_, title, _), let .deleteRecurring(_, title):
             return title
         case .postDueRecurring:
-            return String(localized: "Create transactions for every recurring bill currently due")
+            return AppLanguage.localized("Create transactions for every recurring bill currently due")
         case let .clearAllData(transactionCount, recurringCount):
-            return String(localized: "Delete \(transactionCount) transactions, \(recurringCount) recurring bills, and the budget")
+            return AppLanguage.localized("Delete \(transactionCount) transactions, \(recurringCount) recurring bills, and the budget")
         }
     }
 
@@ -652,14 +664,14 @@ struct PendingAIAction: Identifiable {
         clearNotes: Bool
     ) -> String {
         var changes: [String] = []
-        if let title { changes.append(String(localized: "name to \(title)")) }
-        if let amount { changes.append(String(localized: "amount to \(CurrencyFormatting.shared.string(for: amount))")) }
-        if let category { changes.append(String(localized: "category to \(category.localizedName)")) }
-        if let frequency { changes.append(String(localized: "frequency to \(frequency.localizedName)")) }
-        if let date { changes.append(String(localized: "date to \(date.formattedDate)")) }
-        if let notes { changes.append(String(localized: "notes to \(notes)")) }
-        if clearNotes { changes.append(String(localized: "remove notes")) }
-        return "\(target) · " + changes.joined(separator: String(localized: ", "))
+        if let title { changes.append(AppLanguage.localized("name to \(title)")) }
+        if let amount { changes.append(AppLanguage.localized("amount to \(CurrencyFormatting.shared.string(for: amount))")) }
+        if let category { changes.append(AppLanguage.localized("category to \(category.localizedName)")) }
+        if let frequency { changes.append(AppLanguage.localized("frequency to \(frequency.localizedName)")) }
+        if let date { changes.append(AppLanguage.localized("date to \(date.formattedDate)")) }
+        if let notes { changes.append(AppLanguage.localized("notes to \(notes)")) }
+        if clearNotes { changes.append(AppLanguage.localized("remove notes")) }
+        return "\(target) · " + changes.joined(separator: AppLanguage.localized(", "))
     }
 
     private static func defaultNextDueDate(for frequency: RecurrenceFrequency) -> Date {

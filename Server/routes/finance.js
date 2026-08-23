@@ -29,6 +29,29 @@ const ALLOWED_CATEGORIES = new Set([
     'Other'
 ]);
 
+const SUPPORTED_RESPONSE_LOCALES = new Set([
+    'ar-SA', 'bn-BD', 'de-DE', 'en-AU', 'en-CA', 'en-GB', 'en-US',
+    'es-MX', 'fr-CA', 'fr-FR', 'gu-IN', 'he', 'hi', 'hr', 'id', 'it',
+    'ja', 'kn-IN', 'ko', 'ml-IN', 'mr-IN', 'ms', 'nb', 'nl-NL',
+    'or-IN', 'pa-IN', 'pt-BR', 'ta-IN', 'te-IN', 'th', 'tr', 'uk',
+    'ur-PK', 'vi', 'zh-Hans', 'zh-Hant'
+]);
+
+function responseLocale(req) {
+    const bodyLocale = typeof req.body?.locale === 'string' ? req.body.locale.trim() : '';
+    if (SUPPORTED_RESPONSE_LOCALES.has(bodyLocale)) return bodyLocale;
+
+    const headerLocale = String(req.get('accept-language') || '')
+        .split(',')[0]
+        .split(';')[0]
+        .trim();
+    return SUPPORTED_RESPONSE_LOCALES.has(headerLocale) ? headerLocale : 'en-US';
+}
+
+function withResponseLanguage(systemPrompt, locale) {
+    return `${systemPrompt}\n\nResponse language: Reply in the language associated with BCP 47 locale ${locale}. Keep tool names, record IDs, category enum values, frequency enum values, dates, JSON keys, and other structured API fields exactly in their required contract format.`;
+}
+
 // ─── System prompts ────────────────────────────────────────────────────────────
 
 const INSIGHTS_SYSTEM = `You are a smart, practical personal finance assistant built into Finance Tracker: AI — a mobile app that helps people track expenses, manage recurring bills, and build healthier money habits.
@@ -233,6 +256,7 @@ Respond with only the JSON object — no explanation, no markdown code fences, n
 
 router.post('/ai/assistant', async (req, res) => {
     const { prompt, snapshot, conversation } = req.body;
+    const locale = responseLocale(req);
 
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
         return res.status(400).json({ error: 'Prompt is required.' });
@@ -253,7 +277,7 @@ router.post('/ai/assistant', async (req, res) => {
         appendConversationTurn(history, 'user', currentRequest);
 
         const response = await callClaudeWithTools({
-            system: ASSISTANT_SYSTEM,
+            system: withResponseLanguage(ASSISTANT_SYSTEM, locale),
             messages: history,
             tools: FINANCE_TOOLS,
             maxTokens: 2048
@@ -300,6 +324,7 @@ router.post('/ai/assistant', async (req, res) => {
 
 router.post('/ai/insights', async (req, res) => {
     const { prompt, financeSummary } = req.body;
+    const locale = responseLocale(req);
 
     if (!prompt || typeof prompt !== 'string') {
         return res.status(400).json({ error: 'Prompt is required.' });
@@ -315,7 +340,11 @@ router.post('/ai/insights', async (req, res) => {
 
     try {
         const userMessage = `Here is my current financial snapshot:\n\n${financeSummary}\n\nMy question: ${prompt}`;
-        const text = await callClaude({ system: INSIGHTS_SYSTEM, userMessage, maxTokens: 1024 });
+        const text = await callClaude({
+            system: withResponseLanguage(INSIGHTS_SYSTEM, locale),
+            userMessage,
+            maxTokens: 1024
+        });
 
         if (!text) {
             return res.status(502).json({ error: 'Claude returned an empty response.' });
@@ -329,6 +358,7 @@ router.post('/ai/insights', async (req, res) => {
 
 router.post('/ai/category-insight', async (req, res) => {
     const { category, amount, percentage, monthlyTotal, recentTransactions } = req.body;
+    const locale = responseLocale(req);
 
     if (!category || typeof category !== 'string' || !ALLOWED_CATEGORIES.has(category)) {
         return res.status(400).json({ error: 'Valid category is required.' });
@@ -349,7 +379,11 @@ Recent transactions: ${recentTransactions || 'none'}`;
 
         const system = `You are a concise personal finance analyst. Given one spending category with real data, write exactly 2-3 short sentences. Reference the specific dollar amounts. End with one concrete, actionable suggestion. No markdown, no bullet points, no greeting, no emoji — plain conversational text only.`;
 
-        const text = await callClaude({ system, userMessage, maxTokens: 200 });
+        const text = await callClaude({
+            system: withResponseLanguage(system, locale),
+            userMessage,
+            maxTokens: 200
+        });
 
         if (!text) {
             return res.status(502).json({ error: 'Claude returned an empty response.' });
