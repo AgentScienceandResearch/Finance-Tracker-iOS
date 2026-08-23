@@ -103,22 +103,22 @@ final class FinanceManager: ObservableObject {
 
     var budgetStatusText: String {
         guard let remainingBudgetThisMonth else {
-            return "No monthly budget set"
+            return AppLanguage.localized("No monthly budget set")
         }
 
         let formatter = CurrencyFormatting.shared
         if remainingBudgetThisMonth >= 0 {
-            return "\(formatter.string(for: remainingBudgetThisMonth)) left this month"
+            return AppLanguage.localized("\(formatter.string(for: remainingBudgetThisMonth)) left this month")
         }
 
-        return "Over budget by \(formatter.string(for: abs(remainingBudgetThisMonth)))"
+        return AppLanguage.localized("Over budget by \(formatter.string(for: abs(remainingBudgetThisMonth)))")
     }
 
     var syncStatusText: String {
         if let lastSuccessfulSyncAt {
-            return "Last synced \(lastSuccessfulSyncAt.timeAgo)"
+            return AppLanguage.localized("Last synced \(lastSuccessfulSyncAt.timeAgo)")
         }
-        return remoteSyncEnabled ? "Sync pending" : "Cloud sync disabled"
+        return remoteSyncEnabled ? AppLanguage.localized("Sync pending") : AppLanguage.localized("Cloud sync disabled")
     }
 
     var upcomingRecurringExpenses: [RecurringExpense] {

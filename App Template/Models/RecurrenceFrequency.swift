@@ -9,6 +9,16 @@ enum RecurrenceFrequency: String, CaseIterable, Codable, Identifiable {
 
     var id: String { rawValue }
 
+    var localizedName: String {
+        switch self {
+        case .weekly:    return AppLanguage.localized("Weekly")
+        case .biweekly:  return AppLanguage.localized("Biweekly")
+        case .monthly:   return AppLanguage.localized("Monthly")
+        case .quarterly: return AppLanguage.localized("Quarterly")
+        case .yearly:    return AppLanguage.localized("Yearly")
+        }
+    }
+
     var monthlyMultiplier: Decimal {
         switch self {
         case .weekly:

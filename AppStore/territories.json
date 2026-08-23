@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-08-23",
+  "policy": "Available in every Apple storefront currently supported by the app's commercial AI provider, excluding all EU member states and mainland China.",
+  "availableInNewTerritories": false,
+  "euExcluded": [
+    "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN",
+    "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX",
+    "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"
+  ],
+  "aiProviderUnsupported": [
+    "AFG", "AIA", "BLR", "BMU", "CHN", "COD", "CYM", "HKG", "MAC",
+    "MMR", "MSR", "RUS", "TCA", "VEN", "VGB", "XKS", "YEM"
+  ],
+  "expectedAppleStorefronts": 175,
+  "expectedAvailableStorefronts": 131
+}

@@ -230,13 +230,13 @@ enum APIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return "Invalid response from server"
+            return AppLanguage.localized("Invalid response from server")
         case .unauthorized:
-            return "Unauthorized - please sign in again"
+            return AppLanguage.localized("Unauthorized - please sign in again")
         case .serverError(let code):
-            return "Server error: \(code)"
+            return AppLanguage.localized("Server error: \(code)")
         case .decodingError:
-            return "Failed to decode response"
+            return AppLanguage.localized("Failed to decode response")
         case .networkError(let message):
             return message
         }

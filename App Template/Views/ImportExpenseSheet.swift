@@ -338,7 +338,7 @@ private struct DraftRow: View {
                         .foregroundStyle(FT.t1)
                         .lineLimit(1)
                     HStack(spacing: 6) {
-                        Text(item.draft.category.rawValue)
+                        Text(verbatim: item.draft.category.localizedName)
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(item.draft.category.color)
                             .padding(.horizontal, 7)

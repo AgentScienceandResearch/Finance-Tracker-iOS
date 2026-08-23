@@ -289,7 +289,7 @@ struct AnimatedGradientBackground: View {
 
 // MARK: - Frosted Glass Effect Button
 struct GlassButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String?
     let action: () -> Void
     var isLoading = false
@@ -340,7 +340,7 @@ struct GlassButton: View {
 
 // MARK: - Animated Gradient Text
 struct GradientText: View {
-    let text: String
+    let text: LocalizedStringKey
     let gradient: LinearGradient
     var font: Font = .system(size: 28, weight: .bold, design: .rounded)
     
@@ -421,8 +421,8 @@ struct Particle {
 
 // MARK: - Section Header with Accent
 struct SectionHeaderView: View {
-    let title: String
-    let subtitle: String?
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey?
     var accentColor: Color = .cyan
     
     var body: some View {
@@ -475,7 +475,7 @@ struct BackdropBlur<Content: View>: View {
 
 // MARK: - Animated Glass Button
 struct AnimatedGlassButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String?
     let action: () -> Void
     var isLoading = false
@@ -547,7 +547,7 @@ struct AnimatedGlassButton: View {
 
 // MARK: - Floating Glass Button
 struct FloatingGlassButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String
     let action: () -> Void
     

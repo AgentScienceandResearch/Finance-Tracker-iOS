@@ -86,6 +86,7 @@ describe('Finance AI routes', () => {
             .post('/api/finance/ai/assistant')
             .send({
                 prompt: 'Add lunch for $12 and delete the old coffee charge',
+                locale: 'fr-FR',
                 snapshot: {
                     generatedAt: '2026-08-22T12:00:00Z',
                     currencyCode: 'CAD',
@@ -105,6 +106,8 @@ describe('Finance AI routes', () => {
         expect(response.body.actions[1].input.transactionId).toBe(transactionId);
 
         const requestPayload = mockCreate.mock.calls[0][0];
+        expect(requestPayload.system).toContain('BCP 47 locale fr-FR');
+        expect(requestPayload.system).toContain('tool names');
         expect(requestPayload.tools.map(tool => tool.name)).toEqual(expect.arrayContaining([
             'add_transaction',
             'update_transaction',
@@ -116,6 +119,23 @@ describe('Finance AI routes', () => {
         ]));
         expect(requestPayload.messages[0].role).toBe('user');
         expect(requestPayload.messages[0].content).toContain(transactionId);
+    });
+
+    test('POST /api/finance/ai/insights uses a supported Accept-Language locale', async () => {
+        mockCreate.mockResolvedValueOnce({
+            content: [{ type: 'text', text: 'نصيحة مالية' }]
+        });
+
+        const response = await request(app)
+            .post('/api/finance/ai/insights')
+            .set('Accept-Language', 'ar-SA')
+            .send({
+                prompt: 'Give me one savings idea',
+                financeSummary: 'This month total: $950'
+            });
+
+        expect(response.status).toBe(200);
+        expect(mockCreate.mock.calls[0][0].system).toContain('BCP 47 locale ar-SA');
     });
 
     test('POST /api/finance/ai/assistant ignores unknown tool calls', async () => {

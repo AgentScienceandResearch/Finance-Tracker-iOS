@@ -27,6 +27,33 @@ enum ExpenseCategory: String, CaseIterable, Codable, Identifiable {
 
     var id: String { rawValue }
 
+    var localizedName: String {
+        switch self {
+        case .foodDining:        return AppLanguage.localized("Food & Dining")
+        case .transportation:    return AppLanguage.localized("Transportation")
+        case .housing:           return AppLanguage.localized("Housing")
+        case .utilities:         return AppLanguage.localized("Utilities")
+        case .entertainment:     return AppLanguage.localized("Entertainment")
+        case .shopping:          return AppLanguage.localized("Shopping")
+        case .health:            return AppLanguage.localized("Health")
+        case .travel:            return AppLanguage.localized("Travel")
+        case .education:         return AppLanguage.localized("Education")
+        case .subscriptions:     return AppLanguage.localized("Subscriptions")
+        case .incomeOffset:      return AppLanguage.localized("Income Offset")
+        case .medical:           return AppLanguage.localized("Medical")
+        case .personalCare:      return AppLanguage.localized("Personal Care")
+        case .fitness:           return AppLanguage.localized("Fitness")
+        case .pets:              return AppLanguage.localized("Pets")
+        case .giftsAndDonations: return AppLanguage.localized("Gifts & Donations")
+        case .insurance:         return AppLanguage.localized("Insurance")
+        case .homeMaintenance:   return AppLanguage.localized("Home Maintenance")
+        case .savings:           return AppLanguage.localized("Savings")
+        case .business:          return AppLanguage.localized("Business")
+        case .income:            return AppLanguage.localized("Income")
+        case .other:             return AppLanguage.localized("Other")
+        }
+    }
+
     var isIncome: Bool {
         self == .income || self == .incomeOffset
     }

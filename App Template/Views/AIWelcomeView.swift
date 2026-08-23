@@ -261,10 +261,10 @@ private enum AIWelcomeTheme {
 
 private struct AIWelcomeFeature: Identifiable {
     let icon: String
-    let title: String
-    let detail: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
 
-    var id: String { title }
+    var id: String { icon }
 }
 
 private struct AIWelcomeFeatureRow: View {
@@ -324,7 +324,7 @@ private struct AIWelcomeOrbitIcon: View {
 
 private struct AIWelcomeResultChip: View {
     let icon: String
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         Label(text, systemImage: icon)

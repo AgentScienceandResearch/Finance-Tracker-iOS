@@ -200,7 +200,7 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
             displayPrice: product.displayPrice,
             pricePerMonth: pricePerMonth(for: product),
             trialDuration: trialDuration(for: product),
-            savingsLabel: product.id == yearlyProductID ? "Save 40%" : nil
+            savingsLabel: product.id == yearlyProductID ? AppLanguage.localized("Save 40%") : nil
         )
     }
 
@@ -209,30 +209,30 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
               offer.paymentMode == .freeTrial else { return nil }
         let period = offer.period
         switch period.unit {
-        case .day:   return period.value == 1 ? "1 day" : "\(period.value) days"
-        case .week:  return period.value == 1 ? "1 week" : "\(period.value) weeks"
-        case .month: return period.value == 1 ? "1 month" : "\(period.value) months"
-        case .year:  return period.value == 1 ? "1 year" : "\(period.value) years"
+        case .day:   return period.value == 1 ? AppLanguage.localized("1 day") : AppLanguage.localized("\(period.value) days")
+        case .week:  return period.value == 1 ? AppLanguage.localized("1 week") : AppLanguage.localized("\(period.value) weeks")
+        case .month: return period.value == 1 ? AppLanguage.localized("1 month") : AppLanguage.localized("\(period.value) months")
+        case .year:  return period.value == 1 ? AppLanguage.localized("1 year") : AppLanguage.localized("\(period.value) years")
         @unknown default: return nil
         }
     }
 
     private static func billingPeriod(for product: Product) -> String {
         guard let period = product.subscription?.subscriptionPeriod else {
-            return "Unknown"
+            return AppLanguage.localized("Unknown")
         }
 
         switch period.unit {
         case .day:
-            return "\(period.value) day\(period.value == 1 ? "" : "s")"
+            return period.value == 1 ? AppLanguage.localized("1 day") : AppLanguage.localized("\(period.value) days")
         case .week:
-            return "\(period.value) week\(period.value == 1 ? "" : "s")"
+            return period.value == 1 ? AppLanguage.localized("1 week") : AppLanguage.localized("\(period.value) weeks")
         case .month:
-            return "\(period.value) month\(period.value == 1 ? "" : "s")"
+            return period.value == 1 ? AppLanguage.localized("1 month") : AppLanguage.localized("\(period.value) months")
         case .year:
-            return "\(period.value) year\(period.value == 1 ? "" : "s")"
+            return period.value == 1 ? AppLanguage.localized("1 year") : AppLanguage.localized("\(period.value) years")
         @unknown default:
-            return "Unknown"
+            return AppLanguage.localized("Unknown")
         }
     }
 
@@ -257,7 +257,7 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
         let perMonth = product.price / months
         // Format in the product's own currency so it rounds to 2 places with the
         // right symbol (was dumping the raw Decimal, e.g. "4.16583333…/mo").
-        return "~\(perMonth.formatted(product.priceFormatStyle))/mo"
+        return AppLanguage.localized("~\(perMonth.formatted(product.priceFormatStyle))/mo")
     }
 
     static func makeForTesting(

@@ -4,9 +4,11 @@ import XCTest
 @testable import App_Template
 #elseif canImport(TemplateApp)
 @testable import TemplateApp
+#elseif canImport(FinanceTrackerAI)
+@testable import FinanceTrackerAI
 #endif
 
-#if canImport(App_Template) || canImport(TemplateApp)
+#if canImport(App_Template) || canImport(TemplateApp) || canImport(FinanceTrackerAI)
 final class AppConfigTests: XCTestCase {
     private struct StubEnvironment: EnvironmentValueProviding {
         let environment: [String: String]
@@ -84,6 +86,43 @@ final class AppConfigTests: XCTestCase {
         )
 
         XCTAssertEqual(config.apiURL.absoluteString, "http://localhost:8000")
+    }
+
+    @MainActor
+    func testLanguageSelectionPersistsAcrossControllerRelaunch() {
+        let suiteName = "AppLanguageTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create isolated defaults")
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let firstLaunch = AppLanguageController(defaults: defaults)
+        XCTAssertEqual(firstLaunch.selectedIdentifier, AppLanguage.systemDefaultIdentifier)
+
+        firstLaunch.select("fr-FR")
+        XCTAssertEqual(defaults.string(forKey: AppLanguage.storageKey), "fr-FR")
+
+        let relaunched = AppLanguageController(defaults: defaults)
+        XCTAssertEqual(relaunched.selectedIdentifier, "fr-FR")
+        XCTAssertEqual(relaunched.locale.identifier, "fr-FR")
+
+        relaunched.select("ar-SA")
+        XCTAssertEqual(relaunched.layoutDirection, .rightToLeft)
+
+        relaunched.select(AppLanguage.systemDefaultIdentifier)
+        XCTAssertNil(defaults.string(forKey: AppLanguage.storageKey))
+    }
+
+    func testLanguageListMatchesCompiledLocalizationCount() {
+        XCTAssertEqual(AppLanguage.supportedIdentifiers.count, 36)
+        XCTAssertEqual(Set(AppLanguage.supportedIdentifiers).count, 36)
+        XCTAssertTrue(AppLanguage.supportedIdentifiers.contains("hi"))
+        XCTAssertTrue(AppLanguage.supportedIdentifiers.contains("ar-SA"))
+        XCTAssertTrue(AppLanguage.supportedIdentifiers.contains("he"))
+        XCTAssertTrue(AppLanguage.supportedIdentifiers.contains("nb"))
+        XCTAssertTrue(AppLanguage.supportedIdentifiers.allSatisfy {
+            !AppLanguage.nativeDisplayName(for: $0).isEmpty
+        })
     }
 }
 #endif

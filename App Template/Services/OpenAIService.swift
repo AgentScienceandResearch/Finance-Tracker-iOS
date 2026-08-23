@@ -110,11 +110,13 @@ final class OpenAIService: OpenAIServing {
         request.httpMethod = "POST"
         request.timeoutInterval = 60
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
 
         let payload = FinanceAssistantRequest(
             prompt: prompt,
             snapshot: snapshot,
-            conversation: conversation
+            conversation: conversation,
+            locale: AppLanguage.requestIdentifier
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -129,8 +131,12 @@ final class OpenAIService: OpenAIServing {
         request.httpMethod = "POST"
         request.timeoutInterval = 45
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
 
-        let payload = ReceiptParseRequest(rawText: rawText)
+        let payload = ReceiptParseRequest(
+            rawText: rawText,
+            locale: AppLanguage.requestIdentifier
+        )
         request.httpBody = try JSONEncoder().encode(payload)
 
         let response: ReceiptParseResponse = try await execute(request: request)
@@ -152,8 +158,13 @@ final class OpenAIService: OpenAIServing {
         request.httpMethod = "POST"
         request.timeoutInterval = 60
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
 
-        let payload = ImageParseRequest(imageBase64: imageBase64, mimeType: mimeType)
+        let payload = ImageParseRequest(
+            imageBase64: imageBase64,
+            mimeType: mimeType,
+            locale: AppLanguage.requestIdentifier
+        )
         request.httpBody = try JSONEncoder().encode(payload)
 
         let response: ImageParseResponse = try await execute(request: request)
@@ -177,13 +188,16 @@ final class OpenAIService: OpenAIServing {
         request.httpMethod = "POST"
         request.timeoutInterval = 30
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
 
         let payload = CategoryInsightRequest(
             category: category,
             amount: amount,
             percentage: percentage,
             monthlyTotal: monthlyTotal,
-            recentTransactions: recentTransactions
+            recentTransactions: recentTransactions,
+            locale: AppLanguage.requestIdentifier,
+            responseLanguage: AppLanguage.responseLanguageName
         )
         request.httpBody = try JSONEncoder().encode(payload)
 
@@ -207,7 +221,7 @@ final class OpenAIService: OpenAIServing {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
-            let message = parseErrorMessage(from: data) ?? "Server AI request failed with status \(httpResponse.statusCode)."
+            let message = parseErrorMessage(from: data) ?? AppLanguage.localized("Server AI request failed with status \(httpResponse.statusCode).")
             logger.error("Server AI request failed: \(message)", category: "openai")
             throw OpenAIServiceError.requestFailed(message)
         }
@@ -233,6 +247,7 @@ final class OpenAIService: OpenAIServing {
 private struct ImageParseRequest: Encodable {
     let imageBase64: String
     let mimeType: String
+    let locale: String
 }
 
 private struct ImageTransaction: Decodable {
@@ -262,6 +277,8 @@ private struct CategoryInsightRequest: Encodable {
     let percentage: Double
     let monthlyTotal: Double
     let recentTransactions: String
+    let locale: String
+    let responseLanguage: String
 }
 
 private struct CategoryInsightResponse: Decodable {
@@ -272,10 +289,12 @@ private struct FinanceAssistantRequest: Encodable {
     let prompt: String
     let snapshot: FinanceAISnapshot
     let conversation: [FinanceAIConversationTurn]
+    let locale: String
 }
 
 private struct ReceiptParseRequest: Encodable {
     let rawText: String
+    let locale: String
 }
 
 private struct ReceiptParseResponse: Decodable {
@@ -307,13 +326,13 @@ enum OpenAIServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidRequest:
-            return "Unable to prepare the AI request."
+            return AppLanguage.localized("Unable to prepare the AI request.")
         case .invalidResponse:
-            return "Received an invalid response from the finance server."
+            return AppLanguage.localized("Received an invalid response from the finance server.")
         case .requestFailed(let message):
             return message
         case .invalidStructuredResponse:
-            return "AI response could not be decoded."
+            return AppLanguage.localized("AI response could not be decoded.")
         }
     }
 }
