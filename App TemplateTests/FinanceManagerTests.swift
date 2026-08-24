@@ -125,7 +125,10 @@ final class FinanceManagerTests: XCTestCase {
 
         XCTAssertEqual(manager.remainingBudgetThisMonth, Decimal(75))
         XCTAssertNotNil(manager.monthlyBudgetUsageRatio)
-        XCTAssertEqual(manager.budgetStatusText.contains("left this month"), true)
+        let expectedStatus = AppLanguage.localized(
+            "\(CurrencyFormatting.shared.string(for: Decimal(75))) left this month"
+        )
+        XCTAssertEqual(manager.budgetStatusText, expectedStatus)
     }
 
     func testIncomeDoesNotInflateSpendingOrBudgetUsage() {

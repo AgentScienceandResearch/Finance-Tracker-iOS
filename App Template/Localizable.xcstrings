@@ -33318,25 +33318,25 @@
         "es-MX": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MARCA_1__"
+            "value": "Finance Tracker"
           }
         },
         "fr-CA": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MARQUE_1__"
+            "value": "Finance Tracker"
           }
         },
         "fr-FR": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MARQUE_1__"
+            "value": "Finance Tracker"
           }
         },
         "gu-IN": {
           "stringUnit": {
             "state": "translated",
-            "value": "__બ્રાંડ_1__"
+            "value": "Finance Tracker"
           }
         },
         "he": {
@@ -33348,7 +33348,7 @@
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "__ब्रांड_1__"
+            "value": "Finance Tracker"
           }
         },
         "hr": {
@@ -33360,19 +33360,19 @@
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MEREK_1__"
+            "value": "Finance Tracker"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MARCA_1__"
+            "value": "Finance Tracker"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "__ブランド_1__"
+            "value": "Finance Tracker"
           }
         },
         "kn-IN": {
@@ -33384,13 +33384,13 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "__브랜드_1__"
+            "value": "Finance Tracker"
           }
         },
         "ml-IN": {
           "stringUnit": {
             "state": "translated",
-            "value": "__ബ്രാൻഡ്_1__"
+            "value": "Finance Tracker"
           }
         },
         "mr-IN": {
@@ -33402,19 +33402,19 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "__JENAMA_1__"
+            "value": "Finance Tracker"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MERKE_1__"
+            "value": "Finance Tracker"
           }
         },
         "nl-NL": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MERK_1__"
+            "value": "Finance Tracker"
           }
         },
         "or-IN": {
@@ -33432,7 +33432,7 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MARCA_1__"
+            "value": "Finance Tracker"
           }
         },
         "ta-IN": {
@@ -33450,7 +33450,7 @@
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "__แบรนด์_1__"
+            "value": "Finance Tracker"
           }
         },
         "tr": {
@@ -33468,31 +33468,31 @@
         "ur-PK": {
           "stringUnit": {
             "state": "translated",
-            "value": "__برانڈ_1__"
+            "value": "Finance Tracker"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "__THƯƠNG HIỆU_1__"
+            "value": "Finance Tracker"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "__品牌_1__"
+            "value": "Finance Tracker"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "__品牌_1__"
+            "value": "Finance Tracker"
           }
         },
         "no": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MERKE_1__"
+            "value": "Finance Tracker"
           }
         }
       }
@@ -33574,7 +33574,7 @@
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "__ब्रांड_1__ निर्यात"
+            "value": "Finance Tracker निर्यात"
           }
         },
         "hr": {
@@ -33628,19 +33628,19 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "__JENAMA_1__ Eksport"
+            "value": "Finance Tracker Eksport"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MERKE_1__ Eksporter"
+            "value": "Finance Tracker-eksport"
           }
         },
         "nl-NL": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MERK_1__ Exporteren"
+            "value": "Finance Tracker-export"
           }
         },
         "or-IN": {
@@ -33718,7 +33718,7 @@
         "no": {
           "stringUnit": {
             "state": "translated",
-            "value": "__MERKE_1__ Eksporter"
+            "value": "Finance Tracker-eksport"
           }
         }
       }
@@ -33800,7 +33800,7 @@
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "__ब्रांड_1__ JSON निर्यात"
+            "value": "Finance Tracker JSON निर्यात"
           }
         },
         "hr": {
@@ -36708,13 +36708,13 @@
         "fr-CA": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un rythme soutenu : vous n'avez utilisé que %lld % % de votre budget ce mois-ci. Continuez comme ça! 🎯"
+            "value": "Un rythme soutenu : vous n'avez utilisé que %lld %% de votre budget ce mois-ci. Continuez comme ça! 🎯"
           }
         },
         "fr-FR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un rythme soutenu : vous n'avez utilisé que %lld % % de votre budget ce mois-ci. Continuez comme ça! 🎯"
+            "value": "Un rythme soutenu : vous n'avez utilisé que %lld %% de votre budget ce mois-ci. Continuez comme ça! 🎯"
           }
         },
         "gu-IN": {
@@ -69692,7 +69692,7 @@
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "__ब्रांड_2__ आज़माएं"
+            "value": "Finance AI आज़माएं"
           }
         },
         "hr": {
