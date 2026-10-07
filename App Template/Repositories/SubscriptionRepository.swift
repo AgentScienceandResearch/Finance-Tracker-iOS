@@ -7,7 +7,12 @@ protocol SubscriptionRepositorying: AnyObject {
     func purchase(_ product: Product) async throws -> Product.PurchaseResult
     func syncPurchases() async throws
     func currentEntitledProductIDs() async -> Set<String>
+    func currentEntitlementJWS(for productIDs: [String]) async -> String?
     func transactionUpdates() -> AsyncStream<VerificationResult<Transaction>>
+}
+
+extension SubscriptionRepositorying {
+    func currentEntitlementJWS(for productIDs: [String]) async -> String? { nil }
 }
 
 @MainActor
@@ -33,6 +38,24 @@ final class StoreKitSubscriptionRepository: SubscriptionRepositorying {
         }
 
         return ids
+    }
+
+    /// Signed transaction the AI server verifies with Apple's certificates. Uses the
+    /// entitlement that expires last when more than one is active.
+    func currentEntitlementJWS(for productIDs: [String]) async -> String? {
+        var latest: (expires: Date, jws: String)?
+
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let transaction) = result,
+                  productIDs.contains(transaction.productID),
+                  transaction.revocationDate == nil else { continue }
+            let expires = transaction.expirationDate ?? .distantFuture
+            if latest == nil || expires > latest!.expires {
+                latest = (expires, result.jwsRepresentation)
+            }
+        }
+
+        return latest?.jws
     }
 
     func transactionUpdates() -> AsyncStream<VerificationResult<Transaction>> {

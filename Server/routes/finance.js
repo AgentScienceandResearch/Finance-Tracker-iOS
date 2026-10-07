@@ -1,6 +1,7 @@
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const { getClaudeConfig } = require('../config/env');
+const { requireAIAccess } = require('../middleware/aiAccess');
 
 const router = express.Router();
 
@@ -254,7 +255,11 @@ Respond with only the JSON object — no explanation, no markdown code fences, n
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-router.post('/ai/assistant', async (req, res) => {
+// Chat gets a small free monthly allowance; scanning and category insights are Pro.
+const freeAllowance = requireAIAccess();
+const proOnly = requireAIAccess({ proOnly: true });
+
+router.post('/ai/assistant', freeAllowance, async (req, res) => {
     const { prompt, snapshot, conversation } = req.body;
     const locale = responseLocale(req);
 
@@ -322,7 +327,7 @@ router.post('/ai/assistant', async (req, res) => {
     }
 });
 
-router.post('/ai/insights', async (req, res) => {
+router.post('/ai/insights', freeAllowance, async (req, res) => {
     const { prompt, financeSummary } = req.body;
     const locale = responseLocale(req);
 
@@ -356,7 +361,7 @@ router.post('/ai/insights', async (req, res) => {
     }
 });
 
-router.post('/ai/category-insight', async (req, res) => {
+router.post('/ai/category-insight', proOnly, async (req, res) => {
     const { category, amount, percentage, monthlyTotal, recentTransactions } = req.body;
     const locale = responseLocale(req);
 
@@ -395,7 +400,7 @@ Recent transactions: ${recentTransactions || 'none'}`;
     }
 });
 
-router.post('/ai/parse-receipt', async (req, res) => {
+router.post('/ai/parse-receipt', proOnly, async (req, res) => {
     const { rawText } = req.body;
 
     if (!rawText || typeof rawText !== 'string') {
@@ -459,7 +464,7 @@ Rules:
 - If the image contains no financial data, return an empty array [].
 - Respond with only the JSON array — no explanation, no markdown fences, no surrounding text.`;
 
-router.post('/ai/parse-image', async (req, res) => {
+router.post('/ai/parse-image', proOnly, async (req, res) => {
     const { imageBase64, mimeType } = req.body;
 
     if (!imageBase64 || typeof imageBase64 !== 'string') {

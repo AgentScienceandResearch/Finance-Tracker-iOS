@@ -164,6 +164,9 @@ class SubscriptionManager: NSObject, ObservableObject, SubscriptionManaging {
         let subscribed = entitlements.contains { Self.subscriptionProductIDs.contains($0) }
         
         self.isSubscribed = subscribed
+        AIAccessCredentials.shared.transactionJWS = subscribed
+            ? await repository.currentEntitlementJWS(for: Self.subscriptionProductIDs)
+            : nil
         UserDefaults.standard.set(subscribed, forKey: Self.subscriptionStatusKey)
         subscriptionStatusLoaded = true
     }

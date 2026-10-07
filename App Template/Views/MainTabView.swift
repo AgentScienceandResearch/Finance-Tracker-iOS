@@ -96,6 +96,7 @@ struct MainTabView: View {
     @State private var showAIWelcome     = false
     @State private var showAIUsePaywall  = false
     @State private var aiUsePaywallMode: PaywallMode = .initial
+    @State private var showProPaywall    = false
 
     let canPresentAIWelcome: Bool
 
@@ -148,6 +149,13 @@ struct MainTabView: View {
                     )
                 }
         }
+        .fullScreenCover(isPresented: $showProPaywall) {
+            PaywallView(
+                subscriptionManager: subscriptionManager,
+                mode: .initial,
+                onDismiss: { showProPaywall = false }
+            )
+        }
         .fullScreenCover(isPresented: $showAIWelcome) {
             AIWelcomeView(
                 onTryAI: { completeAIWelcome(openAssistant: true) },
@@ -171,8 +179,26 @@ struct MainTabView: View {
         .onChange(of: financeAIManager.successfulAssistantResponseCount) { _, _ in
             presentPaywallAfterSuccessfulAIUse()
         }
+        .onChange(of: financeAIManager.upgradeRequiredCount) { _, _ in
+            guard !subscriptionManager.isSubscribed else { return }
+            aiUsePaywallMode = .initial
+            showAIUsePaywall = true
+        }
         .onChange(of: subscriptionManager.isSubscribed) { _, isSubscribed in
-            if isSubscribed { showAIUsePaywall = false }
+            if isSubscribed {
+                showAIUsePaywall = false
+                showProPaywall = false
+            }
+        }
+    }
+
+    /// Runs a Pro-only action, or shows the paywall on the free plan.
+    private func requirePro(_ feature: String, _ action: () -> Void) {
+        if subscriptionManager.isSubscribed {
+            action()
+        } else {
+            analytics.track(event: AnalyticsEvent(name: "pro_gate_shown", properties: ["feature": feature]))
+            showProPaywall = true
         }
     }
 
@@ -233,16 +259,16 @@ struct MainTabView: View {
                 onOpenSettings:  { selectedTab = .settings },
                 onSignIn:        { showAuthentication = true },
                 onAddExpense:    { analytics.track(event: AnalyticsEvent(name: "dash_add_expense")); showAddExpense = true },
-                onScanReceipt:   { analytics.track(event: AnalyticsEvent(name: "dash_scan")); showReceiptScanner = true },
+                onScanReceipt:   { analytics.track(event: AnalyticsEvent(name: "dash_scan")); requirePro("receipt_scan") { showReceiptScanner = true } },
                 onAddIncome:     { showAddIncome = true },
-                onImport:        { analytics.track(event: AnalyticsEvent(name: "dash_import")); showImport = true },
+                onImport:        { analytics.track(event: AnalyticsEvent(name: "dash_import")); requirePro("photo_import") { showImport = true } },
                 onAskAI:         { showAIAssistant = true }
             )
         case .expenses:
             ExpensesTabView(
                 financeManager: financeManager,
                 onAddExpense:  { showAddExpense = true },
-                onScanReceipt: { showReceiptScanner = true },
+                onScanReceipt: { requirePro("receipt_scan") { showReceiptScanner = true } },
                 onAskAI:       { showAIAssistant = true }
             )
         case .recurring:
@@ -1503,6 +1529,7 @@ private struct RecurringRow: View {
 private struct InsightsTabView: View {
     @ObservedObject var financeManager: FinanceManager
     @EnvironmentObject private var financeAIManager: FinanceAIManager
+    @EnvironmentObject private var subscriptionManager: SubscriptionManager
     let onAskAI: () -> Void
 
     @State private var selectedCategoryIndex: Int? = nil
@@ -1748,7 +1775,8 @@ private struct InsightsTabView: View {
                 amount: NSDecimalNumber(decimal: item.total).doubleValue,
                 percentage: item.percentage,
                 monthlyTotal: monthlyTotal,
-                recentTransactions: recentTx
+                recentTransactions: recentTx,
+                useAI: subscriptionManager.isSubscribed
             )
             isLoadingInsight = false
         }
@@ -2067,7 +2095,9 @@ private struct FinanceSettingsTabView: View {
                                       isOn: Binding(
                                         get: { billReminders.isEnabled },
                                         set: { wantsOn in
-                                            if wantsOn {
+                                            if wantsOn && !subscriptionManager.isSubscribed {
+                                                showSubscriptionPaywall = true
+                                            } else if wantsOn {
                                                 Task { await billReminders.enable(with: financeManager.upcomingRecurringExpenses) }
                                             } else {
                                                 billReminders.disable()
@@ -2961,6 +2991,16 @@ private struct AIAssistantSheet: View {
                 if let err = aiManager.errorMessage {
                     Text(err).font(.system(size: 12)).foregroundStyle(.red)
                         .padding(.horizontal, 16)
+                }
+
+                if let remaining = aiManager.freeMessagesRemaining {
+                    Text(remaining == 1
+                         ? AppLanguage.localized("1 free AI message left this month")
+                         : AppLanguage.localized("\(remaining) free AI messages left this month"))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(remaining == 0 ? FT.green : FT.t2)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 6)
                 }
 
                 HStack(spacing: 10) {

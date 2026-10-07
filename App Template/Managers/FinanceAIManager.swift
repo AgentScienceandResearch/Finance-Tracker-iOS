@@ -11,6 +11,11 @@ final class FinanceAIManager: ObservableObject {
     /// Typed actions proposed by the model. They are always review-only until the
     /// user explicitly applies the batch in the assistant sheet.
     @Published private(set) var pendingActions: [PendingAIAction] = []
+    /// Free AI messages left this month; nil for subscribers or before the first reply.
+    @Published private(set) var freeMessagesRemaining: Int?
+    /// Increments whenever the server refuses a request because Pro is required,
+    /// so the presenting view can show the paywall.
+    @Published private(set) var upgradeRequiredCount = 0
 
     var pendingAction: PendingAIAction? { pendingActions.first }
 
@@ -67,6 +72,7 @@ final class FinanceAIManager: ObservableObject {
                         : message
                 ))
                 pendingActions = actions
+                freeMessagesRemaining = AIAccessCredentials.shared.freeMessagesRemaining
                 successfulAssistantResponseCount += 1
             } else {
                 messages.append(AIChatMessage(
@@ -74,6 +80,14 @@ final class FinanceAIManager: ObservableObject {
                     content: localFallbackInsight(for: trimmedPrompt, financeManager: financeManager)
                 ))
             }
+        } catch OpenAIServiceError.subscriptionRequired {
+            freeMessagesRemaining = 0
+            messages.append(AIChatMessage(
+                role: .assistant,
+                content: AppLanguage.localized("You've used this month's free AI messages. Upgrade to Pro for unlimited AI, receipt scanning, and bill reminders.")
+            ))
+            upgradeRequiredCount += 1
+            analytics.track(event: AnalyticsEvent(name: "ai_free_limit_reached"))
         } catch {
             let fallback = localFallbackInsight(for: trimmedPrompt, financeManager: financeManager)
             messages.append(AIChatMessage(role: .assistant, content: fallback))
@@ -108,6 +122,10 @@ final class FinanceAIManager: ObservableObject {
             }
 
             return localReceiptFallback(rawText: trimmedText)
+        } catch OpenAIServiceError.subscriptionRequired {
+            errorMessage = AppLanguage.localized("Receipt scanning is part of Pro.")
+            upgradeRequiredCount += 1
+            return nil
         } catch {
             logger.warning("Receipt parsing failed: \(error.localizedDescription)", category: "finance_ai")
             errorMessage = AppLanguage.localized("Couldn't read that receipt automatically. Please review the details.")
@@ -127,6 +145,10 @@ final class FinanceAIManager: ObservableObject {
 
         do {
             return try await service.parseImage(imageBase64: imageBase64, mimeType: mimeType)
+        } catch OpenAIServiceError.subscriptionRequired {
+            errorMessage = AppLanguage.localized("Receipt scanning is part of Pro.")
+            upgradeRequiredCount += 1
+            return []
         } catch {
             logger.warning("Image parsing failed: \(error.localizedDescription)", category: "finance_ai")
             errorMessage = AppLanguage.localized("Couldn't scan that image. Try again or add the expense manually.")
@@ -139,10 +161,11 @@ final class FinanceAIManager: ObservableObject {
         amount: Double,
         percentage: Double,
         monthlyTotal: Double,
-        recentTransactions: String
+        recentTransactions: String,
+        useAI: Bool = true
     ) async -> String? {
         do {
-            if service.isConfigured {
+            if useAI, service.isConfigured {
                 return try await service.getCategoryInsight(
                     category: category,
                     amount: amount,

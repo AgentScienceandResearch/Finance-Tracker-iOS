@@ -39,6 +39,7 @@
 		8646DD833AD7DF949B36D2E3 /* ReceiptDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F2580B4692163C0B383BEBB /* ReceiptDraft.swift */; };
 		86E5B49FFFC4C85C2CFC650A /* AuthenticationManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968843BADE0D4458604AD7FB /* AuthenticationManaging.swift */; };
 		8DFA9C8C2EC8C73914404E47 /* FinanceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C3C7531A0F9BA7F90A5C5E /* FinanceManagerTests.swift */; };
+		8EACE21AA99A79D73CB7D81C /* AIAccessCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A60AC62B1A6642FC39E5AEB /* AIAccessCredentials.swift */; };
 		92655633C4274B761A0BA4BD /* FlowViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871ADDE4BA855712D146CC58 /* FlowViewModelTests.swift */; };
 		944C7F8E9F847EC1FA6E5F29 /* FinanceAIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB7789C4048BE1742C5F50 /* FinanceAIManager.swift */; };
 		95ED9C54C840799C78927BBB /* UserStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BF28296FDF9AA07370CC451 /* UserStoring.swift */; };
@@ -92,6 +93,7 @@
 		1A4357B693A9A8D1CFC172C0 /* AIWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIWelcomeView.swift; sourceTree = "<group>"; };
 		230F65786883781A66EF931E /* AppConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigTests.swift; sourceTree = "<group>"; };
 		29EDA968A520A7D7FE07A9D5 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		2A60AC62B1A6642FC39E5AEB /* AIAccessCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAccessCredentials.swift; sourceTree = "<group>"; };
 		2B1179F38E1A5E65BB151423 /* SubscriptionRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionRepository.swift; sourceTree = "<group>"; };
 		311C928CD654B89422BDD40C /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		321EF5B6079B968EBA8D6D0F /* RecurrenceFrequency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurrenceFrequency.swift; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 		B4473CD3B15A5A6828200433 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2A60AC62B1A6642FC39E5AEB /* AIAccessCredentials.swift */,
 				FEB63B06A994954ADEA16513 /* APIService.swift */,
 				C4CD8FA777A6A20D7150FDAF /* APIServing.swift */,
 				4E0735E007CA2E9DC9E46151 /* GitHubService.swift */,
@@ -492,6 +495,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EACE21AA99A79D73CB7D81C /* AIAccessCredentials.swift in Sources */,
 				02DE20397BD0ECA8F72C176A /* AIChatMessage.swift in Sources */,
 				D3CB8FF10915F5FC3C23FE2C /* AIWelcomeView.swift in Sources */,
 				D29D0F62D1D84BAAA74A03E4 /* APIService.swift in Sources */,
@@ -637,7 +641,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -652,7 +656,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 4.2.0;
+				MARKETING_VERSION = 4.3.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -751,7 +755,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -771,7 +775,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 4.2.0;
+				MARKETING_VERSION = 4.3.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -838,7 +842,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R79MH5A2VX;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -853,7 +857,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 4.2.0;
+				MARKETING_VERSION = 4.3.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

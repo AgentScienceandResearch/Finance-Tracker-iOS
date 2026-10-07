@@ -17,6 +17,18 @@ function getClaudeConfig() {
     };
 }
 
+function getAIAccessConfig() {
+    const freeMessages = Number(process.env.FREE_AI_MESSAGES_PER_MONTH ?? 5);
+    return {
+        bundleId: process.env.APP_BUNDLE_ID || 'com.dakota.financetracker2025',
+        appAppleId: Number(process.env.APP_APPLE_ID || 6757619377),
+        freeMessagesPerMonth: Number.isFinite(freeMessages) ? Math.max(0, Math.floor(freeMessages)) : 5,
+        // "allow" keeps pre-4.3.0 clients (which send no access headers) working.
+        // Switch to "deny" once most users have updated.
+        legacyAccess: process.env.LEGACY_AI_ACCESS === 'deny' ? 'deny' : 'allow'
+    };
+}
+
 function getServerConfig() {
     const nodeEnv = process.env.NODE_ENV || 'development';
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
@@ -65,6 +77,7 @@ function validateServerEnv() {
 module.exports = {
     getJWTSecret,
     getClaudeConfig,
+    getAIAccessConfig,
     getServerConfig,
     validateServerEnv
 };

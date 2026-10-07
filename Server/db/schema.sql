@@ -46,3 +46,12 @@ CREATE TABLE IF NOT EXISTS app_settings (
     value JSONB NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Free-tier AI allowance per install per month (also created lazily by middleware/aiAccess.js).
+CREATE TABLE IF NOT EXISTS ai_usage (
+    device_id TEXT NOT NULL,
+    period TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (device_id, period)
+);

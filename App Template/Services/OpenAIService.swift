@@ -111,6 +111,7 @@ final class OpenAIService: OpenAIServing {
         request.timeoutInterval = 60
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
+        AIAccessCredentials.shared.authorize(&request)
 
         let payload = FinanceAssistantRequest(
             prompt: prompt,
@@ -132,6 +133,7 @@ final class OpenAIService: OpenAIServing {
         request.timeoutInterval = 45
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
+        AIAccessCredentials.shared.authorize(&request)
 
         let payload = ReceiptParseRequest(
             rawText: rawText,
@@ -159,6 +161,7 @@ final class OpenAIService: OpenAIServing {
         request.timeoutInterval = 60
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
+        AIAccessCredentials.shared.authorize(&request)
 
         let payload = ImageParseRequest(
             imageBase64: imageBase64,
@@ -189,6 +192,7 @@ final class OpenAIService: OpenAIServing {
         request.timeoutInterval = 30
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(AppLanguage.requestIdentifier, forHTTPHeaderField: "Accept-Language")
+        AIAccessCredentials.shared.authorize(&request)
 
         let payload = CategoryInsightRequest(
             category: category,
@@ -218,6 +222,11 @@ final class OpenAIService: OpenAIServing {
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw OpenAIServiceError.invalidResponse
+        }
+        AIAccessCredentials.shared.record(httpResponse)
+
+        if httpResponse.statusCode == 402 {
+            throw OpenAIServiceError.subscriptionRequired
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
@@ -322,6 +331,7 @@ enum OpenAIServiceError: LocalizedError {
     case invalidResponse
     case requestFailed(String)
     case invalidStructuredResponse
+    case subscriptionRequired
 
     var errorDescription: String? {
         switch self {
@@ -333,6 +343,8 @@ enum OpenAIServiceError: LocalizedError {
             return message
         case .invalidStructuredResponse:
             return AppLanguage.localized("AI response could not be decoded.")
+        case .subscriptionRequired:
+            return AppLanguage.localized("Upgrade to Pro to keep using AI.")
         }
     }
 }
