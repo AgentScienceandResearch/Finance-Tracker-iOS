@@ -6,26 +6,36 @@ import Security
 import FirebaseAuth
 #endif
 
+enum AccountDeletionVerification {
+    case password
+    case apple
+    case recentSignIn
+}
+
 @MainActor
 class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging {
     @Published var isAuthenticated = false
     @Published var currentUser: User?
     @Published var isLoading = false
+    @Published private(set) var isDeletingAccount = false
     @Published var errorMessage: String?
 
     private let userRepository: UserRepositorying
     private let logger: Logging
     private let analytics: AnalyticsTracking
+    private let onAccountDeleted: (String) -> Void
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     init(
         userRepository: UserRepositorying,
         logger: Logging,
-        analytics: AnalyticsTracking
+        analytics: AnalyticsTracking,
+        onAccountDeleted: @escaping (String) -> Void = { _ in }
     ) {
         self.userRepository = userRepository
         self.logger = logger
         self.analytics = analytics
+        self.onAccountDeleted = onAccountDeleted
         super.init()
         listenToAuthState()
     }
@@ -300,6 +310,129 @@ class AuthenticationManager: NSObject, ObservableObject, AuthenticationManaging 
         currentUser = nil
         errorMessage = nil
     }
+
+    // MARK: - Account Deletion
+
+    var accountDeletionVerification: AccountDeletionVerification {
+#if canImport(FirebaseAuth)
+        let providerIDs = Set(Auth.auth().currentUser?.providerData.map(\.providerID) ?? [])
+        if providerIDs.contains(EmailAuthProvider.id) { return .password }
+        if providerIDs.contains("apple.com") { return .apple }
+#endif
+        return .recentSignIn
+    }
+
+    /// Permanently deletes the Firebase account and every app-owned cloud
+    /// document. Password accounts are reauthenticated first; social accounts
+    /// can delete immediately after a recent sign-in.
+    @discardableResult
+    func deleteAccount(password: String? = nil) async -> Bool {
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+        errorMessage = nil
+
+#if canImport(FirebaseAuth)
+        guard let firebaseUser = Auth.auth().currentUser else {
+            errorMessage = AppLanguage.localized("No signed-in account was found.")
+            return false
+        }
+
+        do {
+            if accountDeletionVerification == .password {
+                guard let email = firebaseUser.email,
+                      let password,
+                      !password.isEmpty else {
+                    errorMessage = AppLanguage.localized("Enter your current password to confirm account deletion.")
+                    return false
+                }
+                let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+                try await firebaseUser.reauthenticate(with: credential)
+            } else if accountDeletionVerification == .apple {
+                errorMessage = AppLanguage.localized("Confirm with Sign in with Apple to delete this account.")
+                return false
+            }
+
+            try await performAccountDeletion(firebaseUser: firebaseUser)
+            return true
+        } catch {
+            errorMessage = accountDeletionErrorMessage(error)
+            logger.error("Account deletion failed: \(error.localizedDescription)", category: "auth")
+            return false
+        }
+#else
+        errorMessage = AppLanguage.localized("Account deletion is unavailable because Firebase Auth is not configured.")
+        return false
+#endif
+    }
+
+    /// Reauthenticates an Apple account, revokes its Apple token, and then
+    /// performs the same permanent Firebase/Firestore deletion.
+    @discardableResult
+    func deleteAppleAccount(
+        credentials: ASAuthorizationAppleIDCredential,
+        rawNonce: String
+    ) async -> Bool {
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+        errorMessage = nil
+
+#if canImport(FirebaseAuth)
+        guard let firebaseUser = Auth.auth().currentUser,
+              let tokenData = credentials.identityToken,
+              let idToken = String(data: tokenData, encoding: .utf8),
+              let codeData = credentials.authorizationCode,
+              let authorizationCode = String(data: codeData, encoding: .utf8) else {
+            errorMessage = AppLanguage.localized("Apple could not verify this deletion request. Please try again.")
+            return false
+        }
+
+        do {
+            let credential = OAuthProvider.appleCredential(
+                withIDToken: idToken,
+                rawNonce: rawNonce,
+                fullName: credentials.fullName
+            )
+            try await firebaseUser.reauthenticate(with: credential)
+            try await Auth.auth().revokeToken(withAuthorizationCode: authorizationCode)
+            try await performAccountDeletion(firebaseUser: firebaseUser)
+            return true
+        } catch {
+            errorMessage = accountDeletionErrorMessage(error)
+            logger.error("Apple account deletion failed: \(error.localizedDescription)", category: "auth")
+            return false
+        }
+#else
+        errorMessage = AppLanguage.localized("Account deletion is unavailable because Firebase Auth is not configured.")
+        return false
+#endif
+    }
+
+#if canImport(FirebaseAuth)
+    private func performAccountDeletion(firebaseUser: FirebaseAuth.User) async throws {
+        let userID = firebaseUser.uid
+        try await userRepository.deleteUserAndAssociatedData(userID)
+        try await firebaseUser.delete()
+        onAccountDeleted(userID)
+        analytics.track(event: AnalyticsEvent(name: "auth_account_deleted"))
+        logger.info("Permanently deleted account uid=\(userID)", category: "auth")
+        currentUser = nil
+        isAuthenticated = false
+        errorMessage = nil
+    }
+
+    private func accountDeletionErrorMessage(_ error: Error) -> String {
+        switch (error as NSError).code {
+        case AuthErrorCode.requiresRecentLogin.rawValue:
+            return AppLanguage.localized("For security, sign out, sign back in, and then try deleting the account again.")
+        case AuthErrorCode.wrongPassword.rawValue, AuthErrorCode.invalidCredential.rawValue:
+            return AppLanguage.localized("The password or sign-in confirmation was incorrect.")
+        case AuthErrorCode.networkError.rawValue:
+            return AppLanguage.localized("Account deletion needs an internet connection. Check your connection and try again.")
+        default:
+            return AppLanguage.localized("We could not delete the account. Please try again.")
+        }
+    }
+#endif
 
     // MARK: - Helpers
 

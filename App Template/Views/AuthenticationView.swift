@@ -19,6 +19,7 @@ private enum AT {
 struct AuthenticationView: View {
     @StateObject private var flow: AuthenticationFlowViewModel
     private let authManager: AuthenticationManager
+    @Environment(\.dismiss) private var dismiss
 
     @State private var appleError: String?
     @State private var isGoogleLoading = false
@@ -42,6 +43,26 @@ struct AuthenticationView: View {
                         .padding(.top, -28)
                     Spacer(minLength: 40)
                 }
+            }
+
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(.black.opacity(0.16))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityLabel("Close")
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 8)
+                Spacer()
             }
         }
     }

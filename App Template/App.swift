@@ -3,7 +3,11 @@ import UIKit
 
 enum AppLanguage {
     static let storageKey = "app.displayLanguage"
-    static let systemDefaultIdentifier = ""
+    static let defaultIdentifier = "en-US"
+    static let englishDefaultMigrationKey = "app.displayLanguage.didResetToEnglishUS.v1"
+    /// A non-empty Picker and persistence value avoids SwiftUI treating the
+    /// system choice as an absent/invalid selection.
+    static let systemDefaultIdentifier = "system"
 
     /// These identifiers mirror the 36 Localizable.strings folders emitted by
     /// the string catalog. Norwegian is emitted by Xcode as `nb.lproj`.
@@ -16,21 +20,28 @@ enum AppLanguage {
     ]
 
     static func persistedIdentifier(defaults: UserDefaults = .standard) -> String {
-        sanitized(defaults.string(forKey: storageKey) ?? systemDefaultIdentifier)
+        guard let storedIdentifier = defaults.string(forKey: storageKey) else {
+            return defaultIdentifier
+        }
+        return sanitized(storedIdentifier)
     }
 
     static func persist(_ identifier: String, defaults: UserDefaults = .standard) {
-        let identifier = sanitized(identifier)
-        if identifier == systemDefaultIdentifier {
-            defaults.removeObject(forKey: storageKey)
-        } else {
-            defaults.set(identifier, forKey: storageKey)
-        }
+        defaults.set(sanitized(identifier), forKey: storageKey)
+    }
+
+    /// Build 17 could inherit an unrelated language saved by the previous
+    /// empty-value system picker. Reset that legacy state once, after which
+    /// any language the user selects is preserved normally.
+    static func migrateLegacyDefaultToEnglishUS(defaults: UserDefaults = .standard) {
+        guard !defaults.bool(forKey: englishDefaultMigrationKey) else { return }
+        defaults.set(defaultIdentifier, forKey: storageKey)
+        defaults.set(true, forKey: englishDefaultMigrationKey)
     }
 
     static func locale(for identifier: String) -> Locale {
         let identifier = sanitized(identifier)
-        return identifier.isEmpty ? .autoupdatingCurrent : Locale(identifier: identifier)
+        return identifier == systemDefaultIdentifier ? systemLocale : Locale(identifier: identifier)
     }
 
     static var currentLocale: Locale {
@@ -51,8 +62,7 @@ enum AppLanguage {
     }
 
     static func nativeDisplayName(for identifier: String) -> String {
-        guard !identifier.isEmpty else {
-            let systemLocale = Locale.autoupdatingCurrent
+        guard sanitized(identifier) != systemDefaultIdentifier else {
             let systemName = systemLocale.localizedString(forIdentifier: systemLocale.identifier)
                 ?? systemLocale.identifier
             return "System Default — \(systemName)"
@@ -67,12 +77,22 @@ enum AppLanguage {
     }
 
     private static func sanitized(_ identifier: String) -> String {
-        supportedIdentifiers.contains(identifier) ? identifier : systemDefaultIdentifier
+        if identifier.isEmpty || identifier == systemDefaultIdentifier {
+            return systemDefaultIdentifier
+        }
+        return supportedIdentifiers.contains(identifier) ? identifier : systemDefaultIdentifier
+    }
+
+    private static var systemLocale: Locale {
+        guard let preferredIdentifier = Locale.preferredLanguages.first else {
+            return .autoupdatingCurrent
+        }
+        return Locale(identifier: preferredIdentifier)
     }
 
     private static var localizationBundle: Bundle {
         let identifier = persistedIdentifier()
-        guard !identifier.isEmpty,
+        guard identifier != systemDefaultIdentifier,
               let path = Bundle.main.path(forResource: identifier, ofType: "lproj"),
               let bundle = Bundle(path: path) else {
             return .main
@@ -90,6 +110,7 @@ final class AppLanguageController: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        AppLanguage.migrateLegacyDefaultToEnglishUS(defaults: defaults)
         selectedIdentifier = AppLanguage.persistedIdentifier(defaults: defaults)
     }
 
@@ -127,23 +148,18 @@ struct TemplateApp: App {
     @StateObject private var languageController = AppLanguageController.shared
     @StateObject private var environment = AppEnvironment()
     @State private var showSplash = true
-    @State private var showPaywall = false
-    @State private var paywallMode: PaywallMode = .initial
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if environment.authManager.isAuthenticated {
-                    MainTabView(canPresentAIWelcome: !showSplash && !showPaywall)
+                if !showSplash {
+                    MainTabView(canPresentAIWelcome: !showSplash)
                         .environmentObject(environment.financeManager)
                         .environmentObject(environment.financeAIManager)
                         .environmentObject(environment.authManager)
                         .environmentObject(environment.subscriptionManager)
                         .environment(\.analyticsTracker, environment.analytics)
                         .dismissKeyboardOnTapOutsideTextInput()
-                        .transition(.opacity)
-                } else if !showSplash {
-                    AuthenticationView(authManager: environment.authManager)
                         .transition(.opacity)
                 }
 
@@ -153,41 +169,13 @@ struct TemplateApp: App {
                 }
             }
             .animation(.easeInOut(duration: 0.4), value: showSplash)
-            .animation(.easeInOut(duration: 0.35), value: environment.authManager.isAuthenticated)
             .environmentObject(languageController)
             .environment(\.locale, languageController.locale)
             .environment(\.layoutDirection, languageController.layoutDirection)
-            .fullScreenCover(isPresented: $showPaywall) {
-                PaywallView(
-                    subscriptionManager: environment.subscriptionManager,
-                    mode: paywallMode,
-                    onDismiss: paywallMode == .initial ? { showPaywall = false } : nil
-                )
-            }
-            .onChange(of: environment.authManager.isAuthenticated) { _, isAuthenticated in
-                if isAuthenticated { evaluatePaywall() }
-            }
-            .onChange(of: environment.subscriptionManager.isSubscribed) { _, isSubscribed in
-                if isSubscribed { showPaywall = false }
-            }
             .onChange(of: languageController.selectedIdentifier) { _, _ in
                 environment.financeAIManager.refreshLocalizedWelcomeIfIdle()
             }
-            .task {
-                if environment.authManager.isAuthenticated { evaluatePaywall() }
-            }
         }
-    }
-
-    // MARK: - Paywall logic
-
-    private func evaluatePaywall() {
-        guard !environment.subscriptionManager.isSubscribed else { return }
-        guard let userID = environment.authManager.currentUser?.id,
-              let mode = PaywallAccessPolicy.modeAtLaunch(userID: userID) else { return }
-
-        paywallMode = mode
-        showPaywall = true
     }
 }
 
@@ -199,12 +187,10 @@ enum PaywallAccessPolicy {
         defaults: UserDefaults = .standard,
         now: Date = .now
     ) -> PaywallMode? {
-        guard let startDate = defaults.object(forKey: startDateKey(userID: userID)) as? Date else {
-            // A new free user is not interrupted on launch. Their free period starts
-            // only after the first successful AI response.
-            return nil
-        }
-        return isExpired(startDate: startDate, now: now) ? .yearlyHard : nil
+        // Launching the app must always enter the locally available tracker.
+        // Subscription offers are presented only from an explicit user action
+        // or after a successful AI use, and every presentation is dismissible.
+        return nil
     }
 
     static func modeAfterSuccessfulAIUse(
@@ -223,6 +209,10 @@ enum PaywallAccessPolicy {
 
     private static func startDateKey(userID: String) -> String {
         "freeTrialStart_\(userID)"
+    }
+
+    static func clear(userID: String, defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: startDateKey(userID: userID))
     }
 
     private static func isExpired(startDate: Date, now: Date) -> Bool {

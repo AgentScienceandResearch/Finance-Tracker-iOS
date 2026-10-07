@@ -128,6 +128,33 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
         }
     }
 
+    /// Deletes every Firestore document owned by this app for a user. This runs
+    /// before Firebase Authentication deletion while the user's security-rule
+    /// permissions are still available.
+    func deleteUserAndAssociatedData(_ userId: String) async throws {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+#if canImport(FirebaseFirestore)
+            if let db = db {
+                let batch = db.batch()
+                batch.deleteDocument(db.collection("finance_states").document("user_\(userId)"))
+                batch.deleteDocument(db.collection("users").document(userId))
+                try await batch.commit()
+            } else {
+                deleteInMemoryUserData(userId)
+            }
+#else
+            deleteInMemoryUserData(userId)
+#endif
+        } catch {
+            errorMessage = "Failed to delete account data: \(error.localizedDescription)"
+            logger.error("deleteUserAndAssociatedData failed: \(error.localizedDescription)", category: "database")
+            throw error
+        }
+    }
+
     // MARK: - Generic Data Storage
 
     func saveData<T: Encodable>(_ data: T, to collection: String, documentID: String) async throws {
@@ -288,5 +315,10 @@ class DatabaseManager: NSObject, ObservableObject, UserStoring {
         let mirror = Mirror(reflecting: item)
         guard let child = mirror.children.first(where: { $0.label == field }) else { return false }
         return String(describing: child.value) == String(describing: expectedValue)
+    }
+
+    private func deleteInMemoryUserData(_ userId: String) {
+        inMemoryUsers[userId] = nil
+        inMemoryCollections["finance_states"]?["user_\(userId)"] = nil
     }
 }

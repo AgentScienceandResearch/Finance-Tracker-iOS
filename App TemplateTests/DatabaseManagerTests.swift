@@ -4,9 +4,11 @@ import XCTest
 @testable import App_Template
 #elseif canImport(TemplateApp)
 @testable import TemplateApp
+#elseif canImport(FinanceTrackerAI)
+@testable import FinanceTrackerAI
 #endif
 
-#if canImport(App_Template) || canImport(TemplateApp)
+#if canImport(App_Template) || canImport(TemplateApp) || canImport(FinanceTrackerAI)
 @MainActor
 final class DatabaseManagerTests: XCTestCase {
     private struct TestRecord: Codable, Equatable {
@@ -32,6 +34,33 @@ final class DatabaseManagerTests: XCTestCase {
 
         XCTAssertEqual(fetched?.id, userID)
         XCTAssertEqual(fetched?.email, user.email)
+    }
+
+    func testDeleteUserRemovesProfileAndFinanceState() async throws {
+        let manager = DatabaseManager.shared
+        let userID = "delete-test-\(UUID().uuidString)"
+        let user = User(
+            id: userID,
+            email: "delete@example.com",
+            displayName: "Delete Test",
+            profileImageURL: nil,
+            createdAt: Date(),
+            lastSignIn: Date()
+        )
+        let record = TestRecord(id: "state", title: "Finance State", category: "test")
+
+        try await manager.saveUser(user)
+        try await manager.saveData(record, to: "finance_states", documentID: "user_\(userID)")
+        try await manager.deleteUserAndAssociatedData(userID)
+
+        let deletedUser = try await manager.fetchUser(userID)
+        let deletedState: TestRecord? = try await manager.fetchData(
+            from: "finance_states",
+            documentID: "user_\(userID)",
+            as: TestRecord.self
+        )
+        XCTAssertNil(deletedUser)
+        XCTAssertNil(deletedState)
     }
 
     func testSaveFetchAndDeleteGenericData() async throws {

@@ -16,6 +16,11 @@ enum AIWelcomePolicy {
         defaults.removeObject(forKey: eligibilityKey(userID: userID))
     }
 
+    static func clear(userID: String, defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: completionKey(userID: userID))
+        defaults.removeObject(forKey: eligibilityKey(userID: userID))
+    }
+
     private static func completionKey(userID: String) -> String {
         "aiWelcome.completed.\(userID)"
     }

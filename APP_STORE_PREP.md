@@ -1,6 +1,6 @@
 # App Store Prep Checklist (Finance Tracker iOS)
 
-Last updated: May 11, 2026
+Last updated: August 27, 2026
 
 ## Build Status
 - iOS unit tests are passing.
@@ -23,6 +23,8 @@ Last updated: May 11, 2026
 - Test first-run profile creation and edit flow.
 - Test receipt parsing with real OCR text samples.
 - Test destructive actions (`Clear All Data`) with confirmation.
+- Verify the tracker launches and saves data without registration.
+- Test account deletion for email/password and Sign in with Apple accounts.
 - Validate accessibility labels, Dynamic Type, and VoiceOver on key flows.
 
 ## Privacy and Compliance
@@ -47,6 +49,8 @@ Last updated: May 11, 2026
 - Add screenshots for all supported iPhone sizes.
 - Add app description, keywords, and support URL.
 - Add privacy policy URL and contact email.
+- Remove duplicate promoted-purchase images or upload unique monthly/yearly artwork.
+- Record the complete create/sign-in → Settings → Delete Account flow on a physical device and link it in App Review Notes.
 - Upload release build from Xcode Organizer.
 - Complete export compliance questions.
 - Submit for TestFlight external testing first, then App Review.

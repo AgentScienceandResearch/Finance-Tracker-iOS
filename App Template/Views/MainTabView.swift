@@ -2,6 +2,7 @@ import SwiftUI
 import VisionKit
 import UIKit
 import StoreKit
+import AuthenticationServices
 
 // MARK: - Design Tokens
 
@@ -91,6 +92,7 @@ struct MainTabView: View {
     @State private var showReceiptScanner = false
     @State private var showImport        = false
     @State private var showAIAssistant   = false
+    @State private var showAuthentication = false
     @State private var showAIWelcome     = false
     @State private var showAIUsePaywall  = false
     @State private var aiUsePaywallMode: PaywallMode = .initial
@@ -130,13 +132,19 @@ struct MainTabView: View {
         .sheet(isPresented: $showImport) {
             ImportExpenseSheet(financeManager: financeManager, aiManager: financeAIManager)
         }
+        .sheet(isPresented: $showAuthentication) {
+            AuthenticationView(authManager: authManager)
+                .onChange(of: authManager.isAuthenticated) { _, isAuthenticated in
+                    if isAuthenticated { showAuthentication = false }
+                }
+        }
         .sheet(isPresented: $showAIAssistant) {
             AIAssistantSheet(financeManager: financeManager, aiManager: financeAIManager)
                 .fullScreenCover(isPresented: $showAIUsePaywall) {
                     PaywallView(
                         subscriptionManager: subscriptionManager,
                         mode: aiUsePaywallMode,
-                        onDismiss: aiUsePaywallMode == .initial ? { showAIUsePaywall = false } : nil
+                        onDismiss: { showAIUsePaywall = false }
                     )
                 }
         }
@@ -183,8 +191,8 @@ struct MainTabView: View {
     }
 
     private func presentPaywallAfterSuccessfulAIUse() {
+        let userID = authManager.currentUser?.id ?? financeManager.accessUserID
         guard !subscriptionManager.isSubscribed,
-              let userID = authManager.currentUser?.id,
               let mode = PaywallAccessPolicy.modeAfterSuccessfulAIUse(userID: userID) else { return }
 
         aiUsePaywallMode = mode
@@ -192,8 +200,8 @@ struct MainTabView: View {
     }
 
     private func presentAIWelcomeIfNeeded() {
+        let userID = authManager.currentUser?.id ?? financeManager.accessUserID
         guard canPresentAIWelcome,
-              let userID = authManager.currentUser?.id,
               AIWelcomePolicy.shouldPresent(userID: userID) else { return }
 
         AIWelcomePolicy.markPresented(userID: userID)
@@ -223,6 +231,7 @@ struct MainTabView: View {
                 onViewInsights:  { selectedTab = .insights },
                 onViewRecurring: { selectedTab = .recurring },
                 onOpenSettings:  { selectedTab = .settings },
+                onSignIn:        { showAuthentication = true },
                 onAddExpense:    { analytics.track(event: AnalyticsEvent(name: "dash_add_expense")); showAddExpense = true },
                 onScanReceipt:   { analytics.track(event: AnalyticsEvent(name: "dash_scan")); showReceiptScanner = true },
                 onAddIncome:     { showAddIncome = true },
@@ -303,10 +312,12 @@ private struct PremiumTabBar: View {
 
 private struct DashboardTabView: View {
     @ObservedObject var financeManager: FinanceManager
+    @EnvironmentObject private var authManager: AuthenticationManager
     let onViewAll:      () -> Void
     let onViewInsights: () -> Void
     let onViewRecurring: () -> Void
     let onOpenSettings: () -> Void
+    let onSignIn: () -> Void
     let onAddExpense:   () -> Void
     let onScanReceipt:  () -> Void
     let onAddIncome:    () -> Void
@@ -314,7 +325,10 @@ private struct DashboardTabView: View {
     let onAskAI:        () -> Void
 
     private var firstName: String {
-        financeManager.currentProfile.displayName
+        guard authManager.isAuthenticated else {
+            return AppLanguage.localized("there")
+        }
+        return financeManager.currentProfile.displayName
             .components(separatedBy: .whitespaces).first ?? AppLanguage.localized("there")
     }
 
@@ -333,6 +347,10 @@ private struct DashboardTabView: View {
                     onNotification: onOpenSettings,
                     onAI: onAskAI
                 )
+
+                if !authManager.isAuthenticated {
+                    LocalModeAccountBanner(onSignIn: onSignIn)
+                }
 
                 HeroBalanceCard(financeManager: financeManager, onViewTransactions: onViewAll)
 
@@ -362,6 +380,48 @@ private struct DashboardTabView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
         }
+    }
+}
+
+private struct LocalModeAccountBanner: View {
+    let onSignIn: () -> Void
+
+    var body: some View {
+        Button(action: onSignIn) {
+            HStack(spacing: 12) {
+                Image(systemName: "person.crop.circle.badge.plus")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(FT.green)
+                    .frame(width: 42, height: 42)
+                    .background(FT.greenSub)
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Sign In")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(FT.t1)
+                    Text("Sync your finance data across devices")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(FT.t2)
+                }
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(FT.t3)
+            }
+            .padding(14)
+            .background(FT.card)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(FT.green.opacity(0.18), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 3)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens account sign in and registration")
     }
 }
 
@@ -1870,6 +1930,9 @@ private struct FinanceSettingsTabView: View {
 
     @State private var showDeleteConfirmation = false
     @State private var showSignOutConfirmation = false
+    @State private var showAuthentication      = false
+    @State private var showDeleteAccount       = false
+    @State private var showAccountDeleted      = false
     @State private var showEditProfile        = false
     @State private var showBudgetEditor       = false
     @State private var showCategories         = false
@@ -1886,6 +1949,45 @@ private struct FinanceSettingsTabView: View {
                 Text(financeManager.syncStatusText)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(FT.t3)
+
+                SettingsSection(label: "Account") {
+                    if authManager.isAuthenticated {
+                        PremiumSettingsRow(icon: "person.fill", color: FT.green,
+                                           title: financeManager.currentProfile.displayName,
+                                           detail: financeManager.currentProfile.email) {
+                            showEditProfile = true
+                        }
+                        SettingsDivider()
+                        PremiumSettingsRowLabel(icon: "checkmark.icloud.fill", color: FT.green,
+                                                title: AppLanguage.localized("Cloud Sync"),
+                                                detail: AppLanguage.localized("Signed in"),
+                                                showsChevron: false)
+                        SettingsDivider()
+                        PremiumSettingsRow(icon: "rectangle.portrait.and.arrow.right", color: .red,
+                                           title: AppLanguage.localized("Sign Out"), detail: nil, isDestructive: true) {
+                            showSignOutConfirmation = true
+                        }
+                        SettingsDivider()
+                        PremiumSettingsRow(icon: "person.crop.circle.badge.minus", color: .red,
+                                           title: AppLanguage.localized("Delete Account"),
+                                           detail: AppLanguage.localized("Permanently delete account and cloud data"),
+                                           isDestructive: true) {
+                            showDeleteAccount = true
+                        }
+                    } else {
+                        PremiumSettingsRow(icon: "person.crop.circle.badge.plus", color: FT.green,
+                                           title: AppLanguage.localized("Sign In"),
+                                           detail: AppLanguage.localized("Sync your finance data across devices")) {
+                            showAuthentication = true
+                        }
+                        SettingsDivider()
+                        PremiumSettingsRow(icon: "internaldrive.fill", color: Color(red: 0.2, green: 0.5, blue: 0.9),
+                                           title: AppLanguage.localized("On-Device Profile"),
+                                           detail: financeManager.currentProfile.displayName) {
+                            showEditProfile = true
+                        }
+                    }
+                }
 
                 SettingsSection(label: "Settings") {
                     Picker(
@@ -1988,19 +2090,6 @@ private struct FinanceSettingsTabView: View {
                     }
                 }
 
-                SettingsSection(label: "Profile") {
-                    PremiumSettingsRow(icon: "person.fill", color: FT.green,
-                                       title: financeManager.currentProfile.displayName,
-                                       detail: financeManager.currentProfile.email) {
-                        showEditProfile = true
-                    }
-                    SettingsDivider()
-                    PremiumSettingsRow(icon: "rectangle.portrait.and.arrow.right", color: .red,
-                                       title: AppLanguage.localized("Sign Out"), detail: nil, isDestructive: true) {
-                        showSignOutConfirmation = true
-                    }
-                }
-
                 SettingsSection(label: "About") {
                     PremiumSettingsRowLabel(icon: "info.circle.fill", color: FT.t2,
                                             title: AppLanguage.localized("Version"), detail: appVersionString,
@@ -2026,6 +2115,24 @@ private struct FinanceSettingsTabView: View {
         .confirmationDialog("Sign out of Finance Tracker?", isPresented: $showSignOutConfirmation, titleVisibility: .visible) {
             Button("Sign Out", role: .destructive) { authManager.signOut() }
         }
+        .sheet(isPresented: $showAuthentication) {
+            AuthenticationView(authManager: authManager)
+                .onChange(of: authManager.isAuthenticated) { _, isAuthenticated in
+                    if isAuthenticated { showAuthentication = false }
+                }
+        }
+        .sheet(isPresented: $showDeleteAccount) {
+            DeleteAccountSheet(
+                authManager: authManager,
+                subscriptionManager: subscriptionManager,
+                onDeleted: { showAccountDeleted = true }
+            )
+        }
+        .alert("Account Deleted", isPresented: $showAccountDeleted) {
+            Button("OK") {}
+        } message: {
+            Text("Your account and associated cloud data were permanently deleted. Local mode is still available.")
+        }
         .sheet(isPresented: $showEditProfile)  { EditProfileSheet(financeManager: financeManager) }
         .sheet(isPresented: $showBudgetEditor) { BudgetEditorSheet(financeManager: financeManager) }
         .sheet(isPresented: $showCategories) { CategoryOverviewSheet(financeManager: financeManager) }
@@ -2046,6 +2153,196 @@ private struct FinanceSettingsTabView: View {
         let short = info?["CFBundleShortVersionString"] as? String ?? "—"
         let build = info?["CFBundleVersion"] as? String
         return build.map { "\(short) (\($0))" } ?? short
+    }
+}
+
+private struct DeleteAccountSheet: View {
+    @ObservedObject var authManager: AuthenticationManager
+    @ObservedObject var subscriptionManager: SubscriptionManager
+    let onDeleted: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmationText = ""
+    @State private var password = ""
+    @State private var appleNonce: String?
+    @State private var appleError: String?
+
+    private var isConfirmed: Bool {
+        confirmationText.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() == "DELETE"
+    }
+
+    private var canDeleteWithPassword: Bool {
+        isConfirmed && !password.isEmpty && !authManager.isDeletingAccount
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Image(systemName: "person.crop.circle.badge.minus")
+                            .font(.system(size: 38, weight: .semibold))
+                            .foregroundStyle(.red)
+                            .accessibilityHidden(true)
+                        Text("Permanently Delete Account")
+                            .font(.title2.bold())
+                        Text("This permanently deletes your Finance Tracker account, profile, and synced finance data. This cannot be undone.")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if subscriptionManager.isSubscribed {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Your App Store subscription is managed separately and will continue until you cancel it.", systemImage: "exclamationmark.triangle.fill")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.orange)
+                            Link("Manage Subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .padding(14)
+                        .background(Color.orange.opacity(0.10))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Type DELETE to confirm")
+                            .font(.subheadline.weight(.semibold))
+                        TextField("DELETE", text: $confirmationText)
+                            .textInputAutocapitalization(.characters)
+                            .autocorrectionDisabled()
+                            .padding(14)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+
+                    deletionControl
+
+                    if let message = appleError ?? authManager.errorMessage {
+                        Label(message, systemImage: "exclamationmark.circle.fill")
+                            .font(.footnote.weight(.medium))
+                            .foregroundStyle(.red)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Text("Your separate local-only tracker remains available after deletion. You can clear it from Settings if desired.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(20)
+            }
+            .navigationTitle("Delete Account")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(authManager.isDeletingAccount)
+                }
+            }
+            .interactiveDismissDisabled(authManager.isDeletingAccount)
+            .onAppear { authManager.errorMessage = nil }
+        }
+    }
+
+    @ViewBuilder
+    private var deletionControl: some View {
+        switch authManager.accountDeletionVerification {
+        case .password:
+            VStack(alignment: .leading, spacing: 12) {
+                SecureField("Current password", text: $password)
+                    .textContentType(.password)
+                    .padding(14)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                destructiveButton(isEnabled: canDeleteWithPassword) {
+                    await completeDeletion {
+                        await authManager.deleteAccount(password: password)
+                    }
+                }
+            }
+
+        case .apple:
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Confirm your identity with Sign in with Apple, then the account will be deleted.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                SignInWithAppleButton(
+                    onRequest: { request in
+                        let nonce = AppleSignInNonce.generate()
+                        appleNonce = nonce
+                        if let nonce { request.nonce = AppleSignInNonce.hash(nonce) }
+                    },
+                    onCompletion: handleAppleDeletion
+                )
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 52)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .opacity(isConfirmed ? 1 : 0.45)
+                .allowsHitTesting(isConfirmed && !authManager.isDeletingAccount)
+                .accessibilityHint("Permanently deletes your account after Apple confirms your identity")
+            }
+
+        case .recentSignIn:
+            destructiveButton(isEnabled: isConfirmed && !authManager.isDeletingAccount) {
+                await completeDeletion {
+                    await authManager.deleteAccount(password: nil)
+                }
+            }
+        }
+    }
+
+    private func destructiveButton(
+        isEnabled: Bool,
+        action: @escaping @MainActor () async -> Void
+    ) -> some View {
+        Button(role: .destructive) {
+            Task { await action() }
+        } label: {
+            HStack {
+                Spacer()
+                if authManager.isDeletingAccount {
+                    ProgressView().tint(.white)
+                } else {
+                    Text("Permanently Delete Account")
+                        .font(.headline)
+                }
+                Spacer()
+            }
+            .frame(height: 52)
+            .foregroundStyle(.white)
+            .background(isEnabled ? Color.red : Color.red.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .disabled(!isEnabled)
+    }
+
+    private func handleAppleDeletion(_ result: Result<ASAuthorization, Error>) {
+        Task {
+            switch result {
+            case .success(let authorization):
+                guard let credentials = authorization.credential as? ASAuthorizationAppleIDCredential,
+                      let rawNonce = appleNonce else {
+                    appleError = AppLanguage.localized("Apple could not verify this deletion request. Please try again.")
+                    return
+                }
+                appleNonce = nil
+                await completeDeletion {
+                    await authManager.deleteAppleAccount(credentials: credentials, rawNonce: rawNonce)
+                }
+            case .failure(let error):
+                appleNonce = nil
+                if (error as? ASAuthorizationError)?.code != .canceled {
+                    appleError = AppLanguage.localized("Sign in with Apple confirmation failed. Please try again.")
+                }
+            }
+        }
+    }
+
+    private func completeDeletion(_ delete: @MainActor () async -> Bool) async {
+        appleError = nil
+        guard await delete() else { return }
+        dismiss()
+        onDeleted()
     }
 }
 

@@ -4,8 +4,8 @@ import SwiftUI
 
 enum PaywallMode: Equatable {
     case initial     // New account: 7-day trial offer, X to get 7 days free
-    case yearlyHard  // After 7 days: yearly only, "Not Now" → monthlyHard
-    case monthlyHard // Final fallback: monthly, no dismissal
+    case yearlyHard  // After 7 days: yearly offer with a monthly alternative
+    case monthlyHard // Monthly alternative; the user can still return to the app
 }
 
 // MARK: - Design tokens
@@ -127,13 +127,17 @@ struct PaywallView: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
 
-                Button { showingMonthlyFromInitial = true } label: {
-                    Text("See monthly plan")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(PW.t2)
-                }
-                .buttonStyle(.plain)
+                secondaryActionButton(
+                    label: AppLanguage.localized("See monthly plan"),
+                    systemImage: "calendar",
+                    action: { showingMonthlyFromInitial = true }
+                )
+                .padding(.horizontal, 24)
                 .padding(.top, 16)
+
+                continueToAppButton
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
 
                 legalFooter
                     .padding(.top, 20)
@@ -183,6 +187,10 @@ struct PaywallView: View {
                 .buttonStyle(.plain)
                 .padding(.top, 16)
 
+                continueToAppButton
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
+
                 legalFooter
                     .padding(.top, 20)
             }
@@ -230,14 +238,18 @@ struct PaywallView: View {
                     .padding(.top, 4)
 
                 if let notNowLabel, let onNotNow {
-                    Button(action: onNotNow) {
-                        Text(verbatim: notNowLabel)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(PW.t2)
-                    }
-                    .buttonStyle(.plain)
+                    secondaryActionButton(
+                        label: notNowLabel,
+                        systemImage: "calendar",
+                        action: onNotNow
+                    )
+                    .padding(.horizontal, 24)
                     .padding(.top, 16)
                 }
+
+                continueToAppButton
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
 
                 legalFooter
                     .padding(.top, 20)
@@ -361,6 +373,48 @@ struct PaywallView: View {
         .disabled(isLoading)
     }
 
+    private func secondaryActionButton(
+        label: String,
+        systemImage: String? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                }
+                Text(verbatim: label)
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .foregroundStyle(PW.green)
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+            .background(PW.card)
+            .clipShape(RoundedRectangle(cornerRadius: PW.r, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: PW.r, style: .continuous)
+                    .strokeBorder(PW.green.opacity(0.35), lineWidth: 1.5)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var continueToAppButton: some View {
+        if let onDismiss {
+            Button(action: onDismiss) {
+                Text("Continue to App")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(PW.t1)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(PW.greenSub)
+                    .clipShape(RoundedRectangle(cornerRadius: PW.r, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private func chargeNote(for plan: SubscriptionPlan?) -> some View {
         Group {
             if let plan {
@@ -409,7 +463,7 @@ struct PaywallView: View {
             Image(systemName: "xmark")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(PW.t2)
-                .frame(width: 30, height: 30)
+                .frame(width: 44, height: 44)
                 .background(PW.t3.opacity(0.18))
                 .clipShape(Circle())
                 .contentShape(Circle())

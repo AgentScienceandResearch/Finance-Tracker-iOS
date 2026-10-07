@@ -13,10 +13,12 @@ final class ViewSnapshotSmokeTests: XCTestCase {
     final class AuthMock: AuthenticationManaging {
         var isAuthenticated = false
         var isLoading = false
+        var isDeletingAccount = false
         var errorMessage: String?
         func signInWithEmail(_ email: String, password: String) async {}
         func signUp(email: String, password: String, displayName: String) async {}
         func signOut() {}
+        func deleteAccount(password: String?) async -> Bool { true }
     }
 
     final class SubscriptionMock: SubscriptionManaging {
