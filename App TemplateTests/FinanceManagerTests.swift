@@ -103,6 +103,64 @@ final class FinanceManagerTests: XCTestCase {
         XCTAssertEqual(snapshot.profile.id, secondManager.currentProfile.id)
     }
 
+    func testGuestDataIsRestoredAfterSignOut() {
+        let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+        let guestExpense = Expense(title: "Local Groceries", amount: 42, category: .foodDining, date: Date())
+        manager.addExpense(guestExpense)
+
+        let cloudUser = User(
+            id: "cloud-user",
+            email: "cloud@example.com",
+            displayName: "Cloud User",
+            profileImageURL: nil,
+            createdAt: Date(),
+            lastSignIn: Date()
+        )
+        manager.switchUser(to: cloudUser)
+        manager.addExpense(Expense(title: "Cloud Taxi", amount: 18, category: .transportation, date: Date()))
+
+        manager.handleSignOut()
+
+        XCTAssertEqual(manager.expenses.map(\.id), [guestExpense.id])
+        XCTAssertEqual(manager.currentUserID, "anonymous")
+        XCTAssertFalse(manager.isUsingCloudSync)
+        XCTAssertEqual(manager.syncStatusText, AppLanguage.localized("Saved on this device"))
+    }
+
+    func testDeletingCloudAccountCachePreservesGuestTracker() {
+        let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+        let guestExpense = Expense(title: "Local Coffee", amount: 5, category: .foodDining, date: Date())
+        manager.addExpense(guestExpense)
+
+        let userID = "deleted-user"
+        manager.switchUser(to: User(
+            id: userID,
+            email: "delete@example.com",
+            displayName: "Delete Me",
+            profileImageURL: nil,
+            createdAt: Date(),
+            lastSignIn: Date()
+        ))
+        manager.addExpense(Expense(title: "Cloud Expense", amount: 99, category: .shopping, date: Date()))
+
+        manager.deleteLocalAccountData(userID: userID)
+
+        XCTAssertNil(defaults.data(forKey: "financeTrackerState.v1.\(userID)"))
+        XCTAssertNil(defaults.data(forKey: "financeUserProfile.v1.\(userID)"))
+        XCTAssertEqual(manager.expenses.map(\.id), [guestExpense.id])
+        XCTAssertEqual(manager.currentUserID, "anonymous")
+    }
+
+    func testGuestProfilePersistsWithoutAccount() {
+        let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+        manager.updateProfile(displayName: "Local Dakota", email: "local@example.com")
+
+        let reloaded = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
+
+        XCTAssertEqual(reloaded.currentProfile.displayName, "Local Dakota")
+        XCTAssertEqual(reloaded.currentProfile.email, "local@example.com")
+    }
+
     func testBatchUpdatesPersistTheFinalCombinedState() {
         let manager = FinanceManager(userDefaults: defaults, remoteSyncEnabled: false)
 
@@ -261,16 +319,13 @@ final class FinanceManagerTests: XCTestCase {
         )
     }
 
-    func testPaywallBecomesHardAfterSevenDaysFromFirstAIUse() {
+    func testPaywallNeverInterruptsAppLaunchAfterSevenDays() {
         let userID = "expired-paywall-user"
         let now = Date(timeIntervalSince1970: 1_750_000_000)
         _ = PaywallAccessPolicy.modeAfterSuccessfulAIUse(userID: userID, defaults: defaults, now: now)
         let sevenDaysLater = now.addingTimeInterval(TimeInterval(7 * 24 * 60 * 60))
 
-        XCTAssertEqual(
-            PaywallAccessPolicy.modeAtLaunch(userID: userID, defaults: defaults, now: sevenDaysLater),
-            .yearlyHard
-        )
+        XCTAssertNil(PaywallAccessPolicy.modeAtLaunch(userID: userID, defaults: defaults, now: sevenDaysLater))
     }
 
     func testAppleSignInNonceUsesFirebaseSHA256Format() {

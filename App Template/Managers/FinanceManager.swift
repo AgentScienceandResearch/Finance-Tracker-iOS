@@ -14,12 +14,13 @@ final class FinanceManager: ObservableObject {
 
     // Keys are user-scoped to prevent data leaking between accounts.
     private static let fallbackUserIDKey = "financeFallbackUserID"
+    private static let guestUserID = "anonymous"
 
     private var localStorageKey: String { "financeTrackerState.v1.\(currentUserID)" }
     private var profileStorageKey: String { "financeUserProfile.v1.\(currentUserID)" }
 
     // Set by AppEnvironment when Firebase auth resolves.
-    private(set) var currentUserID: String = "anonymous"
+    private(set) var currentUserID: String = guestUserID
 
     private let databaseManager: DatabaseManager
     private let userDefaults: UserDefaults
@@ -45,7 +46,7 @@ final class FinanceManager: ObservableObject {
         loadLocalState()
         processDueRecurringExpenses()
 
-        guard remoteSyncEnabled else {
+        guard isUsingCloudSync else {
             return
         }
 
@@ -115,10 +116,22 @@ final class FinanceManager: ObservableObject {
     }
 
     var syncStatusText: String {
+        guard isUsingCloudSync else {
+            return AppLanguage.localized("Saved on this device")
+        }
         if let lastSuccessfulSyncAt {
             return AppLanguage.localized("Last synced \(lastSuccessfulSyncAt.timeAgo)")
         }
-        return remoteSyncEnabled ? AppLanguage.localized("Sync pending") : AppLanguage.localized("Cloud sync disabled")
+        return AppLanguage.localized("Sync pending")
+    }
+
+    var isUsingCloudSync: Bool {
+        remoteSyncEnabled && currentUserID != Self.guestUserID
+    }
+
+    /// Stable identifier used for local-only onboarding and trial state.
+    var accessUserID: String {
+        currentProfile.id
     }
 
     var upcomingRecurringExpenses: [RecurringExpense] {
@@ -187,7 +200,7 @@ final class FinanceManager: ObservableObject {
 
         persistLocalProfile()
 
-        guard remoteSyncEnabled else {
+        guard isUsingCloudSync else {
             return
         }
 
@@ -391,7 +404,7 @@ final class FinanceManager: ObservableObject {
         currentUserID = user.id
         currentProfile = user
         loadLocalState()
-        guard remoteSyncEnabled else { return }
+        guard isUsingCloudSync else { return }
         Task {
             await syncProfileFromRemote()
             await saveProfileToRemote()
@@ -400,10 +413,25 @@ final class FinanceManager: ObservableObject {
         }
     }
 
-    /// Called on sign-out. Clears all in-memory data so the next user starts clean.
+    /// Called on sign-out. Leaves the cloud account scope and restores the
+    /// separate local-only tracker.
     func handleSignOut() {
+        guard currentUserID != Self.guestUserID else { return }
         wipeMemory()
-        currentUserID = "anonymous"
+        currentUserID = Self.guestUserID
+        currentProfile = Self.loadOrCreateLocalProfile(userDefaults: userDefaults)
+        loadLocalState()
+        processDueRecurringExpenses()
+    }
+
+    /// Removes cached data for a deleted cloud account without affecting the
+    /// user's separate local-only tracker.
+    func deleteLocalAccountData(userID: String) {
+        userDefaults.removeObject(forKey: "financeTrackerState.v1.\(userID)")
+        userDefaults.removeObject(forKey: "financeUserProfile.v1.\(userID)")
+
+        guard currentUserID == userID else { return }
+        handleSignOut()
     }
 
     private func wipeMemory() {
@@ -484,7 +512,7 @@ final class FinanceManager: ObservableObject {
         guard !isPerformingBatchUpdate else { return }
         persistLocalState()
 
-        guard remoteSyncEnabled else {
+        guard isUsingCloudSync else {
             return
         }
 
@@ -579,6 +607,15 @@ final class FinanceManager: ObservableObject {
     }
 
     private static func loadOrCreateLocalProfile(userDefaults: UserDefaults) -> User {
+        let profileKey = "financeUserProfile.v1.\(guestUserID)"
+        if let data = userDefaults.data(forKey: profileKey) {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            if let profile = try? decoder.decode(User.self, from: data) {
+                return profile
+            }
+        }
+
         // This runs at init before any Firebase user is known (currentUserID = "anonymous").
         // switchUser(to:) will replace this profile as soon as auth resolves.
         let fallbackID: String

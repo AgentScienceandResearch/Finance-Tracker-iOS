@@ -46,7 +46,14 @@ final class AppEnvironment: ObservableObject {
         self.authManager = AuthenticationManager(
             userRepository: UserRepository(userStore: databaseManager),
             logger: logger,
-            analytics: analytics
+            analytics: analytics,
+            onAccountDeleted: { userID in
+                financeManager.deleteLocalAccountData(userID: userID)
+                PaywallAccessPolicy.clear(userID: userID)
+                AIWelcomePolicy.clear(userID: userID)
+                BillReminderManager.shared.disable()
+                apiService.clearToken()
+            }
         )
 
         self.financeAIManager = FinanceAIManager(

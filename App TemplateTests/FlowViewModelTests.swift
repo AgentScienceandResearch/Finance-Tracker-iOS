@@ -12,6 +12,7 @@ final class FlowViewModelTests: XCTestCase {
     final class MockAuthManager: AuthenticationManaging {
         var isAuthenticated = false
         var isLoading = false
+        var isDeletingAccount = false
         var errorMessage: String?
 
         var lastSignInEmail: String?
@@ -39,6 +40,8 @@ final class FlowViewModelTests: XCTestCase {
         func signOut() {
             isAuthenticated = false
         }
+
+        func deleteAccount(password: String?) async -> Bool { true }
     }
 
     final class MockSubscriptionManager: SubscriptionManaging {

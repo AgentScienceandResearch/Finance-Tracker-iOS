@@ -72,14 +72,14 @@
   <main>
     <section class="panel">
       <h1>Privacy Policy - Finance Tracker AI</h1>
-      <p><strong>Effective date:</strong> August 22, 2026</p>
+      <p><strong>Effective date:</strong> August 27, 2026</p>
 
       <h2>Overview</h2>
       <p>Finance Tracker AI helps users track personal expenses and recurring payments. We store sensitive API keys on backend infrastructure and do not embed provider secret keys in the mobile app.</p>
 
       <h2>Data We Process</h2>
       <ul>
-        <li>Profile data: display name and email, when provided</li>
+        <li>Profile data: display name and email, when the user chooses to create an account for cloud sync</li>
         <li>Finance data: expenses, recurring expense entries, categories, and notes</li>
         <li>AI inputs: user prompts, recent assistant conversation context, receipt text, and a current finance snapshot (transactions, recurring items, budget, categories, dates, identifiers, and notes) when the user asks the assistant for help</li>
         <li>Diagnostics: operational logs for app and server reliability</li>
@@ -88,7 +88,7 @@
       <h2>Where Data Is Stored</h2>
       <ul>
         <li>On device: local app storage for app state and fast startup</li>
-        <li>Cloud sync: Firebase for profile and finance state</li>
+        <li>Optional cloud sync: Firebase for profile and finance state when the user signs in</li>
         <li>AI processing: assistant prompts and the finance context needed to answer them, or receipt text submitted for parsing, are sent to the app backend and relayed to the configured AI provider</li>
       </ul>
 
@@ -106,18 +106,21 @@
       <h2>Data Retention</h2>
       <ul>
         <li>Local data remains on device until the user clears app data or removes the app.</li>
-        <li>Synced data remains until deleted by the user or app operator.</li>
+        <li>Synced data remains until the user permanently deletes the account in Settings or the app operator deletes it.</li>
         <li>Server logs are retained for operational and security purposes for a limited period.</li>
       </ul>
 
       <h2>User Controls</h2>
       <ul>
+        <li>Use the core finance tracker and save data locally without creating an account</li>
         <li>Edit profile data in Settings</li>
         <li>Delete individual expenses and recurring items</li>
         <li>Export finance data from Settings</li>
         <li>Clear local and synced finance data from Settings</li>
+        <li>Permanently delete an account and its associated Firebase profile and finance data from Settings</li>
         <li>Review and approve or dismiss every AI-proposed finance change before it is applied</li>
       </ul>
+      <p>Deleting an account does not automatically cancel an App Store subscription, which is managed by Apple. The account deletion screen provides a direct link to Apple's subscription management page.</p>
 
       <h2>Security</h2>
       <ul>

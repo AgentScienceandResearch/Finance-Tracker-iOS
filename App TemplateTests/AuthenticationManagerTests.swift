@@ -23,6 +23,10 @@ final class AuthenticationManagerTests: XCTestCase {
         func fetchUser(_ userId: String) async throws -> User? {
             savedUsers.first(where: { $0.id == userId })
         }
+
+        func deleteUserAndAssociatedData(_ userId: String) async throws {
+            savedUsers.removeAll { $0.id == userId }
+        }
     }
 
     enum StubError: Error {

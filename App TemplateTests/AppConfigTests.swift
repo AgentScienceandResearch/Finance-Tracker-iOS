@@ -97,7 +97,9 @@ final class AppConfigTests: XCTestCase {
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
         let firstLaunch = AppLanguageController(defaults: defaults)
-        XCTAssertEqual(firstLaunch.selectedIdentifier, AppLanguage.systemDefaultIdentifier)
+        XCTAssertEqual(firstLaunch.selectedIdentifier, AppLanguage.defaultIdentifier)
+        XCTAssertEqual(firstLaunch.locale.identifier, "en-US")
+        XCTAssertTrue(defaults.bool(forKey: AppLanguage.englishDefaultMigrationKey))
 
         firstLaunch.select("fr-FR")
         XCTAssertEqual(defaults.string(forKey: AppLanguage.storageKey), "fr-FR")
@@ -110,7 +112,39 @@ final class AppConfigTests: XCTestCase {
         XCTAssertEqual(relaunched.layoutDirection, .rightToLeft)
 
         relaunched.select(AppLanguage.systemDefaultIdentifier)
-        XCTAssertNil(defaults.string(forKey: AppLanguage.storageKey))
+        XCTAssertEqual(
+            defaults.string(forKey: AppLanguage.storageKey),
+            AppLanguage.systemDefaultIdentifier
+        )
+        XCTAssertEqual(relaunched.selectedIdentifier, AppLanguage.systemDefaultIdentifier)
+        XCTAssertFalse(relaunched.selectedIdentifier.isEmpty)
+    }
+
+    @MainActor
+    func testLegacyLanguageIsResetToEnglishOnceAndSystemChoiceRemainsExplicit() {
+        let suiteName = "AppLanguageLegacyTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create isolated defaults")
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        defaults.set("he", forKey: AppLanguage.storageKey)
+        let controller = AppLanguageController(defaults: defaults)
+        XCTAssertEqual(controller.selectedIdentifier, "en-US")
+        XCTAssertEqual(controller.layoutDirection, .leftToRight)
+        XCTAssertEqual(defaults.string(forKey: AppLanguage.storageKey), "en-US")
+
+        controller.select("")
+
+        XCTAssertEqual(controller.selectedIdentifier, AppLanguage.systemDefaultIdentifier)
+        XCTAssertEqual(
+            defaults.string(forKey: AppLanguage.storageKey),
+            AppLanguage.systemDefaultIdentifier
+        )
+        XCTAssertEqual(
+            controller.locale.identifier.replacingOccurrences(of: "_", with: "-"),
+            Locale.preferredLanguages.first?.replacingOccurrences(of: "_", with: "-")
+        )
     }
 
     func testLanguageListMatchesCompiledLocalizationCount() {
